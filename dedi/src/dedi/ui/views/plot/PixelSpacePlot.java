@@ -16,7 +16,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
-import dedi.configuration.Results;
 import dedi.configuration.calculations.geometry.Ray;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.devices.CameraTube;
@@ -87,8 +86,8 @@ public class PixelSpacePlot extends AbstractBeamlineConfigurationPlotter {
 	protected void createRay(){
 		if(view.getBeamstop() == null || view.getDetector() == null || view.getAngle() == null) return;
 		
-		Vector2d startPoint = Results.getInstance().getStartPoint();
-		Vector2d endPoint = Results.getInstance().getEndPoint();
+		Vector2d startPoint = results.getVisibleRangeStartPoint();
+		Vector2d endPoint = results.getVisibleRangeEndPoint();
 		
 		if(startPoint == null || endPoint == null) return;
 		
@@ -104,7 +103,7 @@ public class PixelSpacePlot extends AbstractBeamlineConfigurationPlotter {
 		}
 		
 		
-		if(!Results.getInstance().isSatisfied()){	
+		if(!results.getIsSatisfied()){	
 			visibleRangeROI1 = new LinearROI(new double[] {startPoint.x/view.getDetector().getXPixelMM(), 
 					                            startPoint.y/view.getDetector().getYPixelMM()}, 
 					               new double[] {endPoint.x/view.getDetector().getXPixelMM(), 
@@ -120,8 +119,8 @@ public class PixelSpacePlot extends AbstractBeamlineConfigurationPlotter {
 			addRegion(visibleRangeRegion1, visibleRangeROI1, new Color(Display.getDefault(), 205, 133, 63));
 			addRegion(inaccessibleRangeRegion, inaccessibleRangeROI, Display.getDefault().getSystemColor(SWT.COLOR_RED));
 		} else{
-			Vector2d reqestedRangeStartPoint = Results.getInstance().getRequestedRangeStartPoint();
-			Vector2d reqestedRangeEndPoint = Results.getInstance().getRequestedRangeEndPoint();
+			Vector2d reqestedRangeStartPoint = results.getRequestedRangeStartPoint();
+			Vector2d reqestedRangeEndPoint = results.getRequestedRangeEndPoint();
 			
 			visibleRangeROI1 = new LinearROI(new double[] {startPoint.x/view.getDetector().getXPixelMM(), 
 										                   startPoint.y/view.getDetector().getYPixelMM()}, 

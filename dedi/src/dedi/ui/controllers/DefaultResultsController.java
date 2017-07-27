@@ -1,4 +1,4 @@
-package dedi.configuration;
+package dedi.ui.controllers;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -8,26 +8,18 @@ import javax.vecmath.Vector2d;
 
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 
+import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.BeamlineConfigurationUtil;
 import dedi.configuration.calculations.NumericRange;
 import dedi.configuration.calculations.geometry.Ray;
+import dedi.configuration.calculations.scattering.Q;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.devices.CameraTube;
+import dedi.ui.models.ResultsModel;
+import dedi.ui.views.results.ResultsView;
 
-public final class Results extends Observable implements Observer {
-	private NumericRange visibleQRange;
-	private NumericRange fullQRange;
-	private NumericRange requestedQRange;
-	
-	private Vector2d startPoint;
-	private Vector2d endPoint;
-	private Vector2d requestedRangeStartPoint;
-	private Vector2d requestedRangeEndPoint;
-	
-	private boolean isSatisfied = false;
-	
-	private final BeamlineConfiguration CONFIG;
+public class DefaultResultsController extends AbstractResultsController {
 	private DiffractionDetector detector;
 	private Beamstop beamstop;
 	private CameraTube cameraTube;
@@ -37,44 +29,47 @@ public final class Results extends Observable implements Observer {
 	private Double cameraLength;
 	
 	
-	private static final Results INSTANCE = new Results();
-	
-	
-	public Results() {
-		CONFIG = BeamlineConfiguration.getInstance();
-		CONFIG.addObserver(this);
-		visibleQRange = null;
-		fullQRange = null;
-		requestedQRange = null;
-		startPoint = null;
-		endPoint = null;
-		update(null, null);
+	public DefaultResultsController(BeamlineConfiguration configuration, ResultsModel model) {
+		super(configuration, model);
 	}
-	
-	
-	public static Results getInstance(){
-		return INSTANCE;
-	}
-	
+
 	
 	@Override
-	public void update(Observable o, Object arg) {
-		detector = CONFIG.getDetector();
-		beamstop = CONFIG.getBeamstop();
-		cameraTube = CONFIG.getCameraTube();
-		angle = CONFIG.getAngle();
-		clearance = CONFIG.getClearance();
-		wavelength = CONFIG.getWavelength();
-		cameraLength = CONFIG.getCameraLength();
+	public void updateRequestedQRange(ScatteringQuantity minRequested, ScatteringQuantity maxRequested){
+		setModelProperty(ResultsModel.IS_SATISFIED_PROPERTY, false, boolean.class);
 		
+		if(minRequested == null || maxRequested == null)
+			setModelProperty(ResultsModel.REQUESTED_Q_RANGE_PROPERTY, null, NumericRange.class);
+		else {
+			double min = minRequested.toQ().getValue().to(Q.BASE_UNIT).getEstimatedValue();
+			double max = maxRequested.toQ().getValue().to(Q.BASE_UNIT).getEstimatedValue();
+			setModelProperty(ResultsModel.REQUESTED_Q_RANGE_PROPERTY, new NumericRange(min, max), NumericRange.class);
+			computeRequestedQRangeEndPoints();
+			setModelProperty(ResultsModel.IS_SATISFIED_PROPERTY, isSatisfied(), boolean.class);
+		}
+		
+	}
+	
+	
+
+	@Override
+	public void update(Observable o, Object arg) {
 		computeQRanges();
 	}
 	
 	
 	private void computeQRanges(){
+		detector = configuration.getDetector();
+		beamstop = configuration.getBeamstop();
+		cameraTube = configuration.getCameraTube();
+		angle = configuration.getAngle();
+		clearance = configuration.getClearance();
+		wavelength = configuration.getWavelength();
+		cameraLength = configuration.getCameraLength();
+		
 		if(detector == null || beamstop == null || angle == null || clearance == null){
 			setVisibleQRange(null, null, null);
-			setFullQRange(null);
+			setModelProperty(ResultsModel.FULL_Q_RANGE_PROPERTY, null, NumericRange.class);
 			return;
 		}
 		
@@ -92,7 +87,7 @@ public final class Results extends Observable implements Observer {
 				
 		if(t1 == null || t1.getMax() < 0){
 			setVisibleQRange(null, null, null);
-			setFullQRange(null);
+			setModelProperty(ResultsModel.FULL_Q_RANGE_PROPERTY, null, NumericRange.class);
 			return;
 		}
 		
@@ -103,7 +98,7 @@ public final class Results extends Observable implements Observer {
 		
 		if(t1 == null || t1.getMax() < 0){
 			setVisibleQRange(null, null, null);
-			setFullQRange(null);
+			setModelProperty(ResultsModel.FULL_Q_RANGE_PROPERTY, null, NumericRange.class);
 			return;
 		}
 		
@@ -118,7 +113,7 @@ public final class Results extends Observable implements Observer {
 		
 		if(wavelength == null || cameraLength == null){
 			setVisibleQRange(null, new Vector2d(ray.getPt(t1.getMin())), new Vector2d(ray.getPt(t1.getMax())));
-			setFullQRange(null);
+			setModelProperty(ResultsModel.FULL_Q_RANGE_PROPERTY, null, NumericRange.class);
 			return;
 		}
 		
@@ -128,63 +123,39 @@ public final class Results extends Observable implements Observer {
 				   new Vector2d(ray.getPt(t1.getMin())), new Vector2d(ray.getPt(t1.getMax())));
 		
 		
-		if(CONFIG.getMaxCameraLength() == null || CONFIG.getMinCameraLength() == null || 
-		   CONFIG.getMaxWavelength() == null || CONFIG.getMinWavelength() == null){
-			setFullQRange(null);
+		if(configuration.getMaxCameraLength() == null || configuration.getMinCameraLength() == null || 
+				configuration.getMaxWavelength() == null || configuration.getMinWavelength() == null){
+			setModelProperty(ResultsModel.FULL_Q_RANGE_PROPERTY, null, NumericRange.class);
 			return;
 		}
 		
-		
-		setFullQRange(new NumericRange(BeamlineConfigurationUtil.calculateQValue(ptMin.length()*1.0e-3, 
-				                                                                 CONFIG.getMaxCameraLength(), 
-				                                                                 CONFIG.getMaxWavelength()), 
-				                       BeamlineConfigurationUtil.calculateQValue(ptMax.length()*1.0e-3, 
-				                    		                                     CONFIG.getMinCameraLength(), 
-				                    		                                     CONFIG.getMinWavelength())));
+		NumericRange fullRange = new NumericRange(BeamlineConfigurationUtil.calculateQValue(ptMin.length()*1.0e-3, 
+																	 configuration.getMaxCameraLength(), 
+																	 configuration.getMaxWavelength()), 
+												  BeamlineConfigurationUtil.calculateQValue(ptMax.length()*1.0e-3, 
+													        		 configuration.getMinCameraLength(), 
+													        		 configuration.getMinWavelength()));
+		setModelProperty(ResultsModel.FULL_Q_RANGE_PROPERTY, fullRange, NumericRange.class);
 	}
-	
-	
+
+
 	private void setVisibleQRange(NumericRange range, Vector2d startPoint, Vector2d endPoint){
-		visibleQRange = range;
-		this.startPoint = startPoint;
-		this.endPoint = endPoint;
-		setChanged();
-		notifyObservers();
-	}
-	
-	
-	private void setFullQRange(NumericRange fullQRange){
-		this.fullQRange = fullQRange;
-		setChanged();
-		notifyObservers();
-	}
-	
-	
-	public void setRequestedQRange(ScatteringQuantity minRequested, ScatteringQuantity maxRequested){
-		if(minRequested == null || maxRequested == null) setRequestedQRange(null);
-		else{
-			double min = minRequested.toQ().getValue().to(SI.METER.inverse()).getEstimatedValue();
-			double max = maxRequested.toQ().getValue().to(SI.METER.inverse()).getEstimatedValue();
-			setRequestedQRange(new NumericRange(min, max));
-		}
-	}
-	
-	
-	public void setRequestedQRange(NumericRange requestedQRange){
-		if(this.requestedQRange == null && requestedQRange == null) return;
-		if(this.requestedQRange != null && this.requestedQRange.equals(requestedQRange)) return;
-		this.requestedQRange = requestedQRange;
-		computeRequestedQRangeEndPoints();
-		isSatisfied = isSatisfied();
-		setChanged();
-		notifyObservers();
+		if(range != null)
+			setModelProperty(ResultsModel.HAS_SOLUTION_PROPERTY, true, boolean.class);
+		else
+			setModelProperty(ResultsModel.HAS_SOLUTION_PROPERTY, false, boolean.class);
+		setModelProperty(ResultsModel.VISIBLE_Q_RANGE_PROPERTY, range, NumericRange.class);
+		setModelProperty(ResultsModel.VISIBLE_RANGE_START_POINT_PROPERTY, startPoint, Vector2d.class);
+		setModelProperty(ResultsModel.VISIBLE_RANGE_END_POINT_PROPERTY, endPoint, Vector2d.class);
+		setModelProperty(ResultsModel.IS_SATISFIED_PROPERTY, isSatisfied(), boolean.class);
 	}
 	
 	
 	private void computeRequestedQRangeEndPoints() {
+		NumericRange requestedQRange = (NumericRange) getModelProperty(ResultsModel.REQUESTED_Q_RANGE_PROPERTY);
 		if(detector == null || beamstop == null || angle == null || clearance == null || wavelength == null || cameraLength == null || requestedQRange == null){
-			requestedRangeStartPoint = null;
-			requestedRangeEndPoint = null;
+			setModelProperty(ResultsModel.REQUESTED_RANGE_START_POINT_PROPERTY, null, Vector2d.class);
+			setModelProperty(ResultsModel.REQUESTED_RANGE_END_POINT_PROPERTY, null, Vector2d.class);
 			return;
 		}
 		
@@ -194,51 +165,19 @@ public final class Results extends Observable implements Observer {
 		
 		Ray ray = new Ray(new Vector2d(Math.cos(angle), Math.sin(angle)), initialPosition);
 
-		requestedRangeStartPoint = 
+		Vector2d requestedRangeStartPoint = 
 				ray.getPtAtDistance(1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(requestedQRange.getMin(), cameraLength, wavelength));
-		requestedRangeEndPoint = 
+		Vector2d requestedRangeEndPoint = 
 				ray.getPtAtDistance(1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(requestedQRange.getMax(), cameraLength, wavelength));
+		setModelProperty(ResultsModel.REQUESTED_RANGE_START_POINT_PROPERTY, requestedRangeStartPoint, Vector2d.class);
+		setModelProperty(ResultsModel.REQUESTED_RANGE_END_POINT_PROPERTY, requestedRangeEndPoint, Vector2d.class);
 	}
-
-
-	public boolean isSatisfied(){
+	
+	
+	private boolean isSatisfied(){
+		NumericRange visibleQRange = (NumericRange) getModelProperty(ResultsModel.VISIBLE_Q_RANGE_PROPERTY);
+		NumericRange requestedQRange = (NumericRange) getModelProperty(ResultsModel.REQUESTED_Q_RANGE_PROPERTY);
 		return  visibleQRange != null && requestedQRange != null &&
-				visibleQRange.contains(requestedQRange);
-	}
-	
-	
-	public NumericRange getQRange(){
-		if(visibleQRange == null) return null;
-		return new NumericRange(visibleQRange.getMin(), visibleQRange.getMax());
-	}
-	
-	
-	public NumericRange getFullQRange(){
-		if(fullQRange == null) return null;
-		return new NumericRange(fullQRange.getMin(), fullQRange.getMax());
-	}
-	
-	
-	public Vector2d getStartPoint(){
-		if(startPoint == null) return null;
-		return new Vector2d(startPoint);
-	}
-	
-	
-	public Vector2d getEndPoint(){
-		if(endPoint == null) return null;
-		return new Vector2d(endPoint);
-	}
-	
-
-	public Vector2d getRequestedRangeStartPoint(){
-		if(requestedRangeStartPoint == null) return null;
-		return new Vector2d(requestedRangeStartPoint);
-	}
-	
-	
-	public Vector2d getRequestedRangeEndPoint(){
-		if(requestedRangeEndPoint == null) return null;
-		return new Vector2d(requestedRangeEndPoint);
+					visibleQRange.contains(requestedQRange);
 	}
 }

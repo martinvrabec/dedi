@@ -12,6 +12,7 @@ import javax.measure.unit.Unit;
 import org.jscience.physics.amount.Amount;
 
 public class Q extends ScatteringQuantity {
+	public static final String NAME = "q";
 	public static final Unit<?> BASE_UNIT = SI.METER.inverse();
 	public static final List<Unit<?>> UNITS = new ArrayList<Unit<?>>(Arrays.asList(SI.NANO(SI.METER).inverse(), NonSI.ANGSTROM.inverse()));
 	
@@ -24,6 +25,18 @@ public class Q extends ScatteringQuantity {
 	
 	public Q(Amount<?> value) {
 		super(value.to(Q.BASE_UNIT));
+	}
+	
+	
+	@Override
+	public Unit<?> getBaseUnit(){
+		return Q.BASE_UNIT;
+	}
+	
+	
+	@Override
+	public List<Unit<?>> getUnits(){
+		return Q.UNITS;
 	}
 	
 	@Override
@@ -43,6 +56,12 @@ public class Q extends ScatteringQuantity {
 
 	public static Q valueOf(Amount<?> value){
 		return new Q(value);
+	}
+
+
+	@Override
+	public String getQuantityName() {
+		return NAME;
 	}
 	
 }

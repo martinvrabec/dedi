@@ -7,9 +7,14 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 
+import dedi.configuration.BeamlineConfiguration;
+import dedi.ui.models.ResultsModel;
+
 public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineConfigurationPlotter {
 	protected IPlottingSystem<Composite> system;
 	protected BeamlineConfigurationPlotView view;
+	protected BeamlineConfiguration config;
+	protected ResultsModel results;
 	
 	protected IRegion detectorRegion;
 	protected IROI detectorROI;
@@ -28,9 +33,12 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 	protected IRegion requestedRangeRegion;
 	protected LinearROI requestedRangeROI;
 	
+	
 	public AbstractBeamlineConfigurationPlotter(IPlottingSystem<Composite> system, BeamlineConfigurationPlotView view) {
 		this.system = system;
 		this.view = view;
+		config = this.view.getBeamlineConfiguration();
+		results = this.view.getResults();
 	}
 	
 	

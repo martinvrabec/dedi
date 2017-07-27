@@ -5,6 +5,7 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 
 import dedi.ui.views.configuration.ConfigurationView;
+import dedi.ui.views.results.ResultsView;
 
 
 public class Perspective implements IPerspectiveFactory {
@@ -17,12 +18,12 @@ public class Perspective implements IPerspectiveFactory {
          IFolderLayout topLeft = layout.createFolder("topLeft", IPageLayout.LEFT, 0.30f,
      		    editorArea);
          
-         layout.addView("dedi.plottingview", IPageLayout.TOP, 0.7f, editorArea);
+         //layout.addView("dedi.plottingview", IPageLayout.TOP, 0.7f, editorArea);
          
 		 topLeft.addView(ConfigurationView.ID);
 		 topLeft.addPlaceholder(IPageLayout.ID_BOOKMARKS);
 		 
-		 layout.addView("dedi.views.results", IPageLayout.BOTTOM, 0.05f, editorArea);
+		 layout.addView(ResultsView.ID, IPageLayout.BOTTOM, 0.05f, editorArea);
 	}
 
 }

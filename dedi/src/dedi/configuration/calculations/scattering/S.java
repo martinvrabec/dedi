@@ -6,6 +6,7 @@ import javax.measure.unit.Unit;
 import org.jscience.physics.amount.Amount;
 
 public class S extends ScatteringQuantity {
+	public static final String NAME = "s";
 	public static final Unit<?> BASE_UNIT = Q.BASE_UNIT; 
 	public static final List<Unit<?>> UNITS = Q.UNITS;
 	
@@ -18,6 +19,17 @@ public class S extends ScatteringQuantity {
 	
 	
 	@Override
+	public Unit<?> getBaseUnit(){
+		return S.BASE_UNIT;
+	}
+	
+	
+	@Override
+	public List<Unit<?>> getUnits(){
+		return S.UNITS;
+	}
+	
+	@Override
 	public S fromQ(Q q) {
 		return new S(q.to(new D()).getValue().inverse());
 	}
@@ -27,4 +39,8 @@ public class S extends ScatteringQuantity {
 		return new Q(this.getValue().times(Math.PI*2));
 	}
 
+	@Override
+	public String getQuantityName() {
+		return NAME;
+	}
 }

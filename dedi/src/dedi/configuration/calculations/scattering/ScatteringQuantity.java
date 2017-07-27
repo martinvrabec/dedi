@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.measure.quantity.Quantity;
+import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
 
@@ -26,6 +27,10 @@ public abstract class ScatteringQuantity implements Quantity {
 	}
 	
 	
+	public abstract Unit<?> getBaseUnit();
+	
+	public abstract List<Unit<?>> getUnits();
+	
 	public abstract <T extends ScatteringQuantity> T fromQ(Q q);
 	
 	public abstract Q toQ();
@@ -41,8 +46,12 @@ public abstract class ScatteringQuantity implements Quantity {
 	}
 	
 	
+	public abstract String getQuantityName();
+	
+	
 	@Override
 	public String toString(){
+		if(value == null) return "";
 		return String.valueOf(value.getEstimatedValue());
 	}
 

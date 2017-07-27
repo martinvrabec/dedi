@@ -1,6 +1,8 @@
 package dedi.ui.views.plot;
 
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -19,14 +21,16 @@ import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.ViewPart;
 
 import dedi.configuration.BeamlineConfiguration;
-import dedi.configuration.Results;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.devices.CameraTube;
+import dedi.ui.models.ResultsModel;
+import dedi.ui.models.ResultsService;
 
 
-public class BeamlineConfigurationPlotView extends ViewPart implements Observer {
-	private final BeamlineConfiguration CONFIG;
-	private final Results RESULTS;
+public class BeamlineConfigurationPlotView extends ViewPart implements Observer, PropertyChangeListener {
+	private final BeamlineConfiguration config;
+	private final ResultsModel results;
+	//private final Results RESULTS;
 	
 	private PageBook plotComposite;
 	private IPlottingSystem<Composite> system;
@@ -65,11 +69,12 @@ public class BeamlineConfigurationPlotView extends ViewPart implements Observer 
 			system = null;
 		}
 		
-		CONFIG = BeamlineConfiguration.getInstance();
-		CONFIG.addObserver(this);
+		config = BeamlineConfiguration.getInstance();
+		config.addObserver(this);
 		
-		RESULTS = Results.getInstance();
-		RESULTS.addObserver(this);
+		results = ResultsService.getInstance().getModel();
+		ResultsService.getInstance().getController().addView(this);
+		
 		
 		// Cannot call update() at this point, because the plot has not been created yet.
 		// Will be called at the end of createPartControl()
@@ -99,20 +104,26 @@ public class BeamlineConfigurationPlotView extends ViewPart implements Observer 
 		
 		parent.layout();
 		
-		update(null, null); //Need to update the plot because the CONFIG might already have been initialised with some data 
+		update(null, null); //Need to update the plot because the config might already have been initialised with some data 
 		                   // before this view registered as its Observer.
 		system.setRescale(false);
 	}
 	
 	
 	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		plotter.updatePlot();
+	};
+	
+	
+	@Override
 	public void update(Observable o, Object arg) {	
 		//Update state
-		detector = CONFIG.getDetector();
-		beamstop = CONFIG.getBeamstop();
-		cameraTube = CONFIG.getCameraTube();
-		angle = CONFIG.getAngle();
-		clearance = CONFIG.getClearance();
+		detector = config.getDetector();
+		beamstop = config.getBeamstop();
+		cameraTube = config.getCameraTube();
+		angle = config.getAngle();
+		clearance = config.getClearance();
 		
 		// Let the plotter delegate update the plot
 		plotter.updatePlot();
@@ -137,6 +148,17 @@ public class BeamlineConfigurationPlotView extends ViewPart implements Observer 
 	
 	public Legend getLegend(){
 		return legend;
+	}
+	
+	
+	
+	public ResultsModel getResults(){
+		return results;
+	}
+	
+	
+	public BeamlineConfiguration getBeamlineConfiguration(){
+		return config;
 	}
 	
 	
@@ -173,7 +195,8 @@ public class BeamlineConfigurationPlotView extends ViewPart implements Observer 
 	}
 
 	
-
+	
+	//////////
 	public DiffractionDetector getDetector() {
 		return detector;
 	}
@@ -197,7 +220,8 @@ public class BeamlineConfigurationPlotView extends ViewPart implements Observer 
 	public Integer getClearance() {
 		return clearance;
 	}
-
+    
+	/////////
 
 	@Override
 	public void setFocus() {
