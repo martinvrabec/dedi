@@ -23,14 +23,13 @@ import org.eclipse.ui.part.ViewPart;
 import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.devices.CameraTube;
-import dedi.ui.models.ResultsModel;
+import dedi.ui.models.Results;
 import dedi.ui.models.ResultsService;
 
 
 public class BeamlineConfigurationPlotView extends ViewPart implements Observer, PropertyChangeListener {
 	private final BeamlineConfiguration config;
-	private final ResultsModel results;
-	//private final Results RESULTS;
+	private final Results results;
 	
 	private PageBook plotComposite;
 	private IPlottingSystem<Composite> system;
@@ -65,7 +64,7 @@ public class BeamlineConfigurationPlotView extends ViewPart implements Observer,
 			system = PlottingFactory.createPlottingSystem(); 
 		} catch (Exception ne) {
 			ne.printStackTrace();
-			// It creates the view but there will be no plotting systems 
+			// It creates the view but there will be no plotting system
 			system = null;
 		}
 		
@@ -104,7 +103,7 @@ public class BeamlineConfigurationPlotView extends ViewPart implements Observer,
 		
 		parent.layout();
 		
-		update(null, null); //Need to update the plot because the config might already have been initialised with some data 
+		update(null, null); //Need to update the plot because the BeamlineConfiguration might already have been initialised with some data 
 		                   // before this view registered as its Observer.
 		system.setRescale(false);
 	}
@@ -118,7 +117,7 @@ public class BeamlineConfigurationPlotView extends ViewPart implements Observer,
 	
 	@Override
 	public void update(Observable o, Object arg) {	
-		//Update state
+		//Update BeamlineConfiguration state
 		detector = config.getDetector();
 		beamstop = config.getBeamstop();
 		cameraTube = config.getCameraTube();
@@ -152,7 +151,7 @@ public class BeamlineConfigurationPlotView extends ViewPart implements Observer,
 	
 	
 	
-	public ResultsModel getResults(){
+	public Results getResults(){
 		return results;
 	}
 	

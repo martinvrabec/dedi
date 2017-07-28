@@ -3,7 +3,7 @@ package dedi.ui.models;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-public abstract class AbstractModel {
+public abstract class AbstractModel implements IModel {
 	 protected PropertyChangeSupport propertyChangeSupport;
 
 	    public AbstractModel()

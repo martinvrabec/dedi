@@ -51,13 +51,12 @@ import dedi.configuration.calculations.scattering.Q;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
 import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
-import dedi.ui.models.ResultsModel;
+import dedi.ui.models.Results;
 import dedi.ui.models.ResultsService;
 import dedi.ui.views.IView;
 
 public class ResultsView extends ViewPart implements PropertyChangeListener {
 	private AbstractResultsViewController controller;
-	private ResultsViewModel model;
 	
 	private Composite main;
 	private Combo scatteringQuantitiesCombo;
@@ -79,7 +78,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 	
 	
 	public ResultsView() {
-		model = createModel();
+		ResultsViewModel model = createModel();
 		controller = createController(model);
 		controller.addView(this);
 	}
@@ -204,42 +203,33 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 
 	
 	public void repaint(PaintEvent e){
-		/*Rectangle bounds = drawingArea.getClientArea();
-		
+		Rectangle bounds = drawingArea.getClientArea();
 		e.gc.setForeground(e.display.getSystemColor(SWT.COLOR_BLACK));
 		
-		if(hasSolution == false) {
+		if(controller.hasSolution() == false) {
 			 e.gc.drawText("No solution", bounds.width/2 - 40, bounds.height/2 - 10);
 			 return;
 		 }
-		
-		 if(requestedMaxValue == null || requestedMinValue == null) return;
+		 if(controller.getRequestedMax() == null || controller.getRequestedMin() == null) return;
 		 
-		 if(isSatisfied) e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_GREEN));
+		 if(controller.isSatisfied()) e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_GREEN));
 		 else e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_RED));
 		 
-
          double slope = (bounds.width-120)/
-        		 (Math.log(fullQRange.getMax()) - 
-        		  Math.log(fullQRange.getMin()));
+				        		 (Math.log(controller.getFullRangeMax()) - 
+				        		  Math.log(controller.getFullRangeMin()));
          
-         double minRequestedX = slope*(Math.log(requestedMinValue.toQ().getValue().to(SI.METER.inverse()).getEstimatedValue()) - 
-        		  Math.log(fullQRange.getMin())) + 60;
+         double minRequestedX = slope*(Math.log(controller.getRequestedMin()) - 
+        		  Math.log(controller.getFullRangeMin())) + 60;
          
-         double maxRequestedX = slope*(Math.log(requestedMaxValue.toQ().getValue().to(SI.METER.inverse()).getEstimatedValue()) - 
-        		  Math.log(fullQRange.getMin())) + 60;
+         double maxRequestedX = slope*(Math.log(controller.getRequestedMax()) - 
+        		  Math.log(controller.getFullRangeMin())) + 60;
          
-         if(minRequestedX > maxRequestedX){
-        	 double temp = minRequestedX;
-        	 minRequestedX = maxRequestedX;
-        	 maxRequestedX = temp;
-         }
+         double minValueX = slope*(Math.log(controller.getVisibleMin()) - 
+        		  Math.log(controller.getFullRangeMin())) + 60;
          
-         double minValueX = slope*(Math.log(minQValue.getValue().to(SI.METER.inverse()).getEstimatedValue()) - 
-        		  Math.log(fullQRange.getMin())) + 60;
-         
-         double maxValueX = slope*(Math.log(maxQValue.getValue().to(SI.METER.inverse()).getEstimatedValue()) - 
-        		  Math.log(fullQRange.getMin())) + 60;
+         double maxValueX = slope*(Math.log(controller.getVisibleMax()) - 
+        		  Math.log(controller.getFullRangeMin())) + 60;
          
          e.gc.fillRectangle((int) minValueX, bounds.height/2, (int) (maxValueX - minValueX), bounds.height/2);
          e.gc.drawLine((int) minRequestedX, 5, (int) minRequestedX, bounds.height);
@@ -247,7 +237,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
          
          e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_WHITE));
          e.gc.drawText("Requested min", (int) minRequestedX - 40, 5);
-         e.gc.drawText("Requested max", (int) maxRequestedX - 40, 5);*/
+         e.gc.drawText("Requested max", (int) maxRequestedX - 40, 5);
 	}
 
 

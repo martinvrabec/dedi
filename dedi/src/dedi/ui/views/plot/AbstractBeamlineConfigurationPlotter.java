@@ -8,13 +8,13 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 
 import dedi.configuration.BeamlineConfiguration;
-import dedi.ui.models.ResultsModel;
+import dedi.ui.models.Results;
 
 public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineConfigurationPlotter {
 	protected IPlottingSystem<Composite> system;
 	protected BeamlineConfigurationPlotView view;
 	protected BeamlineConfiguration config;
-	protected ResultsModel results;
+	protected Results results;
 	
 	protected IRegion detectorRegion;
 	protected IROI detectorROI;

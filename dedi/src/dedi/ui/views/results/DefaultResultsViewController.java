@@ -13,7 +13,7 @@ import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.NumericRange;
 import dedi.configuration.calculations.scattering.Q;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
-import dedi.ui.models.ResultsModel;
+import dedi.ui.models.Results;
 import dedi.ui.models.ResultsService;
 
 public class DefaultResultsViewController extends AbstractResultsViewController {
@@ -25,8 +25,8 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		if(evt.getPropertyName().equals(ResultsModel.VISIBLE_Q_RANGE_PROPERTY)){
-			NumericRange visibleQRange = resultsModel.getVisibleQRange();
+		if(evt.getPropertyName().equals(Results.VISIBLE_Q_RANGE_PROPERTY)){
+			NumericRange visibleQRange = resultsController.getVisibleQRange();
 			if(visibleQRange != null){
 				double minQ = visibleQRange.getMin();
 				double maxQ = visibleQRange.getMax();
@@ -42,6 +42,22 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 			}
 			
 		}
+		if(evt.getPropertyName().equals(Results.FULL_Q_RANGE_PROPERTY)){
+			NumericRange fullQRange = resultsController.getFullQRange();
+			if(fullQRange != null){
+				double minQ = fullQRange.getMin();
+				double maxQ = fullQRange.getMax();
+				if(getCurrentQuantity() != null || getCurrentUnit() != null){
+					minQ = convert(minQ, new Q(), getCurrentQuantity(), Q.BASE_UNIT, getCurrentUnit());
+					maxQ = convert(maxQ, new Q(), getCurrentQuantity(), Q.BASE_UNIT, getCurrentUnit());
+					updateFullRangeMin(minQ);
+					updateFullRangeMax(maxQ);
+				}
+			} else {
+				updateFullRangeMin((Double) null);
+				updateFullRangeMax((Double) null);
+			}
+		}
 		super.propertyChange(evt);
     }
 	
@@ -55,9 +71,9 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 	
 	@Override
 	public void updateCurrentQuantity(ScatteringQuantity newQuantity){
-		ScatteringQuantity oldQuantity = (ScatteringQuantity) getModelProperty(ResultsViewModel.CURRENT_QUANTITY_PROPERTY);
+		ScatteringQuantity oldQuantity = getCurrentQuantity();
 		if(oldQuantity != null && newQuantity.getClass().equals(oldQuantity.getClass())) return;
-		Unit<?> oldUnit = (Unit<?> ) getModelProperty(ResultsViewModel.CURRENT_UNIT_PROPERTY);
+		Unit<?> oldUnit = getCurrentUnit();
 		
 		setModelProperty(ResultsViewModel.CURRENT_QUANTITY_PROPERTY, newQuantity, ScatteringQuantity.class);
 		setModelProperty(ResultsViewModel.CURRENT_UNITS_PROPERTY, newQuantity.getUnits(), List.class);
@@ -66,8 +82,6 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 		if(oldQuantity != null || oldUnit != null)
 			updateRanges(oldQuantity, newQuantity, oldUnit, newQuantity.getUnits().get(0));	
 	}
-	
-	
 	
 	
 	@Override
@@ -79,8 +93,8 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 	
 	@Override
 	public void updateCurrentUnit(Unit<?> newUnit){
-		ScatteringQuantity currentQuantity = (ScatteringQuantity) getModelProperty(ResultsViewModel.CURRENT_QUANTITY_PROPERTY);
-		Unit<?> oldUnit = (Unit<?> ) getModelProperty(ResultsViewModel.CURRENT_UNIT_PROPERTY);
+		ScatteringQuantity currentQuantity = getCurrentQuantity();
+		Unit<?> oldUnit = getCurrentUnit();
 		if(oldUnit != null && oldUnit.equals(newUnit)) return;
 		
 		setModelProperty(ResultsViewModel.CURRENT_UNIT_PROPERTY, newUnit, Unit.class);
@@ -92,16 +106,13 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 	
 	private void updateRanges(ScatteringQuantity oldQuantity, ScatteringQuantity newQuantity, 
             Unit<?> oldUnit, Unit<?> newUnit){
-		Double visibleMin = (Double) getModelProperty(ResultsViewModel.VISIBLE_MIN_PROPERTY);
-		Double visibleMax = (Double) getModelProperty(ResultsViewModel.VISIBLE_MAX_PROPERTY);
-		Double requestedMin = (Double) getModelProperty(ResultsViewModel.REQUESTED_MIN_PROPERTY);
-		Double requestedMax = (Double) getModelProperty(ResultsViewModel.REQUESTED_MAX_PROPERTY);
-		
-		Double newVisibleMin = convert(visibleMin, oldQuantity, newQuantity, oldUnit, newUnit);
-		Double newVisibleMax = convert(visibleMax, oldQuantity, newQuantity, oldUnit, newUnit);
-		Double newRequestedMin = convert(requestedMin, oldQuantity, newQuantity, oldUnit, newUnit);
-		Double newRequestedMax = convert(requestedMax, oldQuantity, newQuantity, oldUnit, newUnit);
-		
+	
+		Double newVisibleMin = convert(getVisibleMin(), oldQuantity, newQuantity, oldUnit, newUnit);
+		Double newVisibleMax = convert(getVisibleMax(), oldQuantity, newQuantity, oldUnit, newUnit);
+		Double newRequestedMin = convert(getRequestedMin(), oldQuantity, newQuantity, oldUnit, newUnit);
+		Double newRequestedMax = convert(getRequestedMax(), oldQuantity, newQuantity, oldUnit, newUnit);
+		Double newFullRangeMin = convert(getFullRangeMin(), oldQuantity, newQuantity, oldUnit, newUnit);
+		Double newFullRangeMax = convert(getFullRangeMax(), oldQuantity, newQuantity, oldUnit, newUnit);
 		
 		if(newVisibleMin != null && newVisibleMax != null){
 			Double temp = newVisibleMin;
@@ -113,11 +124,18 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 			newRequestedMin =  Math.min(newRequestedMin, newRequestedMax);
 			newRequestedMax = Math.max(temp, newRequestedMax);
 		}
+		if(newFullRangeMin != null && newFullRangeMax != null){
+			Double temp = newFullRangeMin;
+			newFullRangeMin =  Math.min(newFullRangeMin, newFullRangeMax);
+			newFullRangeMax = Math.max(temp, newFullRangeMax);
+		}
 		
 		updateVisibleMin(newVisibleMin);
 		updateVisibleMax(newVisibleMax);
 		updateRequestedMin(newRequestedMin);
 		updateRequestedMax(newRequestedMax);
+		updateFullRangeMin(newFullRangeMin);
+		updateFullRangeMax(newFullRangeMax);
 	}
 	
 	
@@ -127,6 +145,7 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 		oldQuantity.setValue(Amount.valueOf(value, oldUnit));
 		return oldQuantity.to(newQuantity).getValue().to(newUnit).getEstimatedValue();
 	}
+	
 	
 	
 	@Override
@@ -170,8 +189,8 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 	
 	
 	private void updateRequestedQRange(){
-		Double minValue = (Double) getModelProperty(ResultsViewModel.REQUESTED_MIN_PROPERTY);
-		Double maxValue = (Double) getModelProperty(ResultsViewModel.REQUESTED_MAX_PROPERTY);
+		Double minValue = getRequestedMin();
+		Double maxValue = getRequestedMax();
 		
 		if(minValue == null || maxValue == null){
 			resultsController.updateRequestedQRange(null, null);
@@ -186,49 +205,26 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 	
 	
 	@Override
-	public void updateVisibleMin(String newMin){
-		double minValue;
-		try{
-			minValue = Double.parseDouble(newMin);
-			setModelProperty(ResultsViewModel.VISIBLE_MIN_PROPERTY, minValue, Double.class);
-		} catch(NumberFormatException ex){
-			setModelProperty(ResultsViewModel.VISIBLE_MIN_PROPERTY, null, Double.class);
-			setModelProperty(ResultsModel.VISIBLE_Q_RANGE_PROPERTY, null, NumericRange.class);
-		}
-	}
-	
-	
-	@Override
-	public void updateVisibleMin(Double newMin){
+	protected void updateVisibleMin(Double newMin){
 		setModelProperty(ResultsViewModel.VISIBLE_MIN_PROPERTY, newMin, Double.class);
 	}
 	
 	
 	@Override
-	public void updateVisibleMax(String newMax){
-		double maxValue;
-		try{
-			maxValue = Double.parseDouble(newMax);
-			setModelProperty(ResultsViewModel.VISIBLE_MAX_PROPERTY, maxValue, Double.class);
-		} catch(NumberFormatException ex){
-			setModelProperty(ResultsViewModel.VISIBLE_MAX_PROPERTY, null, Double.class);
-			setModelProperty(ResultsModel.VISIBLE_Q_RANGE_PROPERTY, null, NumericRange.class);
-		}
-	}
-	
-	
-	@Override
-	public void updateVisibleMax(Double newMax){
+	protected void updateVisibleMax(Double newMax){
 		setModelProperty(ResultsViewModel.VISIBLE_MAX_PROPERTY, newMax, Double.class);
 	}
-	
-	
-	private Unit<?> getCurrentUnit(){
-		return (Unit<?>) getModelProperty(ResultsViewModel.CURRENT_UNIT_PROPERTY);
+
+
+	@Override
+	protected void updateFullRangeMin(Double newMin) {
+		setModelProperty(ResultsViewModel.FULL_RANGE_MIN_PROPERTY, newMin, Double.class);
+	}
+
+
+	@Override
+	protected void updateFullRangeMax(Double newMax) {
+		setModelProperty(ResultsViewModel.FULL_RANGE_MAX_PROPERTY, newMax, Double.class);
 	}
 	
-	
-	private ScatteringQuantity getCurrentQuantity(){
-		return (ScatteringQuantity) getModelProperty(ResultsViewModel.CURRENT_QUANTITY_PROPERTY);
-	}
 }

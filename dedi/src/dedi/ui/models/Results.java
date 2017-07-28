@@ -4,7 +4,7 @@ import javax.vecmath.Vector2d;
 
 import dedi.configuration.calculations.NumericRange;
 
-public class ResultsModel extends AbstractModel {
+public class Results extends AbstractModel implements IResultsModel {
 	private NumericRange visibleQRange;
 	private NumericRange fullQRange;
 	private NumericRange requestedQRange;
@@ -17,17 +17,8 @@ public class ResultsModel extends AbstractModel {
 	private boolean hasSolution;
 	private boolean isSatisfied;
 	
-	public static String FULL_Q_RANGE_PROPERTY = "FullQRange";
-	public static String VISIBLE_Q_RANGE_PROPERTY = "VisibleQRange";
-	public static String REQUESTED_Q_RANGE_PROPERTY = "RequestedQRange";
-	public static String VISIBLE_RANGE_START_POINT_PROPERTY = "VisibleRangeStartPoint";
-	public static String VISIBLE_RANGE_END_POINT_PROPERTY = "VisibleRangeEndPoint";
-	public static String REQUESTED_RANGE_START_POINT_PROPERTY = "RequestedRangeStartPoint";
-	public static String REQUESTED_RANGE_END_POINT_PROPERTY = "RequestedRangeEndPoint";
-	public static String HAS_SOLUTION_PROPERTY = "HasSolution";
-	public static String IS_SATISFIED_PROPERTY = "IsSatisfied";
 	
-	
+	// Getters
 	public NumericRange getVisibleQRange() {
 		return visibleQRange;
 	}
@@ -72,7 +63,37 @@ public class ResultsModel extends AbstractModel {
 		return hasSolution;
 	}
 
+
+	// Setters
+	@Override
+	public void setVisibleQRange(NumericRange range, Vector2d startPt, Vector2d endPt){
+		NumericRange oldRange = visibleQRange;
+		visibleQRange = range;
+		visibleRangeStartPoint = startPt;
+		visibleRangeEndPoint = endPt;
+		isSatisfied = isSatisfied();
+		hasSolution = (visibleQRange != null);
+		if(isStateValid()) firePropertyChange(VISIBLE_Q_RANGE_PROPERTY, oldRange, visibleQRange);
+	}
 	
+	
+	@Override
+	public void setFullQRange(NumericRange range){
+		firePropertyChange(FULL_Q_RANGE_PROPERTY, fullQRange, fullQRange = range);
+	}
+	
+	
+	@Override
+	public void setRequestedQRange(NumericRange range, Vector2d startPt, Vector2d endPt){
+		NumericRange oldRange = requestedQRange;
+		requestedQRange = range;
+		requestedRangeStartPoint = startPt;
+		requestedRangeEndPoint = endPt;
+		isSatisfied = isSatisfied();
+		if(isStateValid()) firePropertyChange(REQUESTED_Q_RANGE_PROPERTY, oldRange, requestedQRange);
+	}
+	
+	/*
 	public void setFullQRange(NumericRange fullQRange){
 		firePropertyChange(FULL_Q_RANGE_PROPERTY, this.fullQRange, this.fullQRange = fullQRange);
 	}
@@ -115,5 +136,17 @@ public class ResultsModel extends AbstractModel {
 	
 	public void setIsSatisfied(boolean value){
 		firePropertyChange(IS_SATISFIED_PROPERTY, isSatisfied, isSatisfied = value);
+	}
+	*/
+	
+	private boolean isSatisfied(){
+		return  visibleQRange != null && requestedQRange != null &&
+					visibleQRange.contains(requestedQRange);
+	}
+	
+	
+	private boolean isStateValid(){
+		// TODO Implement this method.
+		return true;
 	}
 }
