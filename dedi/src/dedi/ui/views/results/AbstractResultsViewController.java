@@ -6,11 +6,9 @@ import java.util.List;
 
 import javax.measure.unit.Unit;
 
-import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
 import dedi.ui.controllers.AbstractController;
 import dedi.ui.controllers.AbstractResultsController;
-import dedi.ui.controllers.DefaultResultsController;
 import dedi.ui.models.AbstractModel;
 import dedi.ui.models.Results;
 import dedi.ui.models.ResultsService;
@@ -88,20 +86,12 @@ public abstract class AbstractResultsViewController extends AbstractController {
 	
 	public abstract void updateRequestedMax(Double newMax);
 	
-	//protected abstract void updateVisibleMin(String newMin);
-	
 	protected abstract void updateVisibleMin(Double newMin);
-	
-	//protected abstract void updateVisibleMax(String newMax);
 	
 	protected abstract void updateVisibleMax(Double newMax);
 	
-	//protected abstract void updateVisibleMin(String newMin);
-	
 	protected abstract void updateFullRangeMin(Double newMin);
-		
-	//protected abstract void updateVisibleMax(String newMax);
-		
+	
 	protected abstract void updateFullRangeMax(Double newMax);
 	
 	

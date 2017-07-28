@@ -8,13 +8,16 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 
 import dedi.configuration.BeamlineConfiguration;
+import dedi.ui.controllers.AbstractResultsController;
 import dedi.ui.models.Results;
+import dedi.ui.models.ResultsService;
 
 public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineConfigurationPlotter {
 	protected IPlottingSystem<Composite> system;
 	protected BeamlineConfigurationPlotView view;
 	protected BeamlineConfiguration config;
 	protected Results results;
+	protected AbstractResultsController controller;
 	
 	protected IRegion detectorRegion;
 	protected IROI detectorROI;
@@ -37,8 +40,9 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 	public AbstractBeamlineConfigurationPlotter(IPlottingSystem<Composite> system, BeamlineConfigurationPlotView view) {
 		this.system = system;
 		this.view = view;
-		config = this.view.getBeamlineConfiguration();
-		results = this.view.getResults();
+		config = BeamlineConfiguration.getInstance();
+		results = ResultsService.getInstance().getModel();
+		controller = ResultsService.getInstance().getController();
 	}
 	
 	
