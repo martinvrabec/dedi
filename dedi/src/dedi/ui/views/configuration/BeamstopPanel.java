@@ -51,11 +51,11 @@ import dedi.configuration.devices.Beamstop;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
 import dedi.configuration.preferences.PreferenceConstants;
 import dedi.ui.GuiHelper;
-import dedi.ui.widgets.ComboUnitsProvider;
-import dedi.ui.widgets.LabelUnitsProvider;
-import dedi.ui.widgets.LabelWithUnits;
-import dedi.ui.widgets.SpinnerWithUnits;
-import dedi.ui.widgets.TextWithUnits;
+import dedi.ui.widgets.units.ComboUnitsProvider;
+import dedi.ui.widgets.units.LabelUnitsProvider;
+import dedi.ui.widgets.units.LabelWithUnits;
+import dedi.ui.widgets.units.SpinnerWithUnits;
+import dedi.ui.widgets.units.TextWithUnits;
 
 
 public class BeamstopPanel implements Observer {

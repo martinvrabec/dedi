@@ -38,6 +38,19 @@ public abstract class AbstractResultsController extends AbstractController imple
 	}
 	
 	
+	protected Object getModelProperty(String propertyName){
+   	 	for (IResultsModel model: registeredModels) {
+	            try {
+	            	Method method = model.getClass().getDeclaredMethod("get" + propertyName);
+	                return method.invoke(model);
+	            } catch (Exception ex) {
+	                //  Handle exception.
+	            }
+	     }
+   	 	 return null;
+    }
+	
+	
 	public abstract void updateRequestedQRange(ScatteringQuantity minRequested, ScatteringQuantity maxRequested);
 	
 		
@@ -54,19 +67,6 @@ public abstract class AbstractResultsController extends AbstractController imple
 	protected void setRequestedQRange(NumericRange range, Vector2d startPt, Vector2d endPt){
 		for(IResultsModel model : registeredModels) model.setRequestedQRange(range, startPt, endPt);
 	}
-	
-	
-	protected Object getModelProperty(String propertyName){
-   	 	for (IResultsModel model: registeredModels) {
-	            try {
-	            	Method method = model.getClass().getDeclaredMethod("get" + propertyName);
-	                return method.invoke(model);
-	            } catch (Exception ex) {
-	                //  Handle exception.
-	            }
-	     }
-   	 	 return null;
-    }
 	
 	
 	public NumericRange getVisibleQRange() {

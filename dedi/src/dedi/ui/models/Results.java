@@ -93,51 +93,6 @@ public class Results extends AbstractModel implements IResultsModel {
 		if(isStateValid()) firePropertyChange(REQUESTED_Q_RANGE_PROPERTY, oldRange, requestedQRange);
 	}
 	
-	/*
-	public void setFullQRange(NumericRange fullQRange){
-		firePropertyChange(FULL_Q_RANGE_PROPERTY, this.fullQRange, this.fullQRange = fullQRange);
-	}
-	
-	
-	public void setVisibleQRange(NumericRange visibleQRange){
-		firePropertyChange(VISIBLE_Q_RANGE_PROPERTY, this.visibleQRange, this.visibleQRange = visibleQRange);
-	}
-	
-	
-	public void setRequestedQRange(NumericRange requestedQRange){
-		firePropertyChange(REQUESTED_Q_RANGE_PROPERTY, this.requestedQRange, this.requestedQRange = requestedQRange);
-	}
-	
-	
-	public void setVisibleRangeStartPoint(Vector2d startPt){
-		firePropertyChange(VISIBLE_RANGE_START_POINT_PROPERTY, this.visibleRangeStartPoint, this.visibleRangeStartPoint = startPt);
-	}
-	
-	
-	public void setVisibleRangeEndPoint(Vector2d endPt){
-		firePropertyChange(VISIBLE_RANGE_END_POINT_PROPERTY, this.visibleRangeEndPoint, this.visibleRangeEndPoint = endPt);
-	}
-	
-	
-	public void setRequestedRangeStartPoint(Vector2d startPt){
-		firePropertyChange(REQUESTED_RANGE_START_POINT_PROPERTY, this.requestedRangeStartPoint, this.requestedRangeStartPoint = startPt);
-	}
-	
-	
-	public void setRequestedRangeEndPoint(Vector2d endPt){
-		firePropertyChange(REQUESTED_RANGE_END_POINT_PROPERTY, this.requestedRangeEndPoint, this.requestedRangeEndPoint = endPt);
-	}
-	
-	
-	public void setHasSolution(boolean value){
-		firePropertyChange(HAS_SOLUTION_PROPERTY, hasSolution, hasSolution = value);
-	}
-	
-	
-	public void setIsSatisfied(boolean value){
-		firePropertyChange(IS_SATISFIED_PROPERTY, isSatisfied, isSatisfied = value);
-	}
-	*/
 	
 	private boolean isSatisfied(){
 		return  visibleQRange != null && requestedQRange != null &&

@@ -1,4 +1,4 @@
-package dedi.ui.widgets;
+package dedi.ui.widgets.units;
 
 import java.util.ArrayList;
 import java.util.List;

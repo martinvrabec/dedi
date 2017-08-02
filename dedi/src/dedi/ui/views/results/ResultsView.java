@@ -48,12 +48,12 @@ import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.NumericRange;
 import dedi.configuration.calculations.scattering.D;
 import dedi.configuration.calculations.scattering.Q;
+import dedi.configuration.calculations.scattering.S;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
 import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
 import dedi.ui.models.Results;
 import dedi.ui.models.ResultsService;
-import dedi.ui.views.IView;
 
 public class ResultsView extends ViewPart implements PropertyChangeListener {
 	private AbstractResultsViewController controller;
@@ -188,6 +188,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		ArrayList<ScatteringQuantity> quantities = new ArrayList<>();
 		quantities.add(new Q());
 		quantities.add(new D());
+		quantities.add(new S());
 		controller.updateQuantities(quantities);
 		
 		
@@ -233,11 +234,11 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
          
          e.gc.fillRectangle((int) minValueX, bounds.height/2, (int) (maxValueX - minValueX), bounds.height/2);
          e.gc.drawLine((int) minRequestedX, 5, (int) minRequestedX, bounds.height);
-         e.gc.drawLine((int) maxRequestedX, 5, (int) maxRequestedX, bounds.height);
+         e.gc.drawLine((int) maxRequestedX, 20, (int) maxRequestedX, bounds.height);
          
          e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_WHITE));
          e.gc.drawText("Requested min", (int) minRequestedX - 40, 5);
-         e.gc.drawText("Requested max", (int) maxRequestedX - 40, 5);
+         e.gc.drawText("Requested max", (int) maxRequestedX - 40, 20);
 	}
 
 

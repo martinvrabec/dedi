@@ -48,8 +48,15 @@ public class DefaultResultsController extends AbstractResultsController {
 	}
 	
 	
-	private void updateRequestedQRange(double min, double max){
-		setRequestedQRange(new NumericRange(min,  max), getPtForQ(min), getPtForQ(max));
+	private void updateRequestedQRangeEndPoints(){
+		NumericRange oldRequestedRange = getRequestedQRange();
+		if(oldRequestedRange != null){
+			double min = oldRequestedRange.getMin();
+			double max = oldRequestedRange.getMax();
+			setRequestedQRange(new NumericRange(min,  max), getPtForQ(min), getPtForQ(max));
+		} else {
+			setRequestedQRange(null, null, null);
+		}
 	}
 	
 	
@@ -80,17 +87,21 @@ public class DefaultResultsController extends AbstractResultsController {
 		wavelength = configuration.getWavelength();
 		cameraLength = configuration.getCameraLength();
 		
-		// Compute new results and store them in the model
+		// Compute the new results and store them in the model
 		computeQRanges();
 	}
 	
 	
 	private void computeQRanges(){
+		updateRequestedQRangeEndPoints(); // Update just the end points; the range is always user-defined
+		                                  // and set by views via updateRequestedQRange().
+		
 		if(detector == null || beamstop == null || angle == null || clearance == null){
 			setVisibleQRange(null, null, null);
 			setFullQRange(null);
 			return;
 		}
+		
 		
 		double initialPositionX = (clearance*detector.getXPixelMM() + beamstop.getDiameterMM()/2)*Math.cos(angle) +
 				                   beamstop.getXCentre()*detector.getXPixelMM();
@@ -154,9 +165,5 @@ public class DefaultResultsController extends AbstractResultsController {
 													        		 configuration.getMinCameraLength(), 
 													        		 configuration.getMinWavelength()));
 		setFullQRange(fullRange);
-		
-		NumericRange oldRequestedRange = (NumericRange) getModelProperty(IResultsModel.REQUESTED_Q_RANGE_PROPERTY);
-		if(oldRequestedRange != null)
-			updateRequestedQRange(oldRequestedRange.getMin(), oldRequestedRange.getMax());
 	}
 }

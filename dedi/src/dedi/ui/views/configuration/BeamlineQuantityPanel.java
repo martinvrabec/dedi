@@ -9,9 +9,9 @@ import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
 import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
-import dedi.ui.widgets.ComboUnitsProvider;
-import dedi.ui.widgets.InputValidator;
-import dedi.ui.widgets.TextWithUnits;
+import dedi.ui.widgets.units.ComboUnitsProvider;
+import dedi.ui.widgets.units.InputValidator;
+import dedi.ui.widgets.units.TextWithUnits;
 
 import java.util.ArrayList;
 import java.util.Arrays;

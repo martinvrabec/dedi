@@ -1,9 +1,17 @@
-package dedi.ui.views.plot;
+package dedi.ui.widgets.plotting;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Observable;
 import java.util.TreeMap;
 
+import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.LocalResourceManager;
+import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -20,21 +28,65 @@ import org.eclipse.swt.widgets.Label;
 
 import dedi.ui.GuiHelper;
 
-public class Legend extends Observable{
-	private Color detectorColour = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
-	private Color beamstopColour = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
-	private Color clearanceColour = Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
-	private Color cameraTubeColour = new Color(Display.getDefault(), 255, 255, 204);
+public class Legend extends Composite {
+	private ResourceManager resourceManager;
 	
-	private Color[] colours;
-	private String[] labels;
-	private Map<String, Color> legendColours = new TreeMap<>();
+	private List<LegendItem> items;
+	private Group legendGroup;
 	
 	
-	public Legend(Composite parent, String[] labels, Color[] colours) {
-		this.labels = labels;
-		this.colours = colours;
+	public Legend(Composite parent){
+		super(parent, SWT.NONE);
+		GridLayoutFactory.swtDefaults().numColumns(1).applyTo(this);
 		
+		items = new ArrayList<>();
+		resourceManager = new LocalResourceManager(JFaceResources.getResources(), this);
+		
+		legendGroup = GuiHelper.createGroup(parent, "Legend", 1);
+	}
+	
+	
+	public LegendItem addLegendItem(String name, Color defaultColour){
+		LegendItem item = getItem(name);
+		if(item != null) return item;
+		item = new LegendItem(legendGroup, name, defaultColour);
+		items.add(item);
+		legendGroup.layout();
+		return item;
+	}
+	
+	
+	public void removeLegendItem(String name){
+		Iterator<LegendItem> iter = items.iterator();
+		while(iter.hasNext()){
+			LegendItem item = iter.next();
+			if(Objects.equals(item.getItemName(), name)){
+				iter.remove();
+				item.dispose();
+			}
+		}
+	}
+	
+	
+	public Color getColour(String name){
+		for(LegendItem item : items){
+			if(Objects.equals(item.getItemName(), name))
+				return item.getColour();
+		}
+		return null;
+	}
+	
+	
+	private LegendItem getItem(String name){
+		for(LegendItem item : items){
+			if(Objects.equals(item.getItemName(), name))
+				return item;
+		}
+		return null;
+	}
+	
+	/*public Legend(Composite parent, String[] labels, Color[] colours) {
+		super(parent, SWT.NONE);
 		Group legendGroup = GuiHelper.createGroup(parent, "Legend", 3);
 		
 		for(int i = 0; i < labels.length; i++){
@@ -60,8 +112,6 @@ public class Legend extends Observable{
 					if(newColour == null) return;
 					legendColours.put(label.getText(), new Color(Display.getDefault(), newColour));
 					colourLabel.redraw();
-					setChanged();
-					notifyObservers();
 				}
 			});
 		}
@@ -77,5 +127,5 @@ public class Legend extends Observable{
 	
 	public Color getColor(String label){
 		return legendColours.get(label);
-	}
+	}*/
 }

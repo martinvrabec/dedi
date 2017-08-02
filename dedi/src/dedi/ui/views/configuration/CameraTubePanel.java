@@ -25,11 +25,10 @@ import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.devices.CameraTube;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
 import dedi.ui.GuiHelper;
-
-import dedi.ui.widgets.ComboUnitsProvider;
-import dedi.ui.widgets.LabelUnitsProvider;
-import dedi.ui.widgets.LabelWithUnits;
-import dedi.ui.widgets.TextWithUnits;
+import dedi.ui.widgets.units.ComboUnitsProvider;
+import dedi.ui.widgets.units.LabelUnitsProvider;
+import dedi.ui.widgets.units.LabelWithUnits;
+import dedi.ui.widgets.units.TextWithUnits;
 
 
 public class CameraTubePanel implements Observer {
