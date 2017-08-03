@@ -13,30 +13,19 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 
-public class ComboUnitsProvider<T extends Quantity> extends UnitsProvider<T> {
+public class ComboUnitsProvider<T extends Quantity> extends WidgetUnitsProvider<T> {
 	private Combo unitsCombo;
 	private ComboViewer unitsComboViewer;
-	private List<Unit<T>> units;
 
 	public ComboUnitsProvider(Composite parent, List<Unit<T>> units) {
 		super(parent);
-		this.units = units;
-	}
-	
-	
-	@Override
-	public void addUnitsChangeListener(IUnitsChangeListener listener) {
-		if(unitsComboViewer == null) throw new NullPointerException("The units provider has not been created yet.");
-		unitsComboViewer.addSelectionChangedListener(e -> listener.unitsChanged());
-	}
-
-
-	@Override
-	void createUnitsProvider() {
-		unitsCombo = new Combo(parent, SWT.READ_ONLY);
+		
+		unitsCombo = new Combo(this, SWT.READ_ONLY);
 		unitsComboViewer = new ComboViewer(unitsCombo);
 		unitsComboViewer.setContentProvider(ArrayContentProvider.getInstance());
 		unitsComboViewer.setLabelProvider(new LabelProvider() {
@@ -52,19 +41,32 @@ public class ComboUnitsProvider<T extends Quantity> extends UnitsProvider<T> {
 		});
 		
 		unitsComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-				if (selection.size() > 0){
-					 currentUnit = (Unit<T>) selection.getFirstElement();
-				}
+				if (selection.size() > 0)
+					 setCurrentUnit((Unit<T>) selection.getFirstElement());
 			}
 		});
 		
-		unitsComboViewer.setInput(units);
-		if(units != null && !units.isEmpty()){
-			unitsComboViewer.setSelection(new StructuredSelection(units.get(0)));
-		}
+		setUnits(units);
 	}
-
+	
+	
+	private void setCurrentUnit(Unit<T> newUnit){
+		currentUnit = newUnit;
+		notifyListeners();
+		layout();
+		getParent().layout();
+	}
+	
+	
+	public void setUnits(List<Unit<T>> units){
+		checkWidget();
+		unitsComboViewer.setInput(units);
+		if(units != null && !units.isEmpty())
+			unitsComboViewer.setSelection(new StructuredSelection(units.get(0)));
+		else setCurrentUnit(null);
+	}
 }

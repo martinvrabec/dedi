@@ -37,17 +37,17 @@ import dedi.configuration.preferences.BeamlineConfigurations;
 import dedi.configuration.preferences.PreferenceConstants;
 import dedi.ui.GuiHelper;
 
-public class PredefinedBeamlineConfigurationsPanel extends Observable {
+public class BeamlineConfigurationTemplatesPanel extends Observable {
 	
 	private List<BeamlineConfigurationBean> beamlineConfigurations;
-	private BeamlineConfigurationBean predefinedBeamlineConfiguration;
+	private BeamlineConfigurationBean beamlineConfigurationTemplate;
 	private Group beamlineConfigurationGroup;
 	
 	private final static String TITLE =  "Beamline configuration templates";
 	
 	
-	public PredefinedBeamlineConfigurationsPanel(Composite parent) {
-		predefinedBeamlineConfiguration = null;
+	public BeamlineConfigurationTemplatesPanel(Composite parent) {
+		beamlineConfigurationTemplate = null;
 		
 		beamlineConfigurationGroup = GuiHelper.createGroup(parent, TITLE, 2);
 		
@@ -73,7 +73,7 @@ public class PredefinedBeamlineConfigurationsPanel extends Observable {
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
 			    if (selection.size() > 0){
-			    	predefinedBeamlineConfiguration = (BeamlineConfigurationBean) selection.getFirstElement();
+			    	beamlineConfigurationTemplate = (BeamlineConfigurationBean) selection.getFirstElement();
 			    	setChanged();
 			    	notifyObservers();
 			    }
@@ -106,7 +106,7 @@ public class PredefinedBeamlineConfigurationsPanel extends Observable {
 
 	
 	public BeamlineConfigurationBean getPredefinedBeamlineConfiguration(){
-		return predefinedBeamlineConfiguration;
+		return beamlineConfigurationTemplate;
 	}
 	
 	

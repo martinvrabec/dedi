@@ -12,6 +12,7 @@ import javax.measure.unit.BaseUnit;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -32,7 +33,7 @@ import dedi.ui.widgets.units.TextWithUnits;
 
 
 public class CameraTubePanel implements Observer {
-	private PredefinedBeamlineConfigurationsPanel predefinedBeamlineConfigurationsPanel; 
+	private BeamlineConfigurationTemplatesPanel templatesPanel; 
 	
 	private Group cameraTubeGroup;
 	private LabelWithUnits<Length> cameraTubeDiameter;
@@ -45,15 +46,19 @@ public class CameraTubePanel implements Observer {
 	private final static List<Unit<Length>> DIAMETER_UNITS = new ArrayList<>(Arrays.asList(SI.MILLIMETRE, SI.MICRO(SI.METER)));;
 	
 	
-	public CameraTubePanel(Composite parent, PredefinedBeamlineConfigurationsPanel panel){
-		predefinedBeamlineConfigurationsPanel = panel;
+	public CameraTubePanel(Composite parent, BeamlineConfigurationTemplatesPanel panel){
+		templatesPanel = panel;
 		panel.addObserver(this);
 		
 		cameraTubeGroup = GuiHelper.createGroup(parent, TITLE, 3);
 		
-		cameraTubeDiameter = new LabelWithUnits<>(cameraTubeGroup, "Diameter:", 
-				                   new ComboUnitsProvider<>(cameraTubeGroup, DIAMETER_UNITS));
+		
+		ComboUnitsProvider<Length> diameterUnitsCombo = new ComboUnitsProvider<>(cameraTubeGroup, DIAMETER_UNITS);
+		cameraTubeDiameter = new LabelWithUnits<>(cameraTubeGroup, "Diameter:", diameterUnitsCombo);
 		cameraTubeDiameter.addAmountChangeListener(() -> textChanged());
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(cameraTubeDiameter);
+		diameterUnitsCombo.moveBelow(cameraTubeDiameter);
+		
 		
 		Group cameraTubePositionGroup = GuiHelper.createGroup(cameraTubeGroup, "Position", 3);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
@@ -62,15 +67,18 @@ public class CameraTubePanel implements Observer {
 		
 		
 		Unit<Dimensionless> Pixel = new BaseUnit<>("Pixel");
-		xPositionText = new TextWithUnits<>(cameraTubePositionGroup, "x:", 
-				                new LabelUnitsProvider<>(cameraTubePositionGroup, Pixel));
+		LabelUnitsProvider<Dimensionless> xPixelLabel = new LabelUnitsProvider<>(cameraTubePositionGroup, Pixel);
+		xPositionText = new TextWithUnits<>(cameraTubePositionGroup, "x:", xPixelLabel);
 		xPositionText.addAmountChangeListener(() -> textChanged());
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(xPositionText);
+		xPixelLabel.moveBelow(xPositionText);
 		
 		
-	
-		yPositionText = new TextWithUnits<>(cameraTubePositionGroup, "y:", 
-                new LabelUnitsProvider<>(cameraTubePositionGroup, Pixel));
+		LabelUnitsProvider<Dimensionless> yPixelLabel = new LabelUnitsProvider<>(cameraTubePositionGroup, Pixel);
+		yPositionText = new TextWithUnits<>(cameraTubePositionGroup, "y:", yPixelLabel);
 		yPositionText.addAmountChangeListener(() -> textChanged());
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(yPositionText);
+		yPixelLabel.moveBelow(yPositionText);
 		
 		
 		/*checkBox = new Button(parent, SWT.CHECK);
@@ -116,7 +124,7 @@ public class CameraTubePanel implements Observer {
 	
 	
 	private void clearValues(){
-		cameraTubeDiameter.clearText();
+		cameraTubeDiameter.clear();
 		xPositionText.clearText();
 		yPositionText.clearText();
 		textChanged();
@@ -125,7 +133,7 @@ public class CameraTubePanel implements Observer {
 	
 	@Override
 	public void update(Observable o, Object arg) {
-		BeamlineConfigurationBean beamlineConfiguration = predefinedBeamlineConfigurationsPanel.getPredefinedBeamlineConfiguration();
+		BeamlineConfigurationBean beamlineConfiguration = templatesPanel.getPredefinedBeamlineConfiguration();
 		if(beamlineConfiguration == null) {
 			clearValues();
 			return;

@@ -63,7 +63,7 @@ import dedi.ui.widgets.units.LabelWithUnits;
 public class DetectorPanel implements Observer {
 	private final static String TITLE =  "Detector";
 	
-	private PredefinedBeamlineConfigurationsPanel predefinedBeamlineConfigurationsPanel;
+	private BeamlineConfigurationTemplatesPanel templatesPanel;
 	private static IPreferenceStore detectorPreferenceStore;
 	private static List<DiffractionDetector> detectors;
 	private Combo detectorTypesCombo; 
@@ -72,8 +72,8 @@ public class DetectorPanel implements Observer {
 	private final static List<Unit<Length>> PIXEL_SIZE_UNITS = new ArrayList<>(Arrays.asList(SI.MILLIMETRE, SI.MICRO(SI.METER)));
 
 	
-	public DetectorPanel(Composite parent, PredefinedBeamlineConfigurationsPanel panel) {
-		predefinedBeamlineConfigurationsPanel = panel;
+	public DetectorPanel(Composite parent, BeamlineConfigurationTemplatesPanel panel) {
+		templatesPanel = panel;
 		panel.addObserver(this);
 		
 		Group detectorGroup = GuiHelper.createGroup(parent, TITLE, 3);
@@ -249,7 +249,7 @@ public class DetectorPanel implements Observer {
 	
 	@Override
 	public void update(Observable o, Object arg) {
-		BeamlineConfigurationBean beamlineConfiguration = predefinedBeamlineConfigurationsPanel.getPredefinedBeamlineConfiguration();
+		BeamlineConfigurationBean beamlineConfiguration = templatesPanel.getPredefinedBeamlineConfiguration();
 		if(beamlineConfiguration == null) return;
 		try{
 			detectorTypesComboViewer.setSelection(new StructuredSelection(beamlineConfiguration.getDetector()));

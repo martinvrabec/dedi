@@ -1,75 +1,31 @@
 package dedi.ui.views.results;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.measure.unit.Unit;
 
+import dedi.configuration.calculations.results.controllers.AbstractController;
+import dedi.configuration.calculations.results.controllers.AbstractResultsController;
+import dedi.configuration.calculations.results.models.AbstractModel;
+import dedi.configuration.calculations.results.models.Results;
+import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
-import dedi.ui.controllers.AbstractController;
-import dedi.ui.controllers.AbstractResultsController;
-import dedi.ui.models.AbstractModel;
-import dedi.ui.models.Results;
-import dedi.ui.models.ResultsService;
 
-public abstract class AbstractResultsViewController extends AbstractController {
+public abstract class AbstractResultsViewController extends AbstractController<AbstractModel> {
 	protected Results resultsModel; // Note that access to the resultsModel should be done via the resultsController.
 	protected AbstractResultsController resultsController;
 	protected ResultsViewModel viewModel;
-	private List<AbstractModel> registeredModels;
 	
 	
 	public AbstractResultsViewController(ResultsViewModel viewModel) {
-		registeredModels = new ArrayList<AbstractModel>();
 		resultsModel = ResultsService.getInstance().getModel();
 		resultsController = ResultsService.getInstance().getController();
 		this.viewModel = viewModel;
-		this.addModel(viewModel);
-		this.addModel(resultsModel);
-		
+		addModel(viewModel);
+		addModel(resultsModel);
 	}
 	
 	
-	protected void addModel(AbstractModel model) {
-        registeredModels.add(model);
-        model.addPropertyChangeListener(this);
-    }
-
-	
-    protected void removeModel(AbstractModel model) {
-        registeredModels.remove(model);
-        model.removePropertyChangeListener(this);
-    }
-	
-	
-
-    protected void setModelProperty(String propertyName, Object newValue, Class clazz) {
-        for (AbstractModel model: registeredModels) {
-            try {
-            	Method method = model.getClass().
-                    getMethod("set"+propertyName, new Class[] {clazz});
-                method.invoke(model, newValue);
-            } catch (Exception ex) {
-                //  Do nothing.
-            }
-        }
-    }
-    
-    
-    protected Object getModelProperty(String propertyName){
-    	 for (AbstractModel model: registeredModels) {
-	            try {
-	            	Method method = model.getClass().getDeclaredMethod("get" + propertyName);
-	                return method.invoke(model);
-	            } catch (Exception ex) {
-	                //  Handle exception.
-	            }
-	     }
-    	 return null;
-    }
-    
-    
 	public abstract void updateQuantities(List<ScatteringQuantity> newQuantities);
 	
 	public abstract void updateCurrentQuantity(ScatteringQuantity newQuantity);

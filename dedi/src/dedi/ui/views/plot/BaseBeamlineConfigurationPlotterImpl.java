@@ -7,11 +7,16 @@ import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.axis.IPositionListener;
+import org.eclipse.dawnsci.plotting.api.axis.PositionEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 
 public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeamlineConfigurationPlotter {
 	protected IRegion detectorRegion;
@@ -175,6 +180,11 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 					minY = Math.min(minY, bounds.getPointY());
 				}
 			}
+			
+			if(detectorROI == null && cameraTubeROI == null && beamstopROI == null){
+				maxX = 100; minX = -100; maxY = 100; minY = -100;
+			}
+				
 			
 			double length = Math.max(maxX-minX, maxY-minY);
 			yAxis.setRange(minY + length, minY);

@@ -1,8 +1,8 @@
-package dedi.ui.models;
+package dedi.configuration.calculations.results.models;
 
 import dedi.configuration.BeamlineConfiguration;
-import dedi.ui.controllers.AbstractResultsController;
-import dedi.ui.controllers.DefaultResultsController;
+import dedi.configuration.calculations.results.controllers.AbstractResultsController;
+import dedi.configuration.calculations.results.controllers.DefaultResultsController;
 
 public final class ResultsService {
 	private static final ResultsService INSTANCE = new ResultsService();

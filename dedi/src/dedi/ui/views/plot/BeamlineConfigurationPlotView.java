@@ -1,35 +1,24 @@
 package dedi.ui.views.plot;
 
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.Observable;
-import java.util.Observer;
-
-import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.ViewPart;
 
-import dedi.configuration.BeamlineConfiguration;
-import dedi.configuration.devices.Beamstop;
-import dedi.configuration.devices.CameraTube;
 import dedi.ui.GuiHelper;
-import dedi.ui.models.Results;
-import dedi.ui.models.ResultsService;
 import dedi.ui.widgets.plotting.Legend;
 
 
@@ -68,10 +57,14 @@ public class BeamlineConfigurationPlotView extends ViewPart implements IBeamline
 		system.createPlotPart(plotComposite, getPartName(), getViewSite().getActionBars(), PlotType.IMAGE, this);  
 		plotComposite.showPage(system.getPlotComposite());
 		
-		controlsPanel = new Composite(sashForm, SWT.NONE);
-		GridLayoutFactory.swtDefaults().spacing(0, 20).numColumns(1).applyTo(controlsPanel);
+		ScrolledComposite scrolledComposite = new ScrolledComposite( sashForm, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL );
+		scrolledComposite.setExpandVertical( true );
+		scrolledComposite.setExpandHorizontal( true );
 		
 		sashForm.setWeights(new int[]{70, 30});
+		
+		controlsPanel = new Composite(scrolledComposite, SWT.NONE);
+		GridLayoutFactory.swtDefaults().spacing(0, 20).numColumns(1).applyTo(controlsPanel);
 		
 		legend = new Legend(controlsPanel);
 		
@@ -120,7 +113,21 @@ public class BeamlineConfigurationPlotView extends ViewPart implements IBeamline
 		
 	    plotTypesPanel.layout();
 		
-		system.setRescale(false);
+	    scrolledComposite.setMinSize( controlsPanel.computeSize( SWT.DEFAULT, SWT.DEFAULT ) );
+	    controlsPanel.addListener(SWT.Resize, new Listener() {
+			int width = -1;
+			@Override
+			public void handleEvent(Event event) {
+				 int newWidth = controlsPanel.getSize().x;
+			     if (newWidth != width) {
+			        scrolledComposite.setMinHeight(controlsPanel.computeSize(newWidth, SWT.DEFAULT).y);
+			        width = newWidth;
+			     }
+			}
+		});
+		scrolledComposite.setContent(controlsPanel);	
+		
+		system.setRescale(true);
 	}
 	
 	

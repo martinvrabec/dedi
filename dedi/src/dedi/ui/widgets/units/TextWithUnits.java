@@ -1,8 +1,9 @@
 package dedi.ui.widgets.units;
 
 import javax.measure.quantity.Quantity;
-import javax.measure.unit.Unit;
 
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -10,34 +11,28 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.jscience.physics.amount.Amount;
 
-import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
 
 public class TextWithUnits<T extends Quantity> extends WidgetWithUnits<T> implements IAmountChangeListener {
-	private InputValidator<T> validator;
+	private IAmountInputValidator<T> validator;
 	private Text text;
 	private boolean isEdited = true;
 	
 	
-	public TextWithUnits(Composite parent, String name, UnitsProvider<T> provider){
-		this(parent, name, provider, new InputValidator<T>() {
-			@Override
-			public boolean isValid(Amount<T> input){
-				return true;
-			}
-		});
+	public TextWithUnits(Composite parent, String name, IUnitsProvider<T> provider){
+		this(parent, name, provider, input -> true);
 	}
 	
 	
-	public TextWithUnits(Composite parent, String name, UnitsProvider<T> provider, InputValidator<T> validator) {
+	public TextWithUnits(Composite parent, String name, IUnitsProvider<T> provider, IAmountInputValidator<T> validator) {
 		super(parent, name, provider);
-		text = new Text(parent, SWT.SINGLE | SWT.BORDER);
-		text.moveBelow(nameLabel);
+		GridLayoutFactory.fillDefaults().numColumns(2).margins(0, 5).spacing(30, 15).equalWidth(true).applyTo(this);
+		
+		text = new Text(this, SWT.SINGLE | SWT.BORDER);
+		GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).hint(70, 20).applyTo(text);
 		this.validator = validator;
 		
 		addAmountChangeListener(this);
@@ -61,18 +56,18 @@ public class TextWithUnits<T extends Quantity> extends WidgetWithUnits<T> implem
 				}
 			}
 		});
-		
-		parent.layout();
 	}
 	
 	
 	
 	public void setToolTipText(String ttt){
+		checkWidget();
 		text.setToolTipText(ttt);
 	}
 	
 	
 	public void clearText(){
+		checkWidget();
 		text.setText("");
 	}
 	

@@ -1,4 +1,4 @@
-package dedi.ui.models;
+package dedi.configuration.calculations.results.models;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;

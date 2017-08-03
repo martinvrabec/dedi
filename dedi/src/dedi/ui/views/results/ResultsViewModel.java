@@ -4,9 +4,9 @@ import java.util.List;
 
 import javax.measure.unit.Unit;
 
+import dedi.configuration.calculations.results.models.AbstractModel;
+import dedi.configuration.calculations.results.models.Results;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
-import dedi.ui.models.AbstractModel;
-import dedi.ui.models.Results;
 
 public class ResultsViewModel extends AbstractModel {
 	private List<ScatteringQuantity> quantities;

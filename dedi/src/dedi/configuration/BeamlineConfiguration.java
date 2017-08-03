@@ -4,6 +4,7 @@ import java.util.Observable;
 
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Length;
+import javax.vecmath.Vector2d;
 
 import org.dawnsci.plotting.tools.Vector3dutil;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
@@ -11,6 +12,7 @@ import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.jscience.physics.amount.Amount;
 
 import dedi.configuration.calculations.BeamlineConfigurationUtil;
+import dedi.configuration.calculations.geometry.Ray;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.devices.CameraTube;
 
@@ -169,5 +171,4 @@ public final class BeamlineConfiguration extends Observable {
 		setChanged();
 		notifyObservers();
 	}
-	
 }

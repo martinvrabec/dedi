@@ -1,56 +1,25 @@
-package dedi.ui.controllers;
+package dedi.configuration.calculations.results.controllers;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Observer;
 
 import javax.vecmath.Vector2d;
 
 import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.NumericRange;
+import dedi.configuration.calculations.results.models.IResultsModel;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
-import dedi.ui.models.AbstractModel;
-import dedi.ui.models.IResultsModel;
-import dedi.ui.models.Results;
 
-public abstract class AbstractResultsController extends AbstractController implements Observer {
-	private List<IResultsModel> registeredModels;
+
+public abstract class AbstractResultsController extends AbstractController<IResultsModel> implements Observer {
 	protected BeamlineConfiguration configuration;
 	
 	
 	public AbstractResultsController(BeamlineConfiguration configuration) {
-		registeredModels = new ArrayList<>();
 		this.configuration = configuration;
 		configuration.addObserver(this);
 	}
 	
-	
-	public void addModel(IResultsModel model){
-		registeredModels.add(model);
-		model.addPropertyChangeListener(this);
-	}
-	
-	
-	public void removeModel(IResultsModel model){
-		registeredModels.remove(model);
-		model.removePropertyChangeListener(this);
-	}
-	
-	
-	protected Object getModelProperty(String propertyName){
-   	 	for (IResultsModel model: registeredModels) {
-	            try {
-	            	Method method = model.getClass().getDeclaredMethod("get" + propertyName);
-	                return method.invoke(model);
-	            } catch (Exception ex) {
-	                //  Handle exception.
-	            }
-	     }
-   	 	 return null;
-    }
-	
-	
+
 	public abstract void updateRequestedQRange(ScatteringQuantity minRequested, ScatteringQuantity maxRequested);
 	
 		
@@ -112,5 +81,4 @@ public abstract class AbstractResultsController extends AbstractController imple
 	public boolean getHasSolution() {
 		return (boolean) getModelProperty(IResultsModel.HAS_SOLUTION_PROPERTY);
 	}
-
 }

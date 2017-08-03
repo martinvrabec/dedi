@@ -46,19 +46,19 @@ import org.jscience.physics.amount.Amount;
 
 import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.NumericRange;
+import dedi.configuration.calculations.results.models.Results;
+import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.calculations.scattering.D;
 import dedi.configuration.calculations.scattering.Q;
 import dedi.configuration.calculations.scattering.S;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
 import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
-import dedi.ui.models.Results;
-import dedi.ui.models.ResultsService;
 
 public class ResultsView extends ViewPart implements PropertyChangeListener {
 	private AbstractResultsViewController controller;
 	
-	private Composite main;
+	private Composite resultsPanel;
 	private Combo scatteringQuantitiesCombo;
 	private ComboViewer scatteringQuantitiesComboViewer;
 	private ComboViewer scatteringQuantitiesUnitsCombo;
@@ -103,13 +103,13 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		scrolledComposite.setExpandHorizontal(true);
 		
 		
-		main = new Composite(scrolledComposite, SWT.NONE);
-		main.setLayout(new GridLayout(3, true));
+		resultsPanel = new Composite(scrolledComposite, SWT.NONE);
+		resultsPanel.setLayout(new GridLayout(3, true));
 		
 		
-		GuiHelper.createLabel(main, "Scattering quantity:");
+		GuiHelper.createLabel(resultsPanel, "Scattering quantity:");
 		
-		scatteringQuantitiesCombo = new Combo(main, SWT.READ_ONLY | SWT.RIGHT);
+		scatteringQuantitiesCombo = new Combo(resultsPanel, SWT.READ_ONLY | SWT.RIGHT);
 		scatteringQuantitiesComboViewer = new ComboViewer(scatteringQuantitiesCombo);
 		scatteringQuantitiesComboViewer.setContentProvider(ArrayContentProvider.getInstance());
 		scatteringQuantitiesComboViewer.setLabelProvider(new LabelProvider(){
@@ -136,7 +136,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		
 		
 		
-		scatteringQuantitiesUnitsCombo = GuiHelper.createUnitsCombo(main, null);
+		scatteringQuantitiesUnitsCombo = GuiHelper.createUnitsCombo(resultsPanel, null);
 		scatteringQuantitiesUnitsCombo.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event){
@@ -150,33 +150,33 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		
 		
 		
-		minValueLabel = GuiHelper.createLabel(main, "");
-		minValue = GuiHelper.createLabel(main, "");
+		minValueLabel = GuiHelper.createLabel(resultsPanel, "");
+		minValue = GuiHelper.createLabel(resultsPanel, "");
 		minValue.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		new Label(main, SWT.NONE);
+		new Label(resultsPanel, SWT.NONE);
 		
 		
-		maxValueLabel = GuiHelper.createLabel(main, "");
-		maxValue = GuiHelper.createLabel(main, "");
+		maxValueLabel = GuiHelper.createLabel(resultsPanel, "");
+		maxValue = GuiHelper.createLabel(resultsPanel, "");
 		maxValue.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		new Label(main, SWT.NONE);
+		new Label(resultsPanel, SWT.NONE);
 		
 		
-		requestedMinValueLabel = GuiHelper.createLabel(main, "");
-		requestedMinValueText = GuiHelper.createText(main);
+		requestedMinValueLabel = GuiHelper.createLabel(resultsPanel, "");
+		requestedMinValueText = GuiHelper.createText(resultsPanel);
 		GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).hint(70, 20).applyTo(requestedMinValueText);
 		requestedMinValueText.addModifyListener(e -> {if(isUserEdited) controller.updateRequestedMin(requestedMinValueText.getText());});
-		new Label(main, SWT.NONE);
+		new Label(resultsPanel, SWT.NONE);
 		
 		
-		requestedMaxValueLabel = GuiHelper.createLabel(main, "");
-		requestedMaxValueText = GuiHelper.createText(main);
+		requestedMaxValueLabel = GuiHelper.createLabel(resultsPanel, "");
+		requestedMaxValueText = GuiHelper.createText(resultsPanel);
 		GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).hint(70, 20).applyTo(requestedMaxValueText);
 		requestedMaxValueText.addModifyListener(e -> {if(isUserEdited) controller.updateRequestedMax(requestedMaxValueText.getText());});
-		new Label(main, SWT.NONE);
+		new Label(resultsPanel, SWT.NONE);
 		
 		
-		drawingArea = new Canvas(main, SWT.NONE);
+		drawingArea = new Canvas(resultsPanel, SWT.NONE);
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		data.horizontalSpan = 3;
 		data.widthHint = 700;
@@ -192,9 +192,9 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		controller.updateQuantities(quantities);
 		
 		
-		main.layout();
-		scrolledComposite.setContent(main);	
-		scrolledComposite.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		resultsPanel.layout();
+		scrolledComposite.setContent(resultsPanel);	
+		scrolledComposite.setMinSize(resultsPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	}
 
 	
@@ -310,7 +310,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		} finally {
 			isUserEdited = true;
 			drawingArea.redraw();
-			main.layout();
+			resultsPanel.layout();
 		}
 	}
 }

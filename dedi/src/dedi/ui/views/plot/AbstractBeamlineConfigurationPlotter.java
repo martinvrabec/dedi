@@ -27,15 +27,21 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
 import dedi.configuration.BeamlineConfiguration;
+import dedi.configuration.calculations.results.controllers.AbstractResultsController;
+import dedi.configuration.calculations.results.models.Results;
+import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.ui.GuiHelper;
-import dedi.ui.controllers.AbstractResultsController;
-import dedi.ui.models.Results;
-import dedi.ui.models.ResultsService;
 import dedi.ui.widgets.plotting.ColourChangeEvent;
 import dedi.ui.widgets.plotting.ColourChangeListener;
 import dedi.ui.widgets.plotting.Legend;
 import dedi.ui.widgets.plotting.LegendItem;
 
+
+/**
+ * Defines what items should be plotted and how their properties can be configured, but leaves the actual implementation
+ *  of the plotting to subclasses.
+ * The default implementation is the {@link BaseBeamlineConfigurationPlotterImpl}.
+ */
 public abstract class AbstractBeamlineConfigurationPlotter 
                       implements IBeamlineConfigurationPlotter, PropertyChangeListener, Observer, ColourChangeListener {
 	

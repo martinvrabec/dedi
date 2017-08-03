@@ -11,10 +11,10 @@ import org.jscience.physics.amount.Amount;
 
 import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.NumericRange;
+import dedi.configuration.calculations.results.models.Results;
+import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.calculations.scattering.Q;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
-import dedi.ui.models.Results;
-import dedi.ui.models.ResultsService;
 
 public class DefaultResultsViewController extends AbstractResultsViewController {
 	

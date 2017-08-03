@@ -11,6 +11,7 @@ import javax.measure.quantity.Length;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlEvent;
@@ -50,13 +51,12 @@ import dedi.ui.GuiHelper;
 import dedi.ui.widgets.units.ComboUnitsProvider;
 import dedi.ui.widgets.units.IAmountChangeListener;
 import dedi.ui.widgets.units.LabelUnitsProvider;
-import dedi.ui.widgets.units.SpinnerWithUnits;
 import dedi.ui.widgets.units.TextWithUnits;
 
 
 public class ConfigurationView extends ViewPart implements Observer {
 	
-	private PredefinedBeamlineConfigurationsPanel predefinedBeamlineConfigurationsPanel;
+	private BeamlineConfigurationTemplatesPanel templatesPanel;
 	
 	private TextWithUnits<Angle> angle;
 	private Spinner cameraLengthValueSpinner;
@@ -76,63 +76,52 @@ public class ConfigurationView extends ViewPart implements Observer {
 		scrolledComposite.setExpandVertical( true );
 		scrolledComposite.setExpandHorizontal( true );
 		
-		Composite main = new Composite(scrolledComposite, SWT.NONE);
-		main.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		Composite mainPanel = new Composite(scrolledComposite, SWT.NONE);
+		mainPanel.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		GridLayout layout = new GridLayout(1, true);
 		layout.verticalSpacing = 20;
-		main.setLayout(layout);
+		mainPanel.setLayout(layout);
 		
-		predefinedBeamlineConfigurationsPanel = new PredefinedBeamlineConfigurationsPanel(main);
-		predefinedBeamlineConfigurationsPanel.addObserver(this);
-	    new DetectorPanel(main, predefinedBeamlineConfigurationsPanel);
-		new BeamstopPanel(main, predefinedBeamlineConfigurationsPanel);
-		new CameraTubePanel(main, predefinedBeamlineConfigurationsPanel);
-		new BeamlineQuantityPanel(main, predefinedBeamlineConfigurationsPanel); 
+		templatesPanel = new BeamlineConfigurationTemplatesPanel(mainPanel);
+		templatesPanel.addObserver(this);
+	    new DetectorPanel(mainPanel, templatesPanel);
+		new BeamstopPanel(mainPanel, templatesPanel);
+		new CameraTubePanel(mainPanel, templatesPanel);
+		new BeamlineQuantityPanel(mainPanel, templatesPanel); 
 		
 		
-		Group cameraGroup = GuiHelper.createGroup(main, "", 3);
+		Group cameraGroup = GuiHelper.createGroup(mainPanel, "", 3);
 		
-		/*cameraLengthValueSpinner = new SpinnerWithUnits<>(cameraGroup, "Camera Length", 
-				                         new LabelUnitsProvider<>(cameraGroup, SI.METER));
-		cameraLengthValueSpinner.addAmountChangeListener( () ->
-				BeamlineConfiguration.getInstance().setCameraLength(cameraLengthValueSpinner.getValue(SI.METER).getEstimatedValue()));
-		cameraLengthValueSpinner.setNumberOfDecimalPlaces(2);
-		cameraLengthValueSpinner.setSpinnerValues(145, 120, 970, 2, 25, 1);*/
-		
-		Label cameraLengthLabel = GuiHelper.createLabel(cameraGroup, "Camera Length:");
+		GuiHelper.createLabel(cameraGroup, "Camera Length:");
 		cameraLengthValueSpinner = new Spinner(cameraGroup, SWT.BORDER | SWT.READ_ONLY);
-		cameraLengthValueSpinner.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				BeamlineConfiguration.getInstance().setCameraLength(cameraLengthValueSpinner.getSelection()/100.0);
-			}
-		});
+		cameraLengthValueSpinner.addModifyListener( e -> BeamlineConfiguration.getInstance().setCameraLength(cameraLengthValueSpinner.getSelection()/100.0));
 		cameraLengthValueSpinner.setValues(145, 120, 970, 2, 25, 1);
-		Label cameraLengthUnitLabel = GuiHelper.createLabel(cameraGroup, "m");
+		GuiHelper.createLabel(cameraGroup, "m");
 		
 		
-		Group angleGroup = GuiHelper.createGroup(main, "", 3);
-		angle = new TextWithUnits<>(angleGroup, "Angle", 
-				     new ComboUnitsProvider<>(angleGroup, new ArrayList<>(Arrays.asList(SI.RADIAN, NonSI.DEGREE_ANGLE))));  
+		Group angleGroup = GuiHelper.createGroup(mainPanel, "", 3);
+		ComboUnitsProvider<Angle> combo = new ComboUnitsProvider<>(angleGroup, new ArrayList<>(Arrays.asList(SI.RADIAN, NonSI.DEGREE_ANGLE)));
+		angle = new TextWithUnits<>(angleGroup, "Angle", combo);  
 		angle.addAmountChangeListener(() -> angleChanged());
 		angle.setValue(Amount.valueOf(90, NonSI.DEGREE_ANGLE));
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(angle);
+		combo.moveBelow(angle);
 		
-		main.layout();
+		mainPanel.layout();
 		
-		scrolledComposite.setMinSize( main.computeSize( SWT.DEFAULT, SWT.DEFAULT ) );
-		main.addListener(SWT.Resize, new Listener() {
+		scrolledComposite.setMinSize( mainPanel.computeSize( SWT.DEFAULT, SWT.DEFAULT ) );
+		mainPanel.addListener(SWT.Resize, new Listener() {
 			int width = -1;
 			@Override
 			public void handleEvent(Event event) {
-				 int newWidth = main.getSize().x;
+				 int newWidth = mainPanel.getSize().x;
 			     if (newWidth != width) {
-			        scrolledComposite.setMinHeight(main.computeSize(newWidth, SWT.DEFAULT).y);
+			        scrolledComposite.setMinHeight(mainPanel.computeSize(newWidth, SWT.DEFAULT).y);
 			        width = newWidth;
 			     }
 			}
 		});
-		
-		scrolledComposite.setContent(main);	
+		scrolledComposite.setContent(mainPanel);	
 		
 		update(null, null);
 	}
@@ -152,14 +141,14 @@ public class ConfigurationView extends ViewPart implements Observer {
 	
 	@Override
 	public void update(Observable o, Object arg) {
-		BeamlineConfigurationBean beamlineConfiguration = predefinedBeamlineConfigurationsPanel.getPredefinedBeamlineConfiguration();
+		BeamlineConfigurationBean beamlineConfiguration = templatesPanel.getPredefinedBeamlineConfiguration();
 		if(beamlineConfiguration == null) return;
 		cameraLengthValueSpinner.setValues((int) (beamlineConfiguration.getMinCameraLength()*100), 
 				                           (int) (beamlineConfiguration.getMinCameraLength()*100), 
 				                           (int) (beamlineConfiguration.getMaxCameraLength()*100), 2, 
 				                           (int) beamlineConfiguration.getCameraLengthStepSize()*100, 1);
 		cameraLengthValueSpinner.setSelection((int) (beamlineConfiguration.getMinCameraLength()*100));
-		// Next line not needed because setSelection will fire the ModifyListener
+		// Next line not really needed because setSelection will fire the ModifyListener
 		//BeamlineConfiguration.getInstance().setCameraLength(beamlineConfiguration.getMinCameraLength());
 		BeamlineConfiguration.getInstance().setMinCameraLength(beamlineConfiguration.getMinCameraLength());
 		BeamlineConfiguration.getInstance().setMaxCameraLength(beamlineConfiguration.getMaxCameraLength());

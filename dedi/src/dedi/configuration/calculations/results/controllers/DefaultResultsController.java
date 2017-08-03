@@ -1,4 +1,4 @@
-package dedi.ui.controllers;
+package dedi.configuration.calculations.results.controllers;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -12,12 +12,12 @@ import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.BeamlineConfigurationUtil;
 import dedi.configuration.calculations.NumericRange;
 import dedi.configuration.calculations.geometry.Ray;
+import dedi.configuration.calculations.results.models.IResultsModel;
+import dedi.configuration.calculations.results.models.Results;
 import dedi.configuration.calculations.scattering.Q;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.devices.CameraTube;
-import dedi.ui.models.IResultsModel;
-import dedi.ui.models.Results;
 import dedi.ui.views.results.ResultsView;
 
 public class DefaultResultsController extends AbstractResultsController {

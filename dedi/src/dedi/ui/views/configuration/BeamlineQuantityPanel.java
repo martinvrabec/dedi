@@ -1,5 +1,6 @@
 package dedi.ui.views.configuration;
 
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -10,7 +11,7 @@ import dedi.configuration.preferences.BeamlineConfigurationBean;
 import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
 import dedi.ui.widgets.units.ComboUnitsProvider;
-import dedi.ui.widgets.units.InputValidator;
+import dedi.ui.widgets.units.IAmountInputValidator;
 import dedi.ui.widgets.units.TextWithUnits;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import javax.measure.unit.Unit;
 import static dedi.configuration.calculations.scattering.BeamQuantity.Quantities;
 
 public class BeamlineQuantityPanel implements Observer {
-	private PredefinedBeamlineConfigurationsPanel predefinedBeamlineConfigurationsPanel;
+	private BeamlineConfigurationTemplatesPanel templatesPanel;
 	
 	private TextWithUnits<Energy> energy;
 	private TextWithUnits<Length> wavelength;
@@ -43,8 +44,8 @@ public class BeamlineQuantityPanel implements Observer {
 	private final static List<Unit<Length>> WAVELENGTH_UNITS = new ArrayList<>(Arrays.asList(SI.NANO(SI.METER), NonSI.ANGSTROM));
 	
 	
-	public BeamlineQuantityPanel(Composite parent, PredefinedBeamlineConfigurationsPanel panel) {
-		predefinedBeamlineConfigurationsPanel = panel;
+	public BeamlineQuantityPanel(Composite parent, BeamlineConfigurationTemplatesPanel panel) {
+		templatesPanel = panel;
 		panel.addObserver(this);
 		
 		Group beamlineQuantityGroup = GuiHelper.createGroup(parent, "Beamline quantity", 3);
@@ -55,25 +56,21 @@ public class BeamlineQuantityPanel implements Observer {
 		maxEnergy = Amount.valueOf(Double.MAX_VALUE, SI.JOULE);
 		
 		
-		energy = new TextWithUnits<>(beamlineQuantityGroup, "Energy", 
-						new ComboUnitsProvider<>(beamlineQuantityGroup, ENERGY_UNITS),
-						new InputValidator<Energy>() {
-							@Override
-							public boolean isValid(Amount<Energy> input){
-								return input.isLessThan(maxEnergy) && input.isGreaterThan(minEnergy);
-							}
-						});
+		ComboUnitsProvider<Energy> energyUnitsCombo = new ComboUnitsProvider<>(beamlineQuantityGroup, ENERGY_UNITS);
+		energy = new TextWithUnits<>(beamlineQuantityGroup, "Energy", energyUnitsCombo,
+						             input ->  input.isLessThan(maxEnergy) && input.isGreaterThan(minEnergy));
 		energy.addAmountChangeListener(() -> textChanged(Quantities.ENERGY));
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(energy);
+		energyUnitsCombo.moveBelow(energy);
 		
-		wavelength = new TextWithUnits<>(beamlineQuantityGroup, "Wavelength", 
-				           new ComboUnitsProvider<>(beamlineQuantityGroup, WAVELENGTH_UNITS), 
-				           new InputValidator<Length>() {
-								@Override
-								public boolean isValid(Amount<Length> input){
-									return input.isLessThan(maxWavelength) && input.isGreaterThan(minWavelength);
-								}
-							});
+		
+		ComboUnitsProvider<Length> wavelengthUnitsCombo = new ComboUnitsProvider<>(beamlineQuantityGroup, WAVELENGTH_UNITS);
+		wavelength = new TextWithUnits<>(beamlineQuantityGroup, "Wavelength", wavelengthUnitsCombo,
+				                         input -> input.isLessThan(maxWavelength) && input.isGreaterThan(minWavelength));
 		wavelength.addAmountChangeListener(() -> textChanged(Quantities.WAVELENGTH));
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(wavelength);
+		wavelengthUnitsCombo.moveBelow(wavelength);
+		
 		setToolTipTexts();
 		
 		wavelength.addUnitsChangeListener(() -> setToolTipTexts());
@@ -110,6 +107,7 @@ public class BeamlineQuantityPanel implements Observer {
 						energy.clearText();
 						BeamlineConfiguration.getInstance().setWavelength(null);
 						break;
+					default:
 				}
 			} finally {
 				isEdited = true;
@@ -121,7 +119,7 @@ public class BeamlineQuantityPanel implements Observer {
 	
 	@Override
 	public void update(Observable o, Object arg) {
-		BeamlineConfigurationBean beamlineConfiguration = predefinedBeamlineConfigurationsPanel.getPredefinedBeamlineConfiguration();
+		BeamlineConfigurationBean beamlineConfiguration = templatesPanel.getPredefinedBeamlineConfiguration();
 		if(beamlineConfiguration == null) return;
 		minWavelength = Amount.valueOf(beamlineConfiguration.getMinWavelength()*1.0e-9, SI.METER);
 		maxWavelength = Amount.valueOf(beamlineConfiguration.getMaxWavelength()*1.0e-9, SI.METER);
