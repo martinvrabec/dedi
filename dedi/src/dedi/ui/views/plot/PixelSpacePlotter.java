@@ -66,15 +66,13 @@ public class PixelSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 
 	@Override
 	protected double getBeamstopMajor() {
-		return beamlineConfiguration.getBeamstop().getDiameterMM()/2
-                /beamlineConfiguration.getDetector().getXPixelMM();
+		return beamlineConfiguration.getBeamstopMajorPixels();
 	}
 
 
 	@Override
 	protected double getBeamstopMinor() {
-		return beamlineConfiguration.getBeamstop().getDiameterMM()/2
-                /beamlineConfiguration.getDetector().getYPixelMM();
+		return beamlineConfiguration.getBeamstopMinorPixels();
 	}
 
 
@@ -92,15 +90,13 @@ public class PixelSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 	
 	@Override
 	protected double getCameraTubeMajor() {
-		return beamlineConfiguration.getCameraTube().getDiameterMM()/2
-                /beamlineConfiguration.getDetector().getXPixelMM();
+		return beamlineConfiguration.getCameraTubeMajorPixels();
 	}
 
 
 	@Override
 	protected double getCameraTubeMinor() {
-		return beamlineConfiguration.getCameraTube().getDiameterMM()/2
-                /beamlineConfiguration.getDetector().getYPixelMM();
+		return beamlineConfiguration.getCameraTubeMinorPixels();
 	}
 
 

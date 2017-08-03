@@ -18,7 +18,7 @@ import dedi.configuration.devices.CameraTube;
 
 public final class BeamlineConfiguration extends Observable {
 	private DiffractionDetector detector;
-	private DetectorProperties detectorProperties;
+	private DetectorProperties detectorProperties;  // Currently not used.
 	private Beamstop beamstop;
 	private CameraTube cameraTube;
 	private Double angle;
@@ -55,6 +55,29 @@ public final class BeamlineConfiguration extends Observable {
 		return detector;
 	}
 
+	
+	/**
+	 * A convenience method that provides the width of the detector in millimetres,
+	 * as the {@link DiffractionDetector} class provides it in pixels only.
+	 * 
+	 * @return The detector width in millimetres.
+	 */
+	public double getDetectorWidthMM(){
+		return getDetector().getNumberOfPixelsX()*getDetector().getXPixelMM();
+	}
+	
+	
+	/**
+	 * A convenience method that provides the height of the detector in millimetres,
+	 * as the {@link DiffractionDetector} class provides it in pixels only.
+	 * 
+	 * @return The detector height in millimetres.
+	 */
+	public double getDetectorHeightMM(){
+		return getDetector().getNumberOfPixelsY()*getDetector().getYPixelMM();
+	}
+	
+	
 	public void setDetector(DiffractionDetector detector) {
 		this.detector = detector;
 		setChanged();
@@ -95,6 +118,35 @@ public final class BeamlineConfiguration extends Observable {
 	public Integer getClearance() {
 		return clearance;
 	}
+	
+	
+	/**
+	 * Within the {@link BeamlineConfiguration}, clearance is specified in pixels, 
+	 * so this method converts this to millimetres.
+	 * Since the pixels of the detector are allowed to have their height different from their width,
+	 * the clearance actually becomes an ellipse. 
+	 * This method returns the length of this ellipse's semi-major axis.
+	 * 
+	 * @return The length of the semi-major axis of the clearance in millimetres.
+	 */
+	public double getClearanceMajorMM() {
+		return getClearance()*getDetector().getXPixelMM();
+	}
+	
+	
+	/**
+	 * Within the {@link BeamlineConfiguration}, clearance is specified in pixels, 
+	 * so this method converts this to millimetres.
+	 * Since the pixels of the detector are allowed to have their height different from their width,
+	 * the clearance actually becomes an ellipse. 
+	 * This method returns the length of this ellipse's semi-minor axis.
+	 * 
+	 * @return The length of the semi-minor axis of the clearance in millimetres.
+	 */
+	public double getClearanceMinorMM() {
+		return getClearance()*getDetector().getYPixelMM();
+	}
+	
 
 	public void setClearance(Integer clearance) {
 		this.clearance = clearance;
@@ -116,6 +168,27 @@ public final class BeamlineConfiguration extends Observable {
 		return beamstop;
 	}
 
+	
+	public double getBeamstopMajorPixels(){
+		return getBeamstop().getRadiusMM()
+                /getDetector().getXPixelMM();
+	}
+	
+	
+	public double getBeamstopMinorPixels(){
+		return getBeamstop().getRadiusMM()
+                /getDetector().getYPixelMM();
+	}
+	
+	
+	public double getBeamstopXCentreMM(){
+		return getBeamstop().getXCentre()*getDetector().getXPixelMM();
+	}
+	
+	public double getBeamstopYCentreMM(){
+		return getBeamstop().getYCentre()*getDetector().getYPixelMM();
+	}
+	
 	public void setBeamstop(Beamstop beamstop) {
 		this.beamstop = beamstop;
 		setChanged();
@@ -125,7 +198,28 @@ public final class BeamlineConfiguration extends Observable {
 	public CameraTube getCameraTube() {
 		return cameraTube;
 	}
+	
+	
+	public double getCameraTubeMajorPixels(){
+		return getCameraTube().getRadiusMM()
+                /getDetector().getXPixelMM();
+	}
+	
+	
+	public double getCameraTubeMinorPixels(){
+		return getCameraTube().getRadiusMM()
+                /getDetector().getYPixelMM();
+	}
+	
+	
+	public double getCameraTubeXCentreMM(){
+		return getCameraTube().getXCentre()*getDetector().getXPixelMM();
+	}
 
+	public double getCameraTubeYCentreMM(){
+		return getCameraTube().getYCentre()*getDetector().getYPixelMM();
+	}
+	
 	public void setCameraTube(CameraTube cameraTube) {
 		this.cameraTube = cameraTube;
 		setChanged();

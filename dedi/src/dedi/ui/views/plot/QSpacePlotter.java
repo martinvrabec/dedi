@@ -34,12 +34,12 @@ public class QSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 	
 	@Override
 	protected double getDetectorWidth() {
-		return  beamlineConfiguration.getDetector().getNumberOfPixelsX()*beamlineConfiguration.getDetector().getXPixelMM()*scaleFactor;
+		return  beamlineConfiguration.getDetectorWidthMM()*scaleFactor;
 	}
 
 	@Override
 	protected double getDetectorHeight() {
-		return beamlineConfiguration.getDetector().getNumberOfPixelsY()*beamlineConfiguration.getDetector().getYPixelMM()*scaleFactor;
+		return beamlineConfiguration.getDetectorHeightMM()*scaleFactor;
 	}
 
 	@Override
@@ -54,22 +54,22 @@ public class QSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 
 	@Override
 	protected double getClearanceMajor() {
-		return beamlineConfiguration.getClearance()*beamlineConfiguration.getDetector().getXPixelMM()*scaleFactor;
+		return beamlineConfiguration.getClearanceMajorMM()*scaleFactor;
 	}
 
 	@Override
 	protected double getClearanceMinor() {
-		return beamlineConfiguration.getClearance()*beamlineConfiguration.getDetector().getYPixelMM()*scaleFactor;
+		return beamlineConfiguration.getClearanceMinorMM()*scaleFactor;
 	}
 
 	@Override
 	protected double getBeamstopMajor() {
-		return beamlineConfiguration.getBeamstop().getDiameterMM()*scaleFactor/2;
+		return beamlineConfiguration.getBeamstop().getRadiusMM()*scaleFactor;
 	}
 
 	@Override
 	protected double getBeamstopMinor() {
-		return beamlineConfiguration.getBeamstop().getDiameterMM()*scaleFactor/2;
+		return beamlineConfiguration.getBeamstop().getRadiusMM()*scaleFactor;
 	}
 
 	@Override
@@ -84,35 +84,33 @@ public class QSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 
 
 	private double getBeamstopCentreXDetectorFrame(){
-		return beamlineConfiguration.getBeamstop().getXCentre()*beamlineConfiguration.getDetector().getXPixelMM();
+		return beamlineConfiguration.getBeamstopXCentreMM();
 	}
 	
 	
 	private double getBeamstopCentreYDetectorFrame(){
-		return beamlineConfiguration.getBeamstop().getYCentre()*beamlineConfiguration.getDetector().getYPixelMM();
+		return beamlineConfiguration.getBeamstopYCentreMM();
 	}
 	
 	
 	@Override
 	protected double getCameraTubeMajor() {
-		return beamlineConfiguration.getCameraTube().getDiameterMM()*scaleFactor/2;
+		return beamlineConfiguration.getCameraTube().getRadiusMM()*scaleFactor;
 	}
 
 	@Override
 	protected double getCameraTubeMinor() {
-		return beamlineConfiguration.getCameraTube().getDiameterMM()*scaleFactor/2;
+		return beamlineConfiguration.getCameraTube().getRadiusMM()*scaleFactor;
 	}
 
 	@Override
 	protected double getCameraTubeCentreX() {
-		return (beamlineConfiguration.getCameraTube().getXCentre() -  beamlineConfiguration.getBeamstop().getXCentre())
-				*beamlineConfiguration.getDetector().getXPixelMM()*scaleFactor;
+		return (beamlineConfiguration.getCameraTubeXCentreMM() -  beamlineConfiguration.getBeamstopXCentreMM())*scaleFactor;
 	}
 
 	@Override
 	protected double getCameraTubeCentreY() {
-		return (beamlineConfiguration.getCameraTube().getYCentre() -  beamlineConfiguration.getBeamstop().getYCentre())
-				*beamlineConfiguration.getDetector().getYPixelMM()*scaleFactor;
+		return (beamlineConfiguration.getCameraTubeYCentreMM() -  beamlineConfiguration.getBeamstopYCentreMM())*scaleFactor;
 	}
 
 	@Override
