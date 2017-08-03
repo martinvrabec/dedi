@@ -1,5 +1,7 @@
 package dedi.ui.views.plot;
 
+import dedi.configuration.calculations.BeamlineConfigurationUtil;
+import dedi.configuration.calculations.scattering.Q;
 
 public class PixelSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 	public PixelSpacePlotter(IBeamlineConfigurationPlotView view) {
@@ -23,6 +25,9 @@ public class PixelSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null && 
 		   beamlineConfiguration.getAngle() != null && rayIsPlot) 
 			createRay();
+		
+		if(beamlineConfiguration.getWavelength() != null && beamlineConfiguration.getCameraLength() != null && calibrantIsPlot)
+			createCalibrantRings();
 		
 		rescalePlot();
 	}
@@ -157,5 +162,21 @@ public class PixelSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 	@Override
 	protected double getRequestedRangeEndPointY() {
 		return resultsController.getRequestedRangeEndPoint().y/beamlineConfiguration.getDetector().getYPixelMM();
+	}
+
+
+	@Override
+	protected double getCalibrantRingMajor(Q q) {
+		return 1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(q.getValue().to(Q.BASE_UNIT).getEstimatedValue(), 
+                beamlineConfiguration.getCameraLength(), beamlineConfiguration.getWavelength())/
+				beamlineConfiguration.getDetector().getXPixelMM();
+	}
+
+
+	@Override
+	protected double getCalibrantRingMinor(Q q) {
+		return 1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(q.getValue().to(Q.BASE_UNIT).getEstimatedValue(), 
+                beamlineConfiguration.getCameraLength(), beamlineConfiguration.getWavelength())/
+				beamlineConfiguration.getDetector().getYPixelMM();
 	}
 }

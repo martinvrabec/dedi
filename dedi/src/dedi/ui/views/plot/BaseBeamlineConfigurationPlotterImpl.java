@@ -1,5 +1,8 @@
 package dedi.ui.views.plot;
 
+import java.util.List;
+
+import javax.measure.unit.SI;
 import javax.vecmath.Vector2d;
 
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
@@ -17,6 +20,14 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+
+import dedi.configuration.calculations.BeamlineConfigurationUtil;
+import dedi.configuration.calculations.scattering.D;
+import dedi.configuration.calculations.scattering.Q;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
+import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 
 public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeamlineConfigurationPlotter {
 	protected IRegion detectorRegion;
@@ -150,6 +161,29 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
+	protected void createCalibrantRings(){
+	   if(selectedCalibrant == null) return;
+	   List<HKL> hkls = selectedCalibrant.getHKLs();
+	   
+	   String ringName = "Ring";
+	   for(int i = 0; i < hkls.size(); i++){
+		   IRegion ringRegion = null;
+		   try {
+				ringRegion = system.createRegion(ringName + i, IRegion.RegionType.ELLIPSE);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return;
+			}
+		   Q q = new D(hkls.get(i).getD()).toQ();
+
+		   IROI ringROI = new EllipticalROI(getCalibrantRingMajor(q), getCalibrantRingMinor(q), 0, getBeamstopCentreX(), getBeamstopCentreY());
+				  
+		   ringRegion.setFill(false);
+		   addRegion(ringRegion, ringROI, Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
+	   }
+	}
+	
+	
 	protected void addRegion(IRegion region, IROI roi, Color colour){
 		region.setROI(roi);
 		region.setMobile(false);
@@ -170,10 +204,10 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 			double maxY = Double.MIN_VALUE;
 			double minY = Double.MAX_VALUE;
 			
-			IROI rois[] = {detectorROI, cameraTubeROI, beamstopROI};
-			for(int i = 0; i < rois.length; i++){
-				if(rois[i] != null){
-					IRectangularROI bounds = rois[i].getBounds();
+			for(IRegion region : system.getRegions()){
+				IROI roi = region.getROI();
+				if(roi != null){
+					IRectangularROI bounds = roi.getBounds();
 					maxX = Math.max(maxX, bounds.getPointX() + bounds.getLength(0));
 					maxY = Math.max(maxY, bounds.getPointY() + bounds.getLength(1));
 					minX = Math.min(minX,  bounds.getPointX());
@@ -181,7 +215,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 				}
 			}
 			
-			if(detectorROI == null && cameraTubeROI == null && beamstopROI == null){
+			if(maxX == Double.MIN_VALUE || minX == Double.MAX_VALUE || maxY == Double.MIN_VALUE || minY == Double.MAX_VALUE){
 				maxX = 100; minX = -100; maxY = 100; minY = -100;
 			}
 				
@@ -236,4 +270,8 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	protected abstract double getRequestedRangeEndPointX();
 	
 	protected abstract double getRequestedRangeEndPointY();
+	
+	protected abstract double getCalibrantRingMajor(Q q);
+	
+	protected abstract double getCalibrantRingMinor(Q q);
 }

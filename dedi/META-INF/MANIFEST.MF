@@ -30,5 +30,6 @@ Import-Package: javax.measure.quantity;version="4.3.1",
  org.eclipse.richbeans.widgets.scalebox,
  org.eclipse.richbeans.widgets.selector,
  org.eclipse.richbeans.widgets.wrappers,
- org.jscience.physics.amount;version="4.3.1"
+ org.jscience.physics.amount;version="4.3.1",
+ uk.ac.diamond.scisoft.analysis.crystallography
 Bundle-ActivationPolicy: lazy

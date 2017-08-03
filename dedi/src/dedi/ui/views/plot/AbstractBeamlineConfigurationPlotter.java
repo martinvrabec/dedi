@@ -35,6 +35,11 @@ import dedi.ui.widgets.plotting.ColourChangeEvent;
 import dedi.ui.widgets.plotting.ColourChangeListener;
 import dedi.ui.widgets.plotting.Legend;
 import dedi.ui.widgets.plotting.LegendItem;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 
 
 /**
@@ -43,7 +48,8 @@ import dedi.ui.widgets.plotting.LegendItem;
  * The default implementation is the {@link BaseBeamlineConfigurationPlotterImpl}.
  */
 public abstract class AbstractBeamlineConfigurationPlotter 
-                      implements IBeamlineConfigurationPlotter, PropertyChangeListener, Observer, ColourChangeListener {
+                      implements IBeamlineConfigurationPlotter, PropertyChangeListener, Observer, ColourChangeListener, 
+                                 CalibrantSelectedListener {
 	
 	private AbstractBeamlineConfigurationPlotter thisInstance;
 	protected IPlottingSystem<Composite> system;
@@ -52,13 +58,17 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	protected AbstractResultsController resultsController;
 
 	private List<Control> controls;
-	private String[]  plotItems = {"Detector", "Beamstop", "CameraTube", "Ray"};
-	private String[] plotItemNames = {"Detector", "Beamstop", "Camera tube", "Q range"};
+	private String[]  plotItems = {"Detector", "Beamstop", "CameraTube", "Ray", "Calibrant"};
+	private String[] plotItemNames = {"Detector", "Beamstop", "Camera tube", "Q range", "Calibrant"};
 	
 	protected boolean detectorIsPlot = true;
 	protected boolean beamstopIsPlot = true;
 	protected boolean cameraTubeIsPlot = true;
 	protected boolean rayIsPlot = true;
+	protected boolean calibrantIsPlot = true;
+	
+	protected CalibrantSpacing selectedCalibrant;
+	private Label selectedCalibrantLabel;
 			
 	//Default colours of the objects to be plotted
 	private Color detectorColour = new Color(Display.getDefault(), 30, 144, 255);
@@ -124,6 +134,16 @@ public abstract class AbstractBeamlineConfigurationPlotter
 			controls.add(button);
 		}
 		
+		selectedCalibrant = CalibrationFactory.getCalibrationStandards().getCalibrant(); 
+		
+		controls.add(GuiHelper.createLabel(plotConfigurationPanel, "The currently selected calibrant is :"));
+		selectedCalibrantLabel = GuiHelper.createLabel(plotConfigurationPanel, "");
+		controls.add(selectedCalibrantLabel);
+		if(selectedCalibrant != null) selectedCalibrantLabel.setText(selectedCalibrant.getName());
+		controls.add(GuiHelper.createLabel(plotConfigurationPanel, "(You can select another calibrant in diffraction preferences)"));
+		
+		CalibrationFactory.addCalibrantSelectionListener(this);
+		
 		plotConfigurationPanel.layout();
 		updatePlot();
 	}
@@ -146,6 +166,14 @@ public abstract class AbstractBeamlineConfigurationPlotter
 		updatePlot();
 	}
 	
+	
+	@Override
+	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
+		selectedCalibrant = CalibrationFactory.getCalibrationStandards().getCalibrant();
+		if(selectedCalibrant != null) selectedCalibrantLabel.setText(selectedCalibrant.getName());
+		plotConfigurationPanel.layout();
+		updatePlot();
+	}
 	
 	public void setDetectorIsPlot(boolean value){
 		detectorIsPlot = value;
@@ -170,7 +198,13 @@ public abstract class AbstractBeamlineConfigurationPlotter
 		updatePlot();
 	}
 	
+	
+	public void setCalibrantIsPlot(boolean value){
+		calibrantIsPlot = value;
+		updatePlot();
+	}
 
+	
 	public void dispose(){
 		clearPlot();
 		beamlineConfiguration.deleteObserver(this);
@@ -178,6 +212,7 @@ public abstract class AbstractBeamlineConfigurationPlotter
 		view = null;
 		system = null;
 		for(LegendItem item : legendItems) item.removeColourChangeListener(this);
+		CalibrationFactory.removeCalibrantSelectionListener(this);
 		for(Control control : controls) control.dispose();
 	}
 	

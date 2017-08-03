@@ -1,5 +1,9 @@
 package dedi.ui.views.plot;
 
+import javax.measure.unit.SI;
+
+import dedi.configuration.calculations.scattering.Q;
+
 public class QSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 	private double scaleFactor; 
 	
@@ -28,6 +32,8 @@ public class QSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 		   beamlineConfiguration.getAngle() != null && rayIsPlot) 
 			createRay();
 		
+	    if(calibrantIsPlot) createCalibrantRings();
+	    
 		rescalePlot();
 	}
 	
@@ -151,6 +157,18 @@ public class QSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 	@Override
 	protected double getRequestedRangeEndPointY() {
 		return (resultsController.getRequestedRangeEndPoint().y - getBeamstopCentreYDetectorFrame())*scaleFactor;
+	}
+
+
+	@Override
+	protected double getCalibrantRingMajor(Q q) {
+		return q.getValue().to(SI.NANO(SI.METER).inverse()).getEstimatedValue();
+	}
+
+
+	@Override
+	protected double getCalibrantRingMinor(Q q) {
+		return q.getValue().to(SI.NANO(SI.METER).inverse()).getEstimatedValue();
 	}
 
 }
