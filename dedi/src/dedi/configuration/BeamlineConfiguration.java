@@ -147,7 +147,27 @@ public final class BeamlineConfiguration extends Observable {
 		return getClearance()*getDetector().getYPixelMM();
 	}
 	
-
+    
+	public double getClearanceAndBeamstopMajorMM(){
+		return getClearanceMajorMM() + getBeamstop().getRadiusMM();
+	}
+	
+	
+	public double getClearanceAndBeamstopMinorMM(){
+		return getClearanceMinorMM() + getBeamstop().getRadiusMM();
+	}
+	
+	
+	public double getClearanceAndBeamstopMajorPixels(){
+		return getClearance() + getBeamstopMajorPixels();
+	}
+	
+	
+	public double getClearanceAndBeamstopMinorPixels(){
+		return getClearance() + getBeamstopMinorPixels();
+	}
+	
+	
 	public void setClearance(Integer clearance) {
 		this.clearance = clearance;
 		setChanged();
