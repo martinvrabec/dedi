@@ -255,7 +255,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 			if(e.getOldValue() != null && e.getNewValue() != null && e.getOldValue().equals(e.getNewValue())) return;
 			if(e.getOldValue() == null && e.getNewValue() == null) return;
 			
-			if(e.getPropertyName().equals(ResultsViewModel.CURRENT_QUANTITY_PROPERTY)){
+			if(e.getPropertyName().equals(ResultsViewConstants.CURRENT_QUANTITY_PROPERTY)){
 				// If the two quantities have the same class, then they are equivalent as far as the quantities combo is concerned.
 				if(e.getOldValue() != null && e.getNewValue() != null && e.getNewValue().getClass().equals(e.getOldValue().getClass())) return;
 				ScatteringQuantity currentQuantity = (ScatteringQuantity) e.getNewValue();
@@ -272,28 +272,28 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 				}
 				scatteringQuantitiesComboViewer.setSelection(new StructuredSelection(currentQuantity));
 			}
-			else if(e.getPropertyName().equals(ResultsViewModel.CURRENT_UNITS_PROPERTY)){
+			else if(e.getPropertyName().equals(ResultsViewConstants.CURRENT_UNITS_PROPERTY)){
 				scatteringQuantitiesUnitsCombo.setInput(e.getNewValue());
 			}
-			else if(e.getPropertyName().equals(ResultsViewModel.CURRENT_UNIT_PROPERTY)){
+			else if(e.getPropertyName().equals(ResultsViewConstants.CURRENT_UNIT_PROPERTY)){
 				scatteringQuantitiesUnitsCombo.setSelection(new StructuredSelection(e.getNewValue()));
 			}
-			else if(e.getPropertyName().equals(ResultsViewModel.QUANTITIES_PROPERTY)){
+			else if(e.getPropertyName().equals(ResultsViewConstants.QUANTITIES_PROPERTY)){
 				scatteringQuantitiesComboViewer.setInput(e.getNewValue());
 			}
-			else if(e.getPropertyName().equals(ResultsViewModel.REQUESTED_MIN_PROPERTY)){
+			else if(e.getPropertyName().equals(ResultsViewConstants.REQUESTED_MIN_PROPERTY)){
 				if(e.getNewValue() == null) return;
 				Double newValue = (Double) e.getNewValue();
 				if(TextUtil.equals(String.valueOf(newValue), requestedMinValueText.getText())) return;
 				requestedMinValueText.setText(TextUtil.format(newValue));
 			}
-			else if(e.getPropertyName().equals(ResultsViewModel.REQUESTED_MAX_PROPERTY)){
+			else if(e.getPropertyName().equals(ResultsViewConstants.REQUESTED_MAX_PROPERTY)){
 				if(e.getNewValue() == null) return;
 				Double newValue = (Double) e.getNewValue();
 				if(TextUtil.equals(String.valueOf(newValue), requestedMaxValueText.getText())) return;
 				requestedMaxValueText.setText(TextUtil.format(newValue));
 			}
-			else if(e.getPropertyName().equals(ResultsViewModel.VISIBLE_MIN_PROPERTY)){
+			else if(e.getPropertyName().equals(ResultsViewConstants.VISIBLE_MIN_PROPERTY)){
 				if(e.getNewValue() == null) {
 					minValue.setText("");
 					return;
@@ -302,7 +302,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 				if(TextUtil.equals(String.valueOf(newValue), minValue.getText())) return;
 				minValue.setText(TextUtil.format(newValue));
 			}
-			else if(e.getPropertyName().equals(ResultsViewModel.VISIBLE_MAX_PROPERTY)){
+			else if(e.getPropertyName().equals(ResultsViewConstants.VISIBLE_MAX_PROPERTY)){
 				if(e.getNewValue() == null) {
 					maxValue.setText("");
 					return;
@@ -311,7 +311,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 				if(TextUtil.equals(String.valueOf(newValue), maxValue.getText())) return;
 				maxValue.setText(TextUtil.format(newValue));
 			}
-			else if(e.getPropertyName().equals(AbstractResultsViewController.BEAMLINE_CONFIGURATION_PROPERTY)){
+			else if(e.getPropertyName().equals(ResultsViewConstants.BEAMLINE_CONFIGURATION_PROPERTY)){
 				doubleTheta.setWavelength(controller.getWavelength());
 			}
 		} finally {

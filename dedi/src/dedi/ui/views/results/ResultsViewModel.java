@@ -5,7 +5,6 @@ import java.util.List;
 import javax.measure.unit.Unit;
 
 import dedi.configuration.calculations.results.models.AbstractModel;
-import dedi.configuration.calculations.results.models.Results;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
 
 public class ResultsViewModel extends AbstractModel {
@@ -21,64 +20,52 @@ public class ResultsViewModel extends AbstractModel {
 	private Double fullRangeMax;
 	
 	
-	public static String QUANTITIES_PROPERTY = "Quantities";
-	public static String CURRENT_QUANTITY_PROPERTY = "CurrentQuantity";
-	public static String CURRENT_UNIT_PROPERTY = "CurrentUnit";
-	public static String CURRENT_UNITS_PROPERTY = "CurrentUnits";
-	public static String REQUESTED_MIN_PROPERTY = "RequestedMin";
-	public static String REQUESTED_MAX_PROPERTY = "RequestedMax";
-	public static String VISIBLE_MIN_PROPERTY = "VisibleMin";
-	public static String VISIBLE_MAX_PROPERTY = "VisibleMax";
-	public static String FULL_RANGE_MIN_PROPERTY = "FullRangeMin";
-	public static String FULL_RANGE_MAX_PROPERTY = "FullRangeMax";
-	
-	
 	public void setCurrentQuantity(ScatteringQuantity currentQuantity) {
-		firePropertyChange(CURRENT_QUANTITY_PROPERTY, this.currentQuantity, this.currentQuantity = currentQuantity);
+		firePropertyChange(ResultsViewConstants.CURRENT_QUANTITY_PROPERTY, this.currentQuantity, this.currentQuantity = currentQuantity);
 	}
 
 	public void setCurrentUnit(Unit<?> currentUnit) {
-		firePropertyChange(CURRENT_UNIT_PROPERTY, this.currentUnit, this.currentUnit = currentUnit);
+		firePropertyChange(ResultsViewConstants.CURRENT_UNIT_PROPERTY, this.currentUnit, this.currentUnit = currentUnit);
 	}
 	
 	
 	public void setQuantities(List<ScatteringQuantity> quantities) {
-		firePropertyChange(QUANTITIES_PROPERTY, this.quantities, this.quantities = quantities);
+		firePropertyChange(ResultsViewConstants.QUANTITIES_PROPERTY, this.quantities, this.quantities = quantities);
 	}
 	
 	
 	public void setCurrentUnits(List<Unit<?>> currentUnits) {
-		firePropertyChange(CURRENT_UNITS_PROPERTY, this.currentUnits, this.currentUnits = currentUnits);
+		firePropertyChange(ResultsViewConstants.CURRENT_UNITS_PROPERTY, this.currentUnits, this.currentUnits = currentUnits);
 	}
 
 	
 	public void setRequestedMin(Double requestedMin) {
-		firePropertyChange(REQUESTED_MIN_PROPERTY, this.requestedMin, this.requestedMin = requestedMin);
+		firePropertyChange(ResultsViewConstants.REQUESTED_MIN_PROPERTY, this.requestedMin, this.requestedMin = requestedMin);
 	}
 
 	
 	public void setRequestedMax(Double requestedMax) {
-		firePropertyChange(REQUESTED_MAX_PROPERTY, this.requestedMax, this.requestedMax = requestedMax);
+		firePropertyChange(ResultsViewConstants.REQUESTED_MAX_PROPERTY, this.requestedMax, this.requestedMax = requestedMax);
 	}
 
 	
 	public void setVisibleMin(Double visibleMin) {
-		firePropertyChange(VISIBLE_MIN_PROPERTY, this.visibleMin, this.visibleMin = visibleMin);
+		firePropertyChange(ResultsViewConstants.VISIBLE_MIN_PROPERTY, this.visibleMin, this.visibleMin = visibleMin);
 	}
 
 	
 	public void setVisibleMax(Double visibleMax) {
-		firePropertyChange(VISIBLE_MAX_PROPERTY, this.visibleMax, this.visibleMax = visibleMax);
+		firePropertyChange(ResultsViewConstants.VISIBLE_MAX_PROPERTY, this.visibleMax, this.visibleMax = visibleMax);
 	}
 	
 	
 	public void setFullRangeMin(Double fullRangeMin) {
-		firePropertyChange(FULL_RANGE_MIN_PROPERTY, this.fullRangeMin, this.fullRangeMin = fullRangeMin);
+		firePropertyChange(ResultsViewConstants.FULL_RANGE_MIN_PROPERTY, this.fullRangeMin, this.fullRangeMin = fullRangeMin);
 	}
 
 	
 	public void setFullRangeMax(Double fullRangeMax) {
-		firePropertyChange(FULL_RANGE_MAX_PROPERTY, this.fullRangeMax, this.fullRangeMax = fullRangeMax);
+		firePropertyChange(ResultsViewConstants.FULL_RANGE_MAX_PROPERTY, this.fullRangeMax, this.fullRangeMax = fullRangeMax);
 	}
 
 	

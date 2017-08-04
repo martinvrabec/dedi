@@ -19,8 +19,6 @@ public abstract class AbstractResultsViewController extends AbstractController<I
 	protected BeamlineConfiguration beamlineConfiguration;
 	protected ResultsViewModel viewModel;
 	
-	public static String BEAMLINE_CONFIGURATION_PROPERTY = "BeamlineConfiguration";
-	
 	public AbstractResultsViewController(ResultsViewModel viewModel) {
 		resultsModel = ResultsService.getInstance().getModel();
 		resultsController = ResultsService.getInstance().getController();
@@ -58,27 +56,27 @@ public abstract class AbstractResultsViewController extends AbstractController<I
 	
 	
 	public Double getRequestedMin(){
-		return (Double) getModelProperty(ResultsViewModel.REQUESTED_MIN_PROPERTY);
+		return (Double) getModelProperty(ResultsViewConstants.REQUESTED_MIN_PROPERTY);
 	}
 	
 	public Double getRequestedMax(){
-		return (Double) getModelProperty(ResultsViewModel.REQUESTED_MAX_PROPERTY);
+		return (Double) getModelProperty(ResultsViewConstants.REQUESTED_MAX_PROPERTY);
 	}
 	
 	public Double getVisibleMin(){
-		return (Double) getModelProperty(ResultsViewModel.VISIBLE_MIN_PROPERTY);
+		return (Double) getModelProperty(ResultsViewConstants.VISIBLE_MIN_PROPERTY);
 	}
 	
 	public Double getVisibleMax(){
-		return (Double) getModelProperty(ResultsViewModel.VISIBLE_MAX_PROPERTY);
+		return (Double) getModelProperty(ResultsViewConstants.VISIBLE_MAX_PROPERTY);
 	}
 	
 	public Double getFullRangeMin(){
-		return (Double) getModelProperty(ResultsViewModel.FULL_RANGE_MIN_PROPERTY);
+		return (Double) getModelProperty(ResultsViewConstants.FULL_RANGE_MIN_PROPERTY);
 	}
 	
 	public Double getFullRangeMax(){
-		return (Double) getModelProperty(ResultsViewModel.FULL_RANGE_MAX_PROPERTY);
+		return (Double) getModelProperty(ResultsViewConstants.FULL_RANGE_MAX_PROPERTY);
 	}
 	
 	public boolean hasSolution(){
@@ -91,12 +89,12 @@ public abstract class AbstractResultsViewController extends AbstractController<I
 	
 
 	protected Unit<?> getCurrentUnit(){
-		return (Unit<?>) getModelProperty(ResultsViewModel.CURRENT_UNIT_PROPERTY);
+		return (Unit<?>) getModelProperty(ResultsViewConstants.CURRENT_UNIT_PROPERTY);
 	}
 	
 	
 	protected ScatteringQuantity getCurrentQuantity(){
-		return (ScatteringQuantity) getModelProperty(ResultsViewModel.CURRENT_QUANTITY_PROPERTY);
+		return (ScatteringQuantity) getModelProperty(ResultsViewConstants.CURRENT_QUANTITY_PROPERTY);
 	}
 	
 	
