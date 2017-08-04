@@ -1,25 +1,31 @@
 package dedi.ui.views.results;
 
 import java.util.List;
+import java.util.Observer;
 
 import javax.measure.unit.Unit;
 
+import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.results.controllers.AbstractController;
 import dedi.configuration.calculations.results.controllers.AbstractResultsController;
-import dedi.configuration.calculations.results.models.AbstractModel;
-import dedi.configuration.calculations.results.models.Results;
+import dedi.configuration.calculations.results.models.IModel;
+import dedi.configuration.calculations.results.models.IResultsModel;
 import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
 
-public abstract class AbstractResultsViewController extends AbstractController<AbstractModel> {
-	protected Results resultsModel; // Note that access to the resultsModel should be done via the resultsController.
+public abstract class AbstractResultsViewController extends AbstractController<IModel> implements Observer {
+	protected IResultsModel resultsModel; // Note that access to the resultsModel should be done via the resultsController.
 	protected AbstractResultsController resultsController;
+	protected BeamlineConfiguration beamlineConfiguration;
 	protected ResultsViewModel viewModel;
 	
+	public static String BEAMLINE_CONFIGURATION_PROPERTY = "BeamlineConfiguration";
 	
 	public AbstractResultsViewController(ResultsViewModel viewModel) {
 		resultsModel = ResultsService.getInstance().getModel();
 		resultsController = ResultsService.getInstance().getController();
+		beamlineConfiguration = resultsController.getBeamlineConfiguration();
+		beamlineConfiguration.addObserver(this);
 		this.viewModel = viewModel;
 		addModel(viewModel);
 		addModel(resultsModel);
@@ -93,4 +99,11 @@ public abstract class AbstractResultsViewController extends AbstractController<A
 		return (ScatteringQuantity) getModelProperty(ResultsViewModel.CURRENT_QUANTITY_PROPERTY);
 	}
 	
+	
+	protected Double getWavelength(){
+		return beamlineConfiguration.getWavelength();
+	}
+	
+	// TODO Maybe add protected setters as well, so that concrete controllers don't need to directly use setModelProperty(),
+	// so that they are independent of the PROPERTY strings in the models.
 }

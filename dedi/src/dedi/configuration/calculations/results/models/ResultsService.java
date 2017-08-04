@@ -8,11 +8,13 @@ public final class ResultsService {
 	private static final ResultsService INSTANCE = new ResultsService();
 	
 	private AbstractResultsController controller;
-	private Results model;
+	private IResultsModel model;
+	private BeamlineConfiguration configuration;
 	
 	private ResultsService(){
 		model = new Results();
-		controller = new DefaultResultsController(BeamlineConfiguration.getInstance());
+		configuration = BeamlineConfiguration.getInstance();
+		controller = new DefaultResultsController(configuration);
 		controller.addModel(model);
 		controller.update(null, null);
 	}
@@ -28,9 +30,15 @@ public final class ResultsService {
 	}
 
 
-	public Results getModel() {
+	public IResultsModel getModel() {
 		return model;
 	}
 	
 	
+	/**
+	 * @return The {@link BeamlineConfiguration} instance that this service's {@link Results} are based on.
+	 */
+	public BeamlineConfiguration getBeamlineConfiguration(){
+		return configuration;
+	}
 }

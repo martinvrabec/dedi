@@ -81,4 +81,12 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	public boolean getHasSolution() {
 		return (boolean) getModelProperty(IResultsModel.HAS_SOLUTION_PROPERTY);
 	}
+	
+	
+	/**
+	 * @return The {@link BeamlineConfiguration} instance that this controller uses to compute the results.
+	 */
+	public BeamlineConfiguration getBeamlineConfiguration(){
+		return configuration;
+	}
 }

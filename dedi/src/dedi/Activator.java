@@ -1,16 +1,10 @@
 package dedi;
-import java.util.List;
 
-import org.dawb.common.ui.util.CalibrationUtils;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
-import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
-import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
-import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 
 public class Activator extends AbstractUIPlugin {
 	 // The plug-in ID
@@ -23,11 +17,6 @@ public class Activator extends AbstractUIPlugin {
 	    * The constructor
 	    */
 	   public Activator() {
-		   CalibrationStandards stds = CalibrationFactory.getCalibrationStandards();
-		   List<String> list =  stds.getCalibrantList();
-		   CalibrantSpacing spacing = stds.getCalibrant(); 
-		   List<HKL> ds = spacing.getHKLs();
-		   double d = ds.get(0).getDNano();
 	   }
 
 	   /**

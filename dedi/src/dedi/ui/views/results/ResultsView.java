@@ -49,6 +49,7 @@ import dedi.configuration.calculations.NumericRange;
 import dedi.configuration.calculations.results.models.Results;
 import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.calculations.scattering.D;
+import dedi.configuration.calculations.scattering.DoubleTheta;
 import dedi.configuration.calculations.scattering.Q;
 import dedi.configuration.calculations.scattering.S;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
@@ -72,6 +73,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 	private Text requestedMaxValueText;
 	private Canvas drawingArea;
 	
+	private DoubleTheta doubleTheta;
 	private boolean isUserEdited = true;
 	
 	public static final String ID = "dedi.views.results";
@@ -189,6 +191,8 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		quantities.add(new Q());
 		quantities.add(new D());
 		quantities.add(new S());
+		doubleTheta = new DoubleTheta();
+		quantities.add(doubleTheta);
 		controller.updateQuantities(quantities);
 		
 		
@@ -306,6 +310,9 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 				Double newValue = (Double) e.getNewValue();
 				if(TextUtil.equals(String.valueOf(newValue), maxValue.getText())) return;
 				maxValue.setText(TextUtil.format(newValue));
+			}
+			else if(e.getPropertyName().equals(AbstractResultsViewController.BEAMLINE_CONFIGURATION_PROPERTY)){
+				doubleTheta.setWavelength(controller.getWavelength());
 			}
 		} finally {
 			isUserEdited = true;

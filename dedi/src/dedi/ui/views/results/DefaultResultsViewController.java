@@ -11,6 +11,7 @@ import org.jscience.physics.amount.Amount;
 
 import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.NumericRange;
+import dedi.configuration.calculations.results.models.IResultsModel;
 import dedi.configuration.calculations.results.models.Results;
 import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.calculations.scattering.Q;
@@ -25,7 +26,7 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		if(evt.getPropertyName().equals(Results.VISIBLE_Q_RANGE_PROPERTY)){
+		if(evt.getPropertyName().equals(IResultsModel.VISIBLE_Q_RANGE_PROPERTY)){
 			NumericRange visibleQRange = resultsController.getVisibleQRange();
 			if(visibleQRange != null){
 				double minQ = visibleQRange.getMin();
@@ -42,7 +43,7 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 			}
 			
 		}
-		if(evt.getPropertyName().equals(Results.FULL_Q_RANGE_PROPERTY)){
+		if(evt.getPropertyName().equals(IResultsModel.FULL_Q_RANGE_PROPERTY)){
 			NumericRange fullQRange = resultsController.getFullQRange();
 			if(fullQRange != null){
 				double minQ = fullQRange.getMin();
@@ -60,6 +61,12 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 		}
 		super.propertyChange(evt);
     }
+	
+	
+	@Override
+	public void update(Observable o, Object arg) {
+		propertyChange(new PropertyChangeEvent(beamlineConfiguration, BEAMLINE_CONFIGURATION_PROPERTY, null, beamlineConfiguration));
+	};
 	
 	
 	@Override
@@ -143,7 +150,9 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 			              Unit<?> oldUnit, Unit<?> newUnit){
 		if(value == null) return null;
 		oldQuantity.setValue(Amount.valueOf(value, oldUnit));
-		return oldQuantity.to(newQuantity).getValue().to(newUnit).getEstimatedValue();
+		ScatteringQuantity newSQ = oldQuantity.to(newQuantity);
+		if(newSQ == null) return null;
+		return newSQ.getValue().to(newUnit).getEstimatedValue();
 	}
 	
 	
