@@ -31,8 +31,7 @@ public class PhysicalSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 		if(beamlineConfiguration.getWavelength() != null && beamlineConfiguration.getCameraLength() != null && calibrantIsPlot)
 			createCalibrantRings();
 		
-		if(maskIsPlot)
-			createMask();
+		if(maskIsPlot) createMask();
 		
 		rescalePlot();
 	}

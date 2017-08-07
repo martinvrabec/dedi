@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.Group;
 import org.jscience.physics.amount.Amount;
 
 import dedi.configuration.BeamlineConfiguration;
+import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
 import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
@@ -88,12 +89,12 @@ public class BeamlineQuantityPanel implements Observer {
 				case ENERGY:
 					wavelength.setValue(new dedi.configuration.calculations.scattering.Energy(energy.getValue())
 							.toWavelength().getAmount().to(SI.METER));
-					BeamlineConfiguration.getInstance().setWavelength(wavelength.getValue(SI.METER).getEstimatedValue());
+					ResultsService.getInstance().getBeamlineConfiguration().setWavelength(wavelength.getValue(SI.METER).getEstimatedValue());
 					break;
 				case WAVELENGTH:
 					energy.setValue(new dedi.configuration.calculations.scattering.Wavelength(wavelength.getValue())
 							.to(new dedi.configuration.calculations.scattering.Energy()).getAmount().to(SI.JOULE));
-					BeamlineConfiguration.getInstance().setWavelength(wavelength.getValue(SI.METER).getEstimatedValue());
+					ResultsService.getInstance().getBeamlineConfiguration().setWavelength(wavelength.getValue(SI.METER).getEstimatedValue());
 					break;
 				default:
 			}
@@ -101,11 +102,11 @@ public class BeamlineQuantityPanel implements Observer {
 				switch(q){
 					case ENERGY:
 						wavelength.clearText();
-						BeamlineConfiguration.getInstance().setWavelength(null);
+						ResultsService.getInstance().getBeamlineConfiguration().setWavelength(null);
 						break;
 					case WAVELENGTH:
 						energy.clearText();
-						BeamlineConfiguration.getInstance().setWavelength(null);
+						ResultsService.getInstance().getBeamlineConfiguration().setWavelength(null);
 						break;
 					default:
 				}
@@ -127,8 +128,8 @@ public class BeamlineQuantityPanel implements Observer {
 				      .to(new dedi.configuration.calculations.scattering.Energy()).getAmount().to(SI.JOULE);
 		maxEnergy = new dedi.configuration.calculations.scattering.Wavelength(minWavelength)
 			          .to(new dedi.configuration.calculations.scattering.Energy()).getAmount().to(SI.JOULE);
-		BeamlineConfiguration.getInstance().setMaxWavelength(maxWavelength.doubleValue(SI.METER));
-		BeamlineConfiguration.getInstance().setMinWavelength(minWavelength.doubleValue(SI.METER));
+		ResultsService.getInstance().getBeamlineConfiguration().setMaxWavelength(maxWavelength.doubleValue(SI.METER));
+		ResultsService.getInstance().getBeamlineConfiguration().setMinWavelength(minWavelength.doubleValue(SI.METER));
 		setToolTipTexts();
 	}
 	

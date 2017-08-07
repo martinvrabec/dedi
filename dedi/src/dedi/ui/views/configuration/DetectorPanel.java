@@ -54,6 +54,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import dedi.configuration.BeamlineConfiguration;
+import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
 import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
@@ -80,7 +81,7 @@ public class DetectorPanel implements Observer {
 
 		
 		//Label for the detector type
-		Label detectorLabel = GuiHelper.createLabel(detectorGroup, "Detector type:");
+		GuiHelper.createLabel(detectorGroup, "Detector type:");
 		
 		
 		detectorTypesCombo = new Combo(detectorGroup, SWT.READ_ONLY | SWT.H_SCROLL);
@@ -104,7 +105,7 @@ public class DetectorPanel implements Observer {
 		
 		
 		// Labels for the resolution of the detector
-		Label resolutionLabel = GuiHelper.createLabel(detectorGroup, "Resolution (hxw):");
+		GuiHelper.createLabel(detectorGroup, "Resolution (hxw):");
 		
 		Label resolutionValueLabel = new Label(detectorGroup, SWT.NONE);
 		resolutionValueLabel.setText("");
@@ -118,7 +119,7 @@ public class DetectorPanel implements Observer {
 		
 		
 		// Labels for the pixel sizes
-		Label pixelSizeLabel = GuiHelper.createLabel(detectorGroup, "Pixel size:");
+		GuiHelper.createLabel(detectorGroup, "Pixel size:");
 		
 		Label pixelSizeValueLabel = GuiHelper.createLabel(detectorGroup, "");
 		
@@ -161,7 +162,7 @@ public class DetectorPanel implements Observer {
 				        pixelSizeValueLabel.setText(TextUtil.format(detector.getxPixelSize().doubleValue(unit)) + " x " +
 				        		TextUtil.format(detector.getyPixelSize().doubleValue(unit)));
 				        detectorGroup.layout();
-				        BeamlineConfiguration.getInstance().setDetector(detector);
+				        ResultsService.getInstance().getBeamlineConfiguration().setDetector(detector);
 				    } else{
 				    	resolutionValueLabel.setText("");
 				    	pixelSizeValueLabel.setText("");
@@ -241,9 +242,6 @@ public class DetectorPanel implements Observer {
 	
 	private void sendDetectorsToCombo(){
 		 detectorTypesComboViewer.setInput(detectors);
-		 /*String[] dds = detectors.stream().map(d -> d.getDetectorName()).toArray(String[]::new);
-		 if (autoComplete==null) autoComplete = new AutoCompleteField(detectorTypesCombo, new ComboContentAdapter(), dds) ;
-		 autoComplete.setProposals(dds);*/
 	}
 
 	

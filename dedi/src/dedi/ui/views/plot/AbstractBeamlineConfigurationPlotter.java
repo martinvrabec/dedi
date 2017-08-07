@@ -101,7 +101,7 @@ public abstract class AbstractBeamlineConfigurationPlotter
 		this.view = view;
 		system = view.getPlottingSystem();
 		
-		beamlineConfiguration = BeamlineConfiguration.getInstance();
+		beamlineConfiguration = ResultsService.getInstance().getBeamlineConfiguration();
 		beamlineConfiguration.addObserver(this);
 		
 		resultsController = ResultsService.getInstance().getController();

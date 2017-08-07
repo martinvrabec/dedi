@@ -34,8 +34,7 @@ public class QSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 		
 	    if(calibrantIsPlot) createCalibrantRings();
 	    
-	    if(maskIsPlot)
-			createMask();
+	    if(maskIsPlot) createMask();
 	    
 		rescalePlot();
 	}

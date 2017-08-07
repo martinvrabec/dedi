@@ -35,24 +35,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 
-public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeamlineConfigurationPlotter {
-	protected IRegion detectorRegion;
-	protected IROI detectorROI;
-	protected IRegion beamstopRegion;
-	protected IROI beamstopROI;
-	protected IRegion clearanceRegion;
-	protected IROI clearanceROI;
-	protected IRegion cameraTubeRegion;
-	protected IROI cameraTubeROI;
-	protected IRegion visibleRangeRegion1;
-	protected IROI visibleRangeROI1;
-	protected IRegion visibleRangeRegion2;
-	protected IROI visibleRangeROI2;
-	protected IRegion inaccessibleRangeRegion;
-	protected IROI inaccessibleRangeROI;
-	protected IRegion requestedRangeRegion;
-	protected IROI requestedRangeROI;
-	
+public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeamlineConfigurationPlotter {	
 	
 	public BaseBeamlineConfigurationPlotterImpl(IBeamlineConfigurationPlotView view) {
 		super(view);
@@ -60,18 +43,21 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	
 	
 	protected void createDetectorRegion(){
+		IRegion detectorRegion;
 		try {
 			detectorRegion = system.createRegion("Detector", IRegion.RegionType.BOX);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
 		}
-		detectorROI = new RectangularROI(getDetectorTopLeftX(), getDetectorTopLeftY(), getDetectorWidth(), getDetectorHeight(), 0);
+		IROI detectorROI = new RectangularROI(getDetectorTopLeftX(), getDetectorTopLeftY(), getDetectorWidth(), getDetectorHeight(), 0);
 		addRegion(detectorRegion, detectorROI, legend.getColour("Detector"));
 	};
 	
 	
 	protected void createBeamstopRegion(){
+		IRegion beamstopRegion;
+		IRegion clearanceRegion;
 		try {
 			beamstopRegion = system.createRegion("Beamstop", IRegion.RegionType.ELLIPSE);
 			clearanceRegion = system.createRegion("Clearance", IRegion.RegionType.ELLIPSE);
@@ -87,9 +73,9 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		double beamstopCentreX = getBeamstopCentreX();
 		double beamstopCentreY = getBeamstopCentreY();
 		
-		clearanceROI = new EllipticalROI(clearanceMajor + beamstopMajor, clearanceMinor + beamstopMinor, 0,
+		IROI clearanceROI = new EllipticalROI(clearanceMajor + beamstopMajor, clearanceMinor + beamstopMinor, 0,
 				                         beamstopCentreX, beamstopCentreY);
-		beamstopROI = new EllipticalROI(beamstopMajor, beamstopMinor, 0, beamstopCentreX, beamstopCentreY);
+		IROI beamstopROI = new EllipticalROI(beamstopMajor, beamstopMinor, 0, beamstopCentreX, beamstopCentreY);
 		
 		addRegion(clearanceRegion, clearanceROI, legend.getColour("Clearance"));
 		addRegion(beamstopRegion, beamstopROI,legend.getColour("Beamstop"));
@@ -97,6 +83,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	
 	
 	protected void createCameraTubeRegion(){
+		IRegion cameraTubeRegion;
 		try {
 			cameraTubeRegion = system.createRegion("Camera Tube", IRegion.RegionType.ELLIPSE);
 		} catch (Exception e) {
@@ -104,7 +91,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 			return;
 		}
 		
-		cameraTubeROI = new EllipticalROI(getCameraTubeMajor(),getCameraTubeMinor(), 0, 
+		IROI cameraTubeROI = new EllipticalROI(getCameraTubeMajor(),getCameraTubeMinor(), 0, 
 										  getCameraTubeCentreX(), getCameraTubeCentreY());
 		
 		cameraTubeRegion.setAlpha(50);
@@ -112,7 +99,12 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
-	protected void createRay(){
+	protected void createRay() {
+		IRegion visibleRangeRegion1;
+		IRegion visibleRangeRegion2;
+		IRegion inaccessibleRangeRegion;
+		IRegion requestedRangeRegion;
+		
 		Vector2d visibleRangeStartPoint = resultsController.getVisibleRangeStartPoint();
 		Vector2d visibleRangeEndPoint = resultsController.getVisibleRangeEndPoint();
 		Vector2d requestedRangeStartPoint = resultsController.getRequestedRangeStartPoint();
@@ -131,7 +123,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		}
 		
 		
-		inaccessibleRangeROI = new LinearROI(new double[] {getBeamstopCentreX(), 
+		IROI inaccessibleRangeROI = new LinearROI(new double[] {getBeamstopCentreX(), 
 				                                           getBeamstopCentreY()},
 											 new double[] {getVisibleRangeStartPointX(), 
 											 		       getVisibleRangeStartPointY()});
@@ -140,24 +132,24 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		
 		
 		if(!resultsController.getIsSatisfied() || requestedRangeStartPoint == null || requestedRangeEndPoint == null){	
-			visibleRangeROI1 = new LinearROI(new double[] {getVisibleRangeStartPointX(), 
+			IROI visibleRangeROI1 = new LinearROI(new double[] {getVisibleRangeStartPointX(), 
 														   getVisibleRangeStartPointY()}, 
 					                         new double[] {getVisibleRangeEndPointX(), 
 					                        		       getVisibleRangeEndPointY()});
 	
 			addRegion(visibleRangeRegion1, visibleRangeROI1, new Color(Display.getDefault(), 205, 133, 63));
 		} else {
-			visibleRangeROI1 = new LinearROI(new double[] {getVisibleRangeStartPointX(), 
+			IROI visibleRangeROI1 = new LinearROI(new double[] {getVisibleRangeStartPointX(), 
 										                   getVisibleRangeStartPointY()}, 
 										      new double[] {getRequestedRangeStartPointX(), 
 										    		        getRequestedRangeStartPointY()});
 			
-			visibleRangeROI2 = new LinearROI(new double[] {getRequestedRangeEndPointX(), 
+			IROI visibleRangeROI2 = new LinearROI(new double[] {getRequestedRangeEndPointX(), 
 														   getRequestedRangeEndPointY()}, 
 										      new double[] {getVisibleRangeEndPointX(), 
 										    		        getVisibleRangeEndPointY()});
 			
-			requestedRangeROI = new LinearROI(new double[] {getRequestedRangeStartPointX(),	
+			IROI requestedRangeROI = new LinearROI(new double[] {getRequestedRangeStartPointX(),	
 															getRequestedRangeStartPointY()}, 
 					                          new double[] {getRequestedRangeEndPointX(),
 					                        		        getRequestedRangeEndPointY()});

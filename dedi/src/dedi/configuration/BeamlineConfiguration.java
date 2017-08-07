@@ -5,9 +5,14 @@ import java.util.Observable;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 
+import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.devices.CameraTube;
 
+
+/**
+ * To get the currently used BeamlineConfiguration use the {@link ResultsService} class.
+ */
 public final class BeamlineConfiguration extends Observable {
 	private DiffractionDetector detector;
 	private DetectorProperties detectorProperties;  // Currently not used.
@@ -22,7 +27,6 @@ public final class BeamlineConfiguration extends Observable {
 	private Double minCameraLength;
 	private Double maxCameraLength;
 	
-	private static final BeamlineConfiguration INSTANCE = new BeamlineConfiguration();
 	
 	public BeamlineConfiguration() {
 		detector = null;
@@ -39,9 +43,6 @@ public final class BeamlineConfiguration extends Observable {
 		maxCameraLength = null;
 	}
 	
-	public static BeamlineConfiguration getInstance(){
-		return INSTANCE;
-	}
 
 	public DiffractionDetector getDetector() {
 		return detector;

@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Group;
 import org.jscience.physics.amount.Amount;
 
 import dedi.configuration.BeamlineConfiguration;
+import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.devices.CameraTube;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
 import dedi.ui.GuiHelper;
@@ -108,9 +109,9 @@ public class CameraTubePanel implements Observer {
 		 Amount<Dimensionless> xpixels = xPositionText.getValue();
 		 Amount<Dimensionless> ypixels = yPositionText.getValue();
 		 if(diameter == null || xpixels == null || ypixels == null)
-			 BeamlineConfiguration.getInstance().setCameraTube(null);
+			 ResultsService.getInstance().getBeamlineConfiguration().setCameraTube(null);
 		 else
-			 BeamlineConfiguration.getInstance()
+			 ResultsService.getInstance().getBeamlineConfiguration()
 			    .setCameraTube(new CameraTube(diameter, xpixels.getEstimatedValue(), ypixels.getEstimatedValue()));
 	}
 	
@@ -141,7 +142,7 @@ public class CameraTubePanel implements Observer {
 		if(beamlineConfiguration.getCameraTubeDiameter() == 0){
 			setValues(0, 0, 0);
 			cameraTubeGroup.setEnabled(false);
-			BeamlineConfiguration.getInstance().setCameraTube(null);
+			ResultsService.getInstance().getBeamlineConfiguration().setCameraTube(null);
 			//checkBox.setSelection(false);
 			//checkBox.setEnabled(false);
 		}

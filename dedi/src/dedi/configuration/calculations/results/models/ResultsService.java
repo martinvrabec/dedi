@@ -13,7 +13,7 @@ public final class ResultsService {
 	
 	private ResultsService(){
 		model = new Results();
-		configuration = BeamlineConfiguration.getInstance();
+		configuration = new BeamlineConfiguration();
 		controller = new DefaultResultsController(configuration);
 		controller.addModel(model);
 		controller.update(null, null);

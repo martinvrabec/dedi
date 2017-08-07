@@ -51,6 +51,7 @@ import org.jscience.physics.amount.Amount;
 
 import dedi.Activator;
 import dedi.configuration.BeamlineConfiguration;
+import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
 import dedi.configuration.preferences.PreferenceConstants;
@@ -117,7 +118,7 @@ public class BeamstopPanel implements Observer {
 		positionButton1.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				DiffractionDetector detector = BeamlineConfiguration.getInstance().getDetector();
+				DiffractionDetector detector = ResultsService.getInstance().getBeamlineConfiguration().getDetector();
 				if(detector != null){
 					xPositionText.setValue(detector.getNumberOfPixelsX()/2.0);
 					yPositionText.setValue(detector.getNumberOfPixelsY()/2.0);
@@ -131,7 +132,7 @@ public class BeamstopPanel implements Observer {
 		positionButton2.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				DiffractionDetector detector = BeamlineConfiguration.getInstance().getDetector();
+				DiffractionDetector detector = ResultsService.getInstance().getBeamlineConfiguration().getDetector();
 				if(detector != null){
 					xPositionText.setValue(detector.getNumberOfPixelsX()/2.0);
 					yPositionText.setValue(0);
@@ -147,7 +148,8 @@ public class BeamstopPanel implements Observer {
 		GuiHelper.createLabel(clearanceGroup, "Clearance :");
 		clearanceValueSpinner = new Spinner(clearanceGroup, SWT.BORDER);
 		clearanceValueSpinner.setValues(0, 0, Integer.MAX_VALUE, 0, 1, 1);
-		clearanceValueSpinner.addModifyListener(e -> BeamlineConfiguration.getInstance().setClearance((int) (clearanceValueSpinner.getSelection())));
+		clearanceValueSpinner.addModifyListener(e -> ResultsService.getInstance().getBeamlineConfiguration()
+				                                     .setClearance((int) (clearanceValueSpinner.getSelection())));
 		GuiHelper.createLabel(clearanceGroup, "pixel(s)");
 		
 		// Need to update because the predefinedBeamlineConfiguration could have been
@@ -161,9 +163,9 @@ public class BeamstopPanel implements Observer {
 		 Amount<Dimensionless> xpixels = xPositionText.getValue();
 		 Amount<Dimensionless> ypixels = yPositionText.getValue();
 		 if(diameter == null || xpixels == null || ypixels == null)
-			 BeamlineConfiguration.getInstance().setBeamstop(null);
+			 ResultsService.getInstance().getBeamlineConfiguration().setBeamstop(null);
 		 else
-			 BeamlineConfiguration.getInstance()
+			 ResultsService.getInstance().getBeamlineConfiguration()
 			    .setBeamstop(new Beamstop(diameter, xpixels.getEstimatedValue(), ypixels.getEstimatedValue()));
 	}
 

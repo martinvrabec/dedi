@@ -13,5 +13,4 @@ public abstract class PlotDecorator implements IBeamlineConfigurationPlotter {
 	public void updatePlot() {
 		wrappedPlotter.updatePlot();
 	}
-
 }

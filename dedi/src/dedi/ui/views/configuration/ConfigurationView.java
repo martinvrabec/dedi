@@ -45,6 +45,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jscience.physics.amount.Amount;
 
 import dedi.configuration.BeamlineConfiguration;
+import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
 import dedi.configuration.preferences.PreferenceConstants;
 import dedi.ui.GuiHelper;
@@ -94,7 +95,8 @@ public class ConfigurationView extends ViewPart implements Observer {
 		
 		GuiHelper.createLabel(cameraGroup, "Camera Length:");
 		cameraLengthValueSpinner = new Spinner(cameraGroup, SWT.BORDER | SWT.READ_ONLY);
-		cameraLengthValueSpinner.addModifyListener( e -> BeamlineConfiguration.getInstance().setCameraLength(cameraLengthValueSpinner.getSelection()/100.0));
+		cameraLengthValueSpinner.addModifyListener( e -> ResultsService.getInstance().getBeamlineConfiguration().
+				                                         setCameraLength(cameraLengthValueSpinner.getSelection()/100.0));
 		cameraLengthValueSpinner.setValues(145, 120, 970, 2, 25, 1);
 		GuiHelper.createLabel(cameraGroup, "m");
 		
@@ -134,8 +136,8 @@ public class ConfigurationView extends ViewPart implements Observer {
 	
 	private void angleChanged(){
 		Amount<Angle> newAngle = angle.getValue(SI.RADIAN);
-		if(newAngle == null) BeamlineConfiguration.getInstance().setAngle(null);
-		else BeamlineConfiguration.getInstance().setAngle(newAngle.getEstimatedValue());
+		if(newAngle == null) ResultsService.getInstance().getBeamlineConfiguration().setAngle(null);
+		else ResultsService.getInstance().getBeamlineConfiguration().setAngle(newAngle.getEstimatedValue());
 	}
 
 	
@@ -150,8 +152,8 @@ public class ConfigurationView extends ViewPart implements Observer {
 		cameraLengthValueSpinner.setSelection((int) (beamlineConfiguration.getMinCameraLength()*100));
 		// Next line not really needed because setSelection will fire the ModifyListener
 		//BeamlineConfiguration.getInstance().setCameraLength(beamlineConfiguration.getMinCameraLength());
-		BeamlineConfiguration.getInstance().setMinCameraLength(beamlineConfiguration.getMinCameraLength());
-		BeamlineConfiguration.getInstance().setMaxCameraLength(beamlineConfiguration.getMaxCameraLength());
+		ResultsService.getInstance().getBeamlineConfiguration().setMinCameraLength(beamlineConfiguration.getMinCameraLength());
+		ResultsService.getInstance().getBeamlineConfiguration().setMaxCameraLength(beamlineConfiguration.getMaxCameraLength());
 	}
 
 }
