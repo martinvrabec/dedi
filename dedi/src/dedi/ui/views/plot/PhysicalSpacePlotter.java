@@ -1,5 +1,7 @@
 package dedi.ui.views.plot;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import dedi.configuration.calculations.BeamlineConfigurationUtil;
 import dedi.configuration.calculations.scattering.Q;
 
@@ -29,20 +31,11 @@ public class PhysicalSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 		if(beamlineConfiguration.getWavelength() != null && beamlineConfiguration.getCameraLength() != null && calibrantIsPlot)
 			createCalibrantRings();
 		
+		if(maskIsPlot)
+			createMask();
+		
 		rescalePlot();
 	}
-	
-	
-	@Override
-	protected double getDetectorWidth() {
-		return beamlineConfiguration.getDetectorWidthMM();
-	};
-	
-	
-	@Override
-	protected double getDetectorHeight() {
-		return beamlineConfiguration.getDetectorHeightMM(); 
-	};
 	
 	
 	@Override
@@ -57,124 +50,27 @@ public class PhysicalSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 	};
 	
 	
-	@Override
-	protected double getClearanceMajor() {
-		return beamlineConfiguration.getClearanceMajorMM();
-	}
-
 	
 	@Override
-	protected double getClearanceMinor(){
-		return beamlineConfiguration.getClearanceMinorMM();
-	}
-
-	
-	@Override
-	protected double getBeamstopMajor() {
-		return beamlineConfiguration.getBeamstop().getRadiusMM();
+	protected double getHorizontalLengthFromMM(double lengthMM) {
+		return lengthMM;
 	}
 
 
 	@Override
-	protected double getBeamstopMinor() {
-		return beamlineConfiguration.getBeamstop().getRadiusMM();
+	protected double getHorizontalLengthFromPixels(double lengthPixels) {
+		return lengthPixels*beamlineConfiguration.getDetector().getXPixelMM();
 	}
 
 
 	@Override
-	protected double getBeamstopCentreX() {
-		return beamlineConfiguration.getBeamstopXCentreMM();
+	protected double getVerticalLengthFromMM(double lengthMM) {
+		return lengthMM;
 	}
 
 
 	@Override
-	protected double getBeamstopCentreY() {
-		return beamlineConfiguration.getBeamstopYCentreMM();
-	}
-
-	
-	@Override
-	protected double getCameraTubeMajor() {
-		return beamlineConfiguration.getCameraTube().getRadiusMM();
-	}
-
-
-	@Override
-	protected double getCameraTubeMinor() {
-		return beamlineConfiguration.getCameraTube().getRadiusMM();
-	}
-
-
-	@Override
-	protected double getCameraTubeCentreX() {
-		return beamlineConfiguration.getCameraTubeXCentreMM();
-	}
-
-
-	@Override
-	protected double getCameraTubeCentreY() {
-		return beamlineConfiguration.getCameraTubeYCentreMM();
-	}
-
-
-	@Override
-	protected double getVisibleRangeStartPointX() {
-		return resultsController.getVisibleRangeStartPoint().x;
-	}
-
-
-	@Override
-	protected double getVisibleRangeStartPointY() {
-		return resultsController.getVisibleRangeStartPoint().y;
-	}
-
-
-	@Override
-	protected double getVisibleRangeEndPointX() {
-		return resultsController.getVisibleRangeEndPoint().x;
-	}
-
-
-	@Override
-	protected double getVisibleRangeEndPointY() {
-		return resultsController.getVisibleRangeEndPoint().y;
-	}
-
-
-	@Override
-	protected double getRequestedRangeStartPointX() {
-		return resultsController.getRequestedRangeStartPoint().x;
-	}
-
-
-	@Override
-	protected double getRequestedRangeStartPointY() {
-		return resultsController.getRequestedRangeStartPoint().y;
-	}
-
-
-	@Override
-	protected double getRequestedRangeEndPointX() {
-		return resultsController.getRequestedRangeEndPoint().x;
-	}
-
-
-	@Override
-	protected double getRequestedRangeEndPointY() {
-		return resultsController.getRequestedRangeEndPoint().y;
-	}
-
-
-	@Override
-	protected double getCalibrantRingMajor(Q q) {
-		return 1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(q.getValue().to(Q.BASE_UNIT).getEstimatedValue(), 
-				                               beamlineConfiguration.getCameraLength(), beamlineConfiguration.getWavelength());
-	}
-
-
-	@Override
-	protected double getCalibrantRingMinor(Q q) {
-		return 1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(q.getValue().to(Q.BASE_UNIT).getEstimatedValue(), 
-                beamlineConfiguration.getCameraLength(), beamlineConfiguration.getWavelength());
+	protected double getVerticalLengthFromPixels(double lengthPixels) {
+		return lengthPixels*beamlineConfiguration.getDetector().getYPixelMM();
 	}
 }

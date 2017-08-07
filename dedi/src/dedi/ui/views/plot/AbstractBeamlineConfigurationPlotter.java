@@ -2,12 +2,16 @@ package dedi.ui.views.plot;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.dawb.common.services.ServiceManager;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.CircularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalROI;
@@ -16,6 +20,12 @@ import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -58,17 +68,19 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	protected AbstractResultsController resultsController;
 
 	private List<Control> controls;
-	private String[]  plotItems = {"Detector", "Beamstop", "CameraTube", "Ray", "Calibrant"};
-	private String[] plotItemNames = {"Detector", "Beamstop", "Camera tube", "Q range", "Calibrant"};
+	private String[]  plotItems = {"detector", "beamstop", "cameraTube", "ray", "mask", "calibrant"};
+	private String[] plotItemNames = {"Detector", "Beamstop", "Camera tube", "Q range", "Mask", "Calibrant"};
 	
 	protected boolean detectorIsPlot = true;
 	protected boolean beamstopIsPlot = true;
 	protected boolean cameraTubeIsPlot = true;
 	protected boolean rayIsPlot = true;
-	protected boolean calibrantIsPlot = true;
+	protected boolean calibrantIsPlot = false;
+	protected boolean maskIsPlot = false;
 	
 	protected CalibrantSpacing selectedCalibrant;
 	private Label selectedCalibrantLabel;
+	protected IDataset mask;
 			
 	//Default colours of the objects to be plotted
 	private Color detectorColour = new Color(Display.getDefault(), 30, 144, 255);
@@ -123,14 +135,20 @@ public abstract class AbstractBeamlineConfigurationPlotter
 				@Override
 				public void widgetSelected(SelectionEvent e){
 					try {
-						Method method = AbstractBeamlineConfigurationPlotter.class.getDeclaredMethod("set" + plotItem + "IsPlot", 
-								                                      new Class[] {boolean.class});
-						method.invoke(thisInstance, ((Button) e.getSource()).getSelection());
+						Field field = AbstractBeamlineConfigurationPlotter.class.getDeclaredField(plotItem + "IsPlot");
+						field.setBoolean(thisInstance, ((Button) e.getSource()).getSelection());
+						updatePlot();
 					} catch (Exception ex) {
+						ex.printStackTrace();
 					}
 				}
 			});
-			button.setSelection(true);
+			try {
+				Field field = AbstractBeamlineConfigurationPlotter.class.getDeclaredField(plotItem + "IsPlot");
+				button.setSelection(field.getBoolean(thisInstance));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
 			controls.add(button);
 		}
 		
@@ -143,6 +161,16 @@ public abstract class AbstractBeamlineConfigurationPlotter
 		controls.add(GuiHelper.createLabel(plotConfigurationPanel, "(You can select another calibrant in diffraction preferences)"));
 		
 		CalibrationFactory.addCalibrantSelectionListener(this);
+		
+		
+		IPersistenceService service;
+		try {
+			service = (IPersistenceService) ServiceManager.getService(IPersistenceService.class);
+			IPersistentFile pf = service.getPersistentFile("/home/kce75424/Documents/Martin/DAWN/runtime-org.dawnsci.base.product/data/examples/I22 Beamline Calibrants/Masks/SAXS_mask.nxs");
+			mask = pf.getMask(pf.getMaskNames(null).get(0),null);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}  
 		
 		plotConfigurationPanel.layout();
 		updatePlot();
@@ -175,35 +203,6 @@ public abstract class AbstractBeamlineConfigurationPlotter
 		updatePlot();
 	}
 	
-	public void setDetectorIsPlot(boolean value){
-		detectorIsPlot = value;
-		updatePlot();
-	}
-	
-	
-	public void setBeamstopIsPlot(boolean value){
-		beamstopIsPlot = value;
-		updatePlot();
-	}
-	
-	
-	public void setCameraTubeIsPlot(boolean value){
-		cameraTubeIsPlot = value;
-		updatePlot();
-	}
-	
-	
-	public void setRayIsPlot(boolean value){
-		rayIsPlot = value;
-		updatePlot();
-	}
-	
-	
-	public void setCalibrantIsPlot(boolean value){
-		calibrantIsPlot = value;
-		updatePlot();
-	}
-
 	
 	public void dispose(){
 		clearPlot();
@@ -220,5 +219,6 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	public void clearPlot(){
 		system.clearRegions();
 		for(IRegion region : system.getRegions()) system.removeRegion(region);
+		for(ITrace trace : system.getTraces()) system.removeTrace(trace);
 	}
 }

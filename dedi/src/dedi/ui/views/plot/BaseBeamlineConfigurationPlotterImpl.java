@@ -1,5 +1,6 @@
 package dedi.ui.views.plot;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.measure.unit.SI;
@@ -15,6 +16,11 @@ import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IPositionListener;
 import org.eclipse.dawnsci.plotting.api.axis.PositionEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -98,8 +104,10 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 			return;
 		}
 		
-		cameraTubeROI = new EllipticalROI(getCameraTubeMajor(), getCameraTubeMinor(), 0, getCameraTubeCentreX(), getCameraTubeCentreY());
+		cameraTubeROI = new EllipticalROI(getCameraTubeMajor(),getCameraTubeMinor(), 0, 
+										  getCameraTubeCentreX(), getCameraTubeCentreY());
 		
+		cameraTubeRegion.setAlpha(50);
 		addRegion(cameraTubeRegion, cameraTubeROI, legend.getColour("Camera tube"));
 	}
 	
@@ -184,6 +192,29 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
+	protected void createMask(){
+		if(mask == null) return;
+		
+		int width = mask.getShape()[1]; // width is the number of columns
+		int height = mask.getShape()[0]; // height is the number of rows
+		
+		Dataset xAxis = DatasetFactory.createFromObject(new double[width]);
+		for(int i = 0; i < width; i++) 
+			xAxis.set(getDetectorTopLeftX() + getHorizontalLengthFromPixels(i), i);
+		
+		Dataset yAxis = DatasetFactory.createFromObject(new double[height]);
+		for(int i = 0; i < height; i++) 
+			yAxis.set(getDetectorTopLeftY() + getVerticalLengthFromPixels(i), i);
+		
+		
+		final IImageTrace image = system.createImageTrace("Mask");
+		image.setData(mask, Arrays.asList(xAxis, yAxis), false);
+		image.setGlobalRange(new double[]{-800, 450, -400, 450});
+		image.setAlpha(255);
+		system.addTrace(image);
+	}
+	
+	
 	protected void addRegion(IRegion region, IROI roi, Color colour){
 		region.setROI(roi);
 		region.setMobile(false);
@@ -193,11 +224,12 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		system.addRegion(region);
 	}
 	
+	
 	public void rescalePlot(){
 		if(system.isRescale()){
-			IAxis yAxis = system.getAxis("");
+			IAxis yAxis = system.getAxes().get(1);
 			yAxis.setInverted(true);
-			IAxis xAxis = system.getAxis("X-Axis");
+			IAxis xAxis = system.getAxes().get(0);
 			
 			double maxX = Double.MIN_VALUE;
 			double minX = Double.MAX_VALUE;
@@ -226,52 +258,127 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		}
 	}
 
-	
-	protected abstract double getDetectorWidth();
-	
-	protected abstract double getDetectorHeight();
-	
+
 	protected abstract double getDetectorTopLeftX();
 	
 	protected abstract double getDetectorTopLeftY();
 	
-	protected abstract double getClearanceMajor();
+	protected abstract double getHorizontalLengthFromMM(double lengthMM);
 	
-	protected abstract double getClearanceMinor();
+	protected abstract double getHorizontalLengthFromPixels(double lengthPixels);
+
+	protected abstract double getVerticalLengthFromMM(double lengthMM);
 	
-	protected abstract double getBeamstopMajor();
+	protected abstract double getVerticalLengthFromPixels(double lengthPixels);
+
 	
-	protected abstract double getBeamstopMinor(); 
+	protected double getDetectorWidth(){
+		return getHorizontalLengthFromMM(beamlineConfiguration.getDetectorWidthMM());
+	}
 	
-	protected abstract double getBeamstopCentreX();
 	
-	protected abstract double getBeamstopCentreY();
+	protected double getDetectorHeight(){
+		return getVerticalLengthFromMM(beamlineConfiguration.getDetectorHeightMM());
+	}
 	
-	protected abstract double getCameraTubeMajor();
 	
-	protected abstract double getCameraTubeMinor();
+	protected double getClearanceMajor(){
+		return getHorizontalLengthFromPixels(beamlineConfiguration.getClearance());
+	}
 	
-	protected abstract double getCameraTubeCentreX();
 	
-	protected abstract double getCameraTubeCentreY();
+	protected double getClearanceMinor(){
+		return getVerticalLengthFromPixels(beamlineConfiguration.getClearance());
+	}
 	
-	protected abstract double getVisibleRangeStartPointX();
 	
-	protected abstract double getVisibleRangeStartPointY();
+	protected double getBeamstopMajor(){
+		return getHorizontalLengthFromMM(beamlineConfiguration.getBeamstop().getRadiusMM());
+	}
 	
-	protected abstract double getVisibleRangeEndPointX();
 	
-	protected abstract double getVisibleRangeEndPointY();
+	protected double getBeamstopMinor(){
+		return getVerticalLengthFromMM(beamlineConfiguration.getBeamstop().getRadiusMM());
+	}
 	
-	protected abstract double getRequestedRangeStartPointX();
 	
-	protected abstract double getRequestedRangeStartPointY();
+	protected double getBeamstopCentreX(){
+		return getDetectorTopLeftX() + getHorizontalLengthFromMM(beamlineConfiguration.getBeamstopXCentreMM());
+	}
 	
-	protected abstract double getRequestedRangeEndPointX();
 	
-	protected abstract double getRequestedRangeEndPointY();
+	protected double getBeamstopCentreY(){
+		return getDetectorTopLeftY() + getVerticalLengthFromMM(beamlineConfiguration.getBeamstopYCentreMM());
+	}
 	
-	protected abstract double getCalibrantRingMajor(Q q);
 	
-	protected abstract double getCalibrantRingMinor(Q q);
+	protected double getCameraTubeMajor(){
+		return getHorizontalLengthFromMM(beamlineConfiguration.getCameraTube().getRadiusMM());
+	}
+	
+	
+	protected double getCameraTubeMinor(){
+		return getVerticalLengthFromMM(beamlineConfiguration.getCameraTube().getRadiusMM());
+	}
+	
+	
+	protected double getCameraTubeCentreX(){
+		return getDetectorTopLeftX() + getHorizontalLengthFromMM(beamlineConfiguration.getCameraTubeXCentreMM());
+	}
+	
+	protected double getCameraTubeCentreY(){
+		return getDetectorTopLeftY() + getVerticalLengthFromMM(beamlineConfiguration.getCameraTubeYCentreMM());
+	}
+	
+	
+	protected double getVisibleRangeStartPointX(){
+		return getDetectorTopLeftX() + getHorizontalLengthFromMM(resultsController.getVisibleRangeStartPoint().x);
+	}
+	
+	
+	protected double getVisibleRangeStartPointY(){
+		return getDetectorTopLeftY() + getVerticalLengthFromMM(resultsController.getVisibleRangeStartPoint().y);
+	}
+	
+	
+	protected double getVisibleRangeEndPointX(){
+		return getDetectorTopLeftX() + getHorizontalLengthFromMM(resultsController.getVisibleRangeEndPoint().x);
+	}
+	
+	
+	protected double getVisibleRangeEndPointY(){
+		return getDetectorTopLeftY() + getVerticalLengthFromMM(resultsController.getVisibleRangeEndPoint().y);
+	}
+	
+	
+	protected double getRequestedRangeStartPointX(){
+		return getDetectorTopLeftX() + getHorizontalLengthFromMM(resultsController.getRequestedRangeStartPoint().x);
+	}
+	
+	
+	protected double getRequestedRangeStartPointY(){
+		return getDetectorTopLeftY() + getVerticalLengthFromMM(resultsController.getRequestedRangeStartPoint().y);
+	}
+	
+	
+	protected double getRequestedRangeEndPointX(){
+		return getDetectorTopLeftX() + getHorizontalLengthFromMM(resultsController.getRequestedRangeEndPoint().x);
+	}
+	
+	
+	protected double getRequestedRangeEndPointY(){
+		return getDetectorTopLeftY() + getVerticalLengthFromMM(resultsController.getRequestedRangeEndPoint().y);
+	}
+	
+	
+	protected double getCalibrantRingMajor(Q q){
+		return getHorizontalLengthFromMM(1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(q.getValue().to(Q.BASE_UNIT).getEstimatedValue(), 
+                beamlineConfiguration.getCameraLength(), beamlineConfiguration.getWavelength())); 
+	}
+	
+	
+	protected double getCalibrantRingMinor(Q q){
+		return getVerticalLengthFromMM(1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(q.getValue().to(Q.BASE_UNIT).getEstimatedValue(), 
+                beamlineConfiguration.getCameraLength(), beamlineConfiguration.getWavelength()));
+	}
 }

@@ -25,11 +25,15 @@ Import-Package: javax.measure.quantity;version="4.3.1",
  org.eclipse.dawnsci.plotting.api.region,
  org.eclipse.dawnsci.plotting.api.tool,
  org.eclipse.draw2d.geometry,
+ org.eclipse.january;version="2.0.2",
+ org.eclipse.january.dataset;version="2.0.2",
+ org.eclipse.january.metadata;version="2.0.2",
  org.eclipse.richbeans.api.binding,
  org.eclipse.richbeans.widgets,
  org.eclipse.richbeans.widgets.scalebox,
  org.eclipse.richbeans.widgets.selector,
  org.eclipse.richbeans.widgets.wrappers,
  org.jscience.physics.amount;version="4.3.1",
- uk.ac.diamond.scisoft.analysis.crystallography
+ uk.ac.diamond.scisoft.analysis.crystallography,
+ uk.ac.diamond.scisoft.analysis.io
 Bundle-ActivationPolicy: lazy
