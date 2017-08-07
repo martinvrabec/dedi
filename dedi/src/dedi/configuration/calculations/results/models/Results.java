@@ -100,6 +100,11 @@ public class Results extends AbstractModel implements IResultsModel {
 	}
 	
 	
+	/**
+	 * Checks whether the state is valid.
+	 * To be used before firing PropertyChange events to prevent the listeners from 
+	 * accessing the results in an invalid state.
+	 */
 	private boolean isStateValid(){
 		// TODO Implement this method.
 		return true;

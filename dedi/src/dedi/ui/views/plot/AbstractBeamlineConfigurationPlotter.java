@@ -26,6 +26,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -35,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.results.controllers.AbstractResultsController;
@@ -80,6 +82,7 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	
 	protected CalibrantSpacing selectedCalibrant;
 	private Label selectedCalibrantLabel;
+	
 	protected IDataset mask;
 			
 	//Default colours of the objects to be plotted
@@ -158,7 +161,18 @@ public abstract class AbstractBeamlineConfigurationPlotter
 		selectedCalibrantLabel = GuiHelper.createLabel(plotConfigurationPanel, "");
 		controls.add(selectedCalibrantLabel);
 		if(selectedCalibrant != null) selectedCalibrantLabel.setText(selectedCalibrant.getName());
-		controls.add(GuiHelper.createLabel(plotConfigurationPanel, "(You can select another calibrant in diffraction preferences)"));
+		//controls.add(GuiHelper.createLabel(plotConfigurationPanel, "(You can select another calibrant in diffraction preferences)"));
+		Button configureCalibrantButton = new Button(plotConfigurationPanel, SWT.PUSH);
+		configureCalibrantButton.setText("Configure calibrant ...");
+		configureCalibrantButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(plotConfigurationPanel.getShell(), 
+						                "org.dawb.workbench.plotting.preference.diffraction.calibrantPreferencePage", null, null);
+				if (pref != null) pref.open();
+			}
+		});
+		controls.add(configureCalibrantButton);
 		
 		CalibrationFactory.addCalibrantSelectionListener(this);
 		

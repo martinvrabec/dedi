@@ -20,7 +20,7 @@ public abstract class AbstractResultsViewController extends AbstractController<I
 	protected ResultsViewModel viewModel;
 	
 	public AbstractResultsViewController(ResultsViewModel viewModel) {
-		resultsModel = ResultsService.getInstance().getModel();
+		resultsModel = ResultsService.getInstance().getResults();
 		resultsController = ResultsService.getInstance().getController();
 		beamlineConfiguration = resultsController.getBeamlineConfiguration();
 		beamlineConfiguration.addObserver(this);

@@ -5,6 +5,7 @@ import java.util.Observable;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 
+import dedi.configuration.calculations.results.models.AbstractModel;
 import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.devices.CameraTube;
@@ -77,10 +78,12 @@ public final class BeamlineConfiguration extends Observable {
 		notifyObservers();
 	}
 
+	
 	public DetectorProperties getDetectorProperties() {
 		return detectorProperties;
 	}
 
+	
 	public void setDetectorProperties(DetectorProperties detectorProperties) {
 		this.detectorProperties = detectorProperties;
 		setChanged();
@@ -92,22 +95,26 @@ public final class BeamlineConfiguration extends Observable {
 		return angle;
 	}
 
+	
 	public void setAngle(Double angle) {
 		this.angle = angle;
 		setChanged();
 		notifyObservers();
 	}
 
+	
 	public Double getCameraLength() {
 		return cameraLength;
 	}
 
+	
 	public void setCameraLength(Double cameraLength) {
 		this.cameraLength = cameraLength;
 		setChanged();
 		notifyObservers();
 	}
 
+	
 	public Integer getClearance() {
 		return clearance;
 	}
@@ -167,16 +174,19 @@ public final class BeamlineConfiguration extends Observable {
 		notifyObservers();
 	}
 
+	
 	public Double getWavelength() {
 		return wavelength;
 	}
 
+	
 	public void setWavelength(Double wavelength) {
 		this.wavelength = wavelength;
 		setChanged();
 		notifyObservers();
 	}
 
+	
 	public Beamstop getBeamstop() {
 		return beamstop;
 	}
@@ -198,9 +208,11 @@ public final class BeamlineConfiguration extends Observable {
 		return getBeamstop().getXCentre()*getDetector().getXPixelMM();
 	}
 	
+	
 	public double getBeamstopYCentreMM(){
 		return getBeamstop().getYCentre()*getDetector().getYPixelMM();
 	}
+	
 	
 	public void setBeamstop(Beamstop beamstop) {
 		this.beamstop = beamstop;
@@ -208,6 +220,7 @@ public final class BeamlineConfiguration extends Observable {
 		notifyObservers();
 	}
 
+	
 	public CameraTube getCameraTube() {
 		return cameraTube;
 	}
@@ -229,9 +242,11 @@ public final class BeamlineConfiguration extends Observable {
 		return getCameraTube().getXCentre()*getDetector().getXPixelMM();
 	}
 
+	
 	public double getCameraTubeYCentreMM(){
 		return getCameraTube().getYCentre()*getDetector().getYPixelMM();
 	}
+	
 	
 	public void setCameraTube(CameraTube cameraTube) {
 		this.cameraTube = cameraTube;
@@ -239,40 +254,48 @@ public final class BeamlineConfiguration extends Observable {
 		notifyObservers();
 	}
 	
+	
 	public Double getMaxWavelength() {
 		return maxWavelength;
 	}
 
+	
 	public void setMaxWavelength(Double wavelength) {
 		this.maxWavelength = wavelength;
 		setChanged();
 		notifyObservers();
 	}
 	
+	
 	public Double getMinWavelength() {
 		return minWavelength;
 	}
 
+	
 	public void setMinWavelength(Double wavelength) {
 		this.minWavelength = wavelength;
 		setChanged();
 		notifyObservers();
 	}
 	
+	
 	public Double getMinCameraLength() {
 		return minCameraLength;
 	}
 
+	
 	public void setMinCameraLength(Double cameraLength) {
 		this.minCameraLength = cameraLength;
 		setChanged();
 		notifyObservers();
 	}
 	
+	
 	public Double getMaxCameraLength() {
 		return maxCameraLength;
 	}
 
+	
 	public void setMaxCameraLength(Double cameraLength) {
 		this.maxCameraLength = cameraLength;
 		setChanged();
