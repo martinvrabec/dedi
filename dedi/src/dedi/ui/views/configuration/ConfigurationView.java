@@ -148,12 +148,9 @@ public class ConfigurationView extends ViewPart implements Observer {
 		cameraLengthValueSpinner.setValues((int) (beamlineConfiguration.getMinCameraLength()*100), 
 				                           (int) (beamlineConfiguration.getMinCameraLength()*100), 
 				                           (int) (beamlineConfiguration.getMaxCameraLength()*100), 2, 
-				                           (int) beamlineConfiguration.getCameraLengthStepSize()*100, 1);
+				                           (int) (beamlineConfiguration.getCameraLengthStepSize()*100), 1);
 		cameraLengthValueSpinner.setSelection((int) (beamlineConfiguration.getMinCameraLength()*100));
-		// Next line not really needed because setSelection will fire the ModifyListener
-		//BeamlineConfiguration.getInstance().setCameraLength(beamlineConfiguration.getMinCameraLength());
 		ResultsService.getInstance().getBeamlineConfiguration().setMinCameraLength(beamlineConfiguration.getMinCameraLength());
 		ResultsService.getInstance().getBeamlineConfiguration().setMaxCameraLength(beamlineConfiguration.getMaxCameraLength());
 	}
-
 }

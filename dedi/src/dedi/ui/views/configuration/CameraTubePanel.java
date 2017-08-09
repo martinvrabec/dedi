@@ -81,25 +81,6 @@ public class CameraTubePanel implements Observer {
 		GridDataFactory.fillDefaults().span(2, 1).applyTo(yPositionText);
 		yPixelLabel.moveBelow(yPositionText);
 		
-		
-		/*checkBox = new Button(parent, SWT.CHECK);
-		checkBox.setText("Select whether to take the camera tube into account in the calculations");
-		checkBox.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				if(!((Button) e.getSource()).getSelection()){
-					cameraTubeGroup.setEnabled(false);
-					BeamlineConfiguration.getInstance().setCameraTube(null);
-				}
-				else {
-					cameraTubeGroup.setEnabled(true);
-					textChanged();
-				}
-			}
-		});
-		checkBox.setSelection(true);*/
-		
-		
 		update(null, null);
 	}
 	
@@ -108,7 +89,7 @@ public class CameraTubePanel implements Observer {
 		 Amount<Length> diameter = cameraTubeDiameter.getValue(SI.MILLIMETER);
 		 Amount<Dimensionless> xpixels = xPositionText.getValue();
 		 Amount<Dimensionless> ypixels = yPositionText.getValue();
-		 if(diameter == null || xpixels == null || ypixels == null)
+		 if(diameter == null || xpixels == null || ypixels == null || diameter.getEstimatedValue() == 0)
 			 ResultsService.getInstance().getBeamlineConfiguration().setCameraTube(null);
 		 else
 			 ResultsService.getInstance().getBeamlineConfiguration()
@@ -140,18 +121,14 @@ public class CameraTubePanel implements Observer {
 			return;
 		}
 		if(beamlineConfiguration.getCameraTubeDiameter() == 0){
-			ResultsService.getInstance().getBeamlineConfiguration().setCameraTube(null);
+			//ResultsService.getInstance().getBeamlineConfiguration().setCameraTube(null);
 			setValues(0, 0, 0);
 			cameraTubeGroup.setEnabled(false);
-			//checkBox.setSelection(false);
-			//checkBox.setEnabled(false);
 		}
 		else {
 			setValues(beamlineConfiguration.getCameraTubeDiameter(), beamlineConfiguration.getCameraTubeXCentre(), 
 				 beamlineConfiguration.getCameraTubeYCentre());
 			cameraTubeGroup.setEnabled(true);
-			//checkBox.setSelection(true);
-			//checkBox.setEnabled(true);
 		}
 	}
 }

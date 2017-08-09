@@ -31,6 +31,8 @@ public class PixelSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 		
 		if(maskIsPlot) createMask();
 		
+		createEmptyTrace();
+		
 		rescalePlot();
 	}
 	

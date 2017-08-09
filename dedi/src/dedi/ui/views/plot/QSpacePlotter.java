@@ -36,6 +36,8 @@ public class QSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 	    
 	    if(maskIsPlot) createMask();
 	    
+	    createEmptyTrace();
+	    
 		rescalePlot();
 	}
 	

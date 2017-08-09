@@ -135,7 +135,8 @@ public class BeamlineConfigurationPlotView extends ViewPart implements IBeamline
 		});
 		scrolledComposite.setContent(controlsPanel);	
 		
-		system.setRescale(true);
+		system.setRescale(false);
+		system.setKeepAspect(true);
 	}
 	
 	

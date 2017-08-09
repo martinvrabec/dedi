@@ -37,9 +37,10 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 
 public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeamlineConfigurationPlotter {	
-	
 	private Dataset mask;
 	private DiffractionDetector previousDetector;
+	private IRegion detectorRegion;
+	private IRegion cameraTubeRegion;
 
 
 	public BaseBeamlineConfigurationPlotterImpl(IBeamlineConfigurationPlotView view) {
@@ -48,7 +49,6 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	
 	
 	protected void createDetectorRegion(){
-		IRegion detectorRegion;
 		try {
 			detectorRegion = system.createRegion("Detector", IRegion.RegionType.BOX);
 		} catch (Exception e) {
@@ -88,7 +88,6 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	
 	
 	protected void createCameraTubeRegion(){
-		IRegion cameraTubeRegion;
 		try {
 			cameraTubeRegion = system.createRegion("Camera Tube", IRegion.RegionType.ELLIPSE);
 		} catch (Exception e) {
@@ -172,6 +171,12 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	   
 	   String ringName = "Ring";
 	   for(int i = 0; i < hkls.size(); i++){
+		   Q q = new D(hkls.get(i).getD()).toQ();
+		   
+		   if(beamlineConfiguration.getCameraTube() != null &&
+				   (getCalibrantRingMajor(q) > getCameraTubeMajor() || getCalibrantRingMinor(q) > getCameraTubeMinor())) 
+			   continue;
+		   
 		   IRegion ringRegion = null;
 		   try {
 				ringRegion = system.createRegion(ringName + i, IRegion.RegionType.ELLIPSE);
@@ -179,7 +184,6 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 				e.printStackTrace();
 				return;
 			}
-		   Q q = new D(hkls.get(i).getD()).toQ();
 
 		   IROI ringROI = new EllipticalROI(getCalibrantRingMajor(q), getCalibrantRingMinor(q), 0, getBeamstopCentreX(), getBeamstopCentreY());
 				  
@@ -259,19 +263,35 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 			yAxis.set(getDetectorTopLeftY() + getVerticalLengthFromPixels(i), i);
 		
 		
-		IAxis systemYAxis = system.getAxes().get(1);
-		IAxis systemXAxis = system.getAxes().get(0);
-		
 		final IImageTrace image = system.createImageTrace("Mask");
 		image.setData(mask, Arrays.asList(xAxis, yAxis), false);
-		image.setGlobalRange(new double[]{systemXAxis.getLower(), systemXAxis.getUpper(), 
-				                          systemYAxis.getUpper(), systemYAxis.getLower()});  // Assuming y axis is inverted.
+		image.setGlobalRange(getGlobalRange());  
 		image.setAlpha(255);
 		system.addTrace(image);
 		
 		previousDetector = detector;
 	}
 	
+	
+	protected void createEmptyTrace(){
+		final IImageTrace image = system.createImageTrace("Dot");
+		image.setData(DatasetFactory.createFromObject(new boolean[1][1]), 
+				      Arrays.asList(DatasetFactory.createFromObject(new boolean[1]),
+				    		  		DatasetFactory.createFromObject(new boolean[1])), false);
+		image.setGlobalRange(getGlobalRange());
+		image.setAlpha(0);
+		system.addTrace(image);
+	    
+	}
+	
+	
+	private double[] getGlobalRange(){
+		IAxis systemYAxis = system.getAxes().get(1);
+		IAxis systemXAxis = system.getAxes().get(0);
+		
+		return new double[]{systemXAxis.getLower(), systemXAxis.getUpper(), 
+                systemYAxis.getUpper(), systemYAxis.getLower()}; // Assuming y axis is inverted.
+	}
 	
 	
 	protected void addRegion(IRegion region, IROI roi, Color colour){
@@ -295,7 +315,10 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 			double maxY = Double.MIN_VALUE;
 			double minY = Double.MAX_VALUE;
 			
-			for(IRegion region : system.getRegions()){
+			// The regions to take into account when scaling the plot
+			List<IRegion> regions = Arrays.asList(detectorRegion, cameraTubeRegion);
+			
+			for(IRegion region : regions){
 				IROI roi = region.getROI();
 				if(roi != null){
 					IRectangularROI bounds = roi.getBounds();

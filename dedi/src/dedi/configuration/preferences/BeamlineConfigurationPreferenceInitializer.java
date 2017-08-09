@@ -31,35 +31,52 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		
 		BeamlineConfigurations beamlineConfigurations = new BeamlineConfigurations(); 
 		
-		BeamlineConfigurationBean beamlineConfiguration1 = new BeamlineConfigurationBean();
-		beamlineConfiguration1.setName("I22 SAXS Config 1");
-		beamlineConfiguration1.setBeamstopDiameter(3);
-		beamlineConfiguration1.setBeamstopXCentre(737.5);
-		beamlineConfiguration1.setBeamstopYCentre(0);
-		beamlineConfiguration1.setCameraTubeDiameter(350);
-		beamlineConfiguration1.setCameraTubeXCentre(737.5);
-		beamlineConfiguration1.setCameraTubeYCentre(839.5);
-		beamlineConfiguration1.setClearance(10);
-		beamlineConfiguration1.setMinWavelength(0.1);
-		beamlineConfiguration1.setMaxWavelength(0.5);
-		beamlineConfiguration1.setMinCameraLength(1.2);
-		beamlineConfiguration1.setMaxCameraLength(9.7);
-		beamlineConfiguration1.setCameraLengthStepSize(0.25);
+		BeamlineConfigurationBean bc1 = new BeamlineConfigurationBean();
+		bc1.setName("I22 SAXS Config 1");
+		bc1.setBeamstopDiameter(4);
+		bc1.setBeamstopXCentre(737.5);
+		bc1.setBeamstopYCentre(0);
+		bc1.setCameraTubeDiameter(350);
+		bc1.setCameraTubeXCentre(737.5);
+		bc1.setCameraTubeYCentre(839.5);
+		bc1.setClearance(10);
+		bc1.setMinWavelength(0.1);
+		bc1.setMaxWavelength(0.5);
+		bc1.setMinCameraLength(1.2);
+		bc1.setMaxCameraLength(9.7);
+		bc1.setCameraLengthStepSize(0.25);
 		
-		BeamlineConfigurationBean beamlineConfiguration2 = new BeamlineConfigurationBean();
-		beamlineConfiguration2.setName("I22 SAXS Config 2");
-		beamlineConfiguration2.setBeamstopDiameter(3);
-		beamlineConfiguration2.setBeamstopXCentre(737.5);
-		beamlineConfiguration2.setBeamstopYCentre(839.5);
-		beamlineConfiguration2.setCameraTubeDiameter(350);
-		beamlineConfiguration2.setCameraTubeXCentre(737.5);
-		beamlineConfiguration2.setCameraTubeYCentre(839.5);
-		beamlineConfiguration2.setClearance(10);
-		beamlineConfiguration2.setMinWavelength(0.1);
-		beamlineConfiguration2.setMaxWavelength(0.5);
-		beamlineConfiguration2.setMinCameraLength(1.2);
-		beamlineConfiguration2.setMaxCameraLength(9.7);
-		beamlineConfiguration2.setCameraLengthStepSize(0.25);
+		BeamlineConfigurationBean bc2 = new BeamlineConfigurationBean();
+		bc2.setName("I22 SAXS Config 2");
+		bc2.setBeamstopDiameter(4);
+		bc2.setBeamstopXCentre(737.5);
+		bc2.setBeamstopYCentre(839.5);
+		bc2.setCameraTubeDiameter(350);
+		bc2.setCameraTubeXCentre(737.5);
+		bc2.setCameraTubeYCentre(839.5);
+		bc2.setClearance(10);
+		bc2.setMinWavelength(0.1);
+		bc2.setMaxWavelength(0.5);
+		bc2.setMinCameraLength(1.2);
+		bc2.setMaxCameraLength(9.7);
+		bc2.setCameraLengthStepSize(0.25);
+		
+		
+		BeamlineConfigurationBean bc3 = new BeamlineConfigurationBean();
+		bc3.setName("I22 WAXS");
+		bc3.setBeamstopDiameter(4);
+		bc3.setBeamstopXCentre(737.5);
+		bc3.setBeamstopYCentre(839.5);
+		bc3.setCameraTubeDiameter(0);
+		bc3.setCameraTubeXCentre(0);
+		bc3.setCameraTubeYCentre(0);
+		bc3.setClearance(10);
+		bc3.setMinWavelength(0.1);
+		bc3.setMaxWavelength(0.5);
+		bc3.setMinCameraLength(0.1);
+		bc3.setMaxCameraLength(9.7);
+		bc3.setCameraLengthStepSize(0.01);
+		
 		
 		DiffractionDetector dd = new DiffractionDetector();
 		dd.setDetectorName("Pilatus2m");
@@ -71,17 +88,20 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		if(detectors != null){
 			int index = detectors.indexOf(dd);
 			if(index != -1){
-				beamlineConfiguration1.setDetector(detectors.get(index));
-				beamlineConfiguration2.setDetector(detectors.get(index));
+				bc1.setDetector(detectors.get(index));
+				bc2.setDetector(detectors.get(0));
+				bc3.setDetector(detectors.get(index));
 			} else {
-				beamlineConfiguration1.setDetector(detectors.get(0));
-				beamlineConfiguration2.setDetector(detectors.get(0));
+				bc1.setDetector(detectors.get(0));
+				bc2.setDetector(detectors.get(0));
+				bc3.setDetector(detectors.get(0));
 			}
 		}
 		
-		beamlineConfigurations.addBeamlineConfiguration(beamlineConfiguration1);
-		beamlineConfigurations.setBeamlineConfiguration(beamlineConfiguration1);
-		beamlineConfigurations.addBeamlineConfiguration(beamlineConfiguration2);
+		beamlineConfigurations.addBeamlineConfiguration(bc1);
+		beamlineConfigurations.setBeamlineConfiguration(bc1);
+		beamlineConfigurations.addBeamlineConfiguration(bc2);
+		beamlineConfigurations.addBeamlineConfiguration(bc3);
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		XMLEncoder xmlEncoder = new XMLEncoder(baos);
