@@ -6,6 +6,7 @@ import java.util.List;
 import javax.measure.unit.SI;
 import javax.vecmath.Vector2d;
 
+import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalROI;
@@ -37,6 +38,10 @@ import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 
 public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeamlineConfigurationPlotter {	
 	
+	private Dataset mask;
+	private DiffractionDetector previousDetector;
+
+
 	public BaseBeamlineConfigurationPlotterImpl(IBeamlineConfigurationPlotView view) {
 		super(view);
 	}
@@ -184,7 +189,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
-	protected void createMask(){
+	/*protected void createMask(){
 		if(mask == null) return;
 		
 		int width = mask.getShape()[1]; // width is the number of columns
@@ -204,7 +209,69 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		image.setGlobalRange(new double[]{-800, 450, -400, 450});
 		image.setAlpha(255);
 		system.addTrace(image);
+	}*/
+	
+	
+	protected void createMask(){
+		DiffractionDetector detector = beamlineConfiguration.getDetector();
+		
+		if(detector.getNumberOfHorizontalModules() == 0 || detector.getNumberOfVerticalModules() == 0 
+		   || (detector.getXGap() == 0 && detector.getYGap() == 0)) return;
+		
+		
+		int detectorWidth = detector.getNumberOfPixelsX();  // Number of columns
+		int detectorHeight = detector.getNumberOfPixelsY(); // Number of rows
+		
+		int gapWidth = detector.getXGap();
+		int gapHeight = detector.getYGap();
+		
+		int moduleWidth = (detectorWidth - (detector.getNumberOfHorizontalModules()-1)*gapWidth)/
+				          detector.getNumberOfHorizontalModules();
+		int moduleHeight = (detectorHeight - (detector.getNumberOfVerticalModules()-1)*gapHeight)/
+				           detector.getNumberOfVerticalModules();
+		
+		if(mask == null || (previousDetector != null && !previousDetector.equals(detector))){
+			mask = DatasetFactory.ones(new int[]{detectorHeight, detectorWidth}, Dataset.BOOL);
+		
+			for(int row = 0; row < detectorHeight; row++){
+				for(int i = moduleWidth; i < detectorWidth; i += moduleWidth + gapWidth){
+					for(int j = 0; j < gapWidth && i+j < detectorWidth; j++){
+						mask.set(false, row, i+j);
+					}
+				}
+			}
+			for(int col = 0; col < detectorWidth; col++){
+				for(int i = moduleHeight; i < detectorHeight; i += moduleHeight + gapHeight){
+					for(int j = 0; j < gapHeight && i+j < detectorHeight; j++){
+						mask.set(false,  i+j, col);
+					}
+				}
+			}
+		}
+		
+		
+		Dataset xAxis = DatasetFactory.createFromObject(new double[detectorWidth]);
+		for(int i = 0; i < detectorWidth; i++) 
+			xAxis.set(getDetectorTopLeftX() + getHorizontalLengthFromPixels(i), i);
+		
+		Dataset yAxis = DatasetFactory.createFromObject(new double[detectorHeight]);
+		for(int i = 0; i < detectorHeight; i++) 
+			yAxis.set(getDetectorTopLeftY() + getVerticalLengthFromPixels(i), i);
+		
+		
+		IAxis systemYAxis = system.getAxes().get(1);
+		IAxis systemXAxis = system.getAxes().get(0);
+		
+		final IImageTrace image = system.createImageTrace("Mask");
+		image.setData(mask, Arrays.asList(xAxis, yAxis), false);
+		image.setGlobalRange(new double[]{systemXAxis.getLower(), systemXAxis.getUpper(), 
+				                          systemYAxis.getUpper(), systemYAxis.getLower()});  // Assuming y axis is inverted.
+		image.setAlpha(255);
+		system.addTrace(image);
+		
+		previousDetector = detector;
 	}
+	
 	
 	
 	protected void addRegion(IRegion region, IROI roi, Color colour){
