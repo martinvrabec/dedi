@@ -140,9 +140,9 @@ public class CameraTubePanel implements Observer {
 			return;
 		}
 		if(beamlineConfiguration.getCameraTubeDiameter() == 0){
+			ResultsService.getInstance().getBeamlineConfiguration().setCameraTube(null);
 			setValues(0, 0, 0);
 			cameraTubeGroup.setEnabled(false);
-			ResultsService.getInstance().getBeamlineConfiguration().setCameraTube(null);
 			//checkBox.setSelection(false);
 			//checkBox.setEnabled(false);
 		}

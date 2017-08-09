@@ -141,7 +141,7 @@ public class DefaultResultsController extends AbstractResultsController {
 		
 		
 		// Find the region of the ray that lies within the camera tubes projection onto the detector face.
-		if(cameraTube != null)
+		if(cameraTube != null && cameraTube.getRadiusMM() != 0)
 			t1 = t1.intersect(ray.getCircleIntersectionParameterRange(cameraTube.getRadiusMM(), 
                               new Vector2d(configuration.getCameraTubeXCentreMM(),configuration.getCameraTubeYCentreMM())));
 		
