@@ -41,7 +41,8 @@ import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 
 public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeamlineConfigurationPlotter {	
 	private Dataset mask;
-	private DiffractionDetector previousDetector;
+	private DiffractionDetector previousDetectorForDetectorRegion;
+	private DiffractionDetector previousMaskDetector;
 	private CameraTube previousCameraTube;
 	private IRegion detectorRegion;
 	private IRegion cameraTubeRegion;
@@ -57,24 +58,27 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	public void updatePlot(){
 		if(beamlineConfiguration.getDetector() != null) 
 			createDetectorRegion();
+		else removeRegion("Detector");
 		
 		if(beamlineConfiguration.getDetector() != null && beamlineConfiguration.getCameraTube() != null) 
 			createCameraTubeRegion();
+		else removeRegion("Camera Tube");
 		
 		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null) 
 			createBeamstopRegion();
+		else removeRegions(new String[]{"Beamstop", "Clearance"});
 		
 		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null && 
 		   beamlineConfiguration.getAngle() != null) 
 			createRay();
+		else removeRegions(new String[] {"Ray1", "Ray2", "Ray3", "Ray4"});
 		
 		if(beamlineConfiguration.getWavelength() != null && beamlineConfiguration.getCameraLength() != null)
 			createCalibrantRings();
+		else removeRegions(calibrantRingRegions);
 		
 		createMask();
-		
 		createEmptyTrace();
-		
 		rescalePlot();
 	}
 	
@@ -82,14 +86,14 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	protected void createDetectorRegion(){
 		if(!detectorIsPlot) {
 			removeRegion("Detector"); 
-			previousDetector = null;
+			previousDetectorForDetectorRegion = null;
 			detectorRegion = null;
 			return;
 		}
 		
 		DiffractionDetector detector = beamlineConfiguration.getDetector();
-		if(previousDetector != null && previousDetector.equals(detector)) return; 
-		previousDetector = detector;
+		if(previousDetectorForDetectorRegion != null && previousDetectorForDetectorRegion.equals(detector)) return; 
+		previousDetectorForDetectorRegion = detector;
 		
 		removeRegion("Detector"); 
 		try {
@@ -238,12 +242,6 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	   
 	   String ringName = "Ring";
 	   for(int i = 0; i < hkls.size(); i++){
-		   Q q = new D(hkls.get(i).getD()).toQ();
-		   
-		   if(beamlineConfiguration.getCameraTube() != null &&
-				   (getCalibrantRingMajor(q) > getCameraTubeMajor() || getCalibrantRingMinor(q) > getCameraTubeMinor())) 
-			   continue;
-		   
 		   IRegion ringRegion = null;
 		   try {
 				ringRegion = system.createRegion(ringName + i, IRegion.RegionType.ELLIPSE);
@@ -252,7 +250,8 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 				e.printStackTrace();
 				return;
 			}
-
+		   
+		   Q q = new D(hkls.get(i).getD()).toQ();
 		   IROI ringROI = new EllipticalROI(getCalibrantRingMajor(q), getCalibrantRingMinor(q), 0, getBeamstopCentreX(), getBeamstopCentreY());
 				  
 		   ringRegion.setFill(false);
@@ -263,7 +262,10 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	
 	protected void createMask(){
 		removeTrace("Mask");
-		if(!maskIsPlot) return;
+		if(!maskIsPlot){
+			mask = null;
+			return;
+		}
 		
 		DiffractionDetector detector = beamlineConfiguration.getDetector();
 		
@@ -282,7 +284,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		int moduleHeight = (detectorHeight - (detector.getNumberOfVerticalModules()-1)*gapHeight)/
 				           detector.getNumberOfVerticalModules();
 		
-		if(mask == null || (previousDetector != null && !previousDetector.equals(detector))){
+		if(mask == null || previousMaskDetector == null || (previousMaskDetector != null && !previousMaskDetector.equals(detector))){
 			mask = DatasetFactory.ones(new int[]{detectorHeight, detectorWidth}, Dataset.BOOL);
 		
 			for(int row = 0; row < detectorHeight; row++){
@@ -316,6 +318,8 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		image.setGlobalRange(getGlobalRange());  
 		image.setAlpha(255);
 		system.addTrace(image);
+		
+		previousMaskDetector = detector;
 	}
 	
 	
