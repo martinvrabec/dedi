@@ -41,11 +41,6 @@ public class BeamlineConfigurationPlotView extends ViewPart implements IBeamline
 		
 		try {
 			system = PlottingFactory.createPlottingSystem(); 
-			/*IDataHolder data = LoaderFactory.getData("/home/kce75424/Documents/Martin/DAWN/runtime-org.dawnsci.base.product/data/examples/TestMask4.nxs");
-			m = DatasetUtils.sliceAndConvertLazyDataset(data.getLazyDataset("/entry/mask/TestMask4"));
-			IPersistenceService service = (IPersistenceService) ServiceManager.getService(IPersistenceService.class);  
-			IPersistentFile pf = service.getPersistentFile("/home/kce75424/Documents/Martin/DAWN/runtime-org.dawnsci.base.product/data/examples/TestMask5.nxs");
-			m = pf.getMask(pf.getMaskNames(null).get(0),null);*/
 		} catch (Exception ne) {
 			ne.printStackTrace();
 			// It creates the view but there will be no plotting system

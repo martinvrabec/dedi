@@ -230,9 +230,31 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	}
 	
 
-	public void clearPlot(){
+	protected void clearPlot(){
 		system.clearRegions();
 		for(IRegion region : system.getRegions()) system.removeRegion(region);
 		for(ITrace trace : system.getTraces()) system.removeTrace(trace);
+	}
+	
+	
+	protected void removeRegion(String name){
+		IRegion region = system.getRegion(name);
+		if(region != null) system.removeRegion(region);
+	}
+	
+	
+	protected void removeTrace(String name){
+		ITrace trace = system.getTrace(name);
+		if(trace != null) system.removeTrace(trace);
+	}
+	
+	
+	protected void removeRegions(String[] names){
+		for(int i = 0; i < names.length; i++) removeRegion(names[i]);
+	}
+	
+	protected void removeRegions(List<IRegion> regions){
+		for(IRegion region : regions)
+			if(region != null) system.removeRegion(region);
 	}
 }

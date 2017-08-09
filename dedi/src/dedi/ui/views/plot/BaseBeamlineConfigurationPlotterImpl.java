@@ -1,5 +1,6 @@
 package dedi.ui.views.plot;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,6 +32,8 @@ import org.eclipse.ui.PlatformUI;
 import dedi.configuration.calculations.BeamlineConfigurationUtil;
 import dedi.configuration.calculations.scattering.D;
 import dedi.configuration.calculations.scattering.Q;
+import dedi.configuration.devices.Beamstop;
+import dedi.configuration.devices.CameraTube;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
@@ -39,8 +42,10 @@ import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeamlineConfigurationPlotter {	
 	private Dataset mask;
 	private DiffractionDetector previousDetector;
+	private CameraTube previousCameraTube;
 	private IRegion detectorRegion;
 	private IRegion cameraTubeRegion;
+	private List<IRegion> calibrantRingRegions = new ArrayList<>();
 
 
 	public BaseBeamlineConfigurationPlotterImpl(IBeamlineConfigurationPlotView view) {
@@ -48,7 +53,45 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
+	@Override
+	public void updatePlot(){
+		if(beamlineConfiguration.getDetector() != null) 
+			createDetectorRegion();
+		
+		if(beamlineConfiguration.getDetector() != null && beamlineConfiguration.getCameraTube() != null) 
+			createCameraTubeRegion();
+		
+		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null) 
+			createBeamstopRegion();
+		
+		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null && 
+		   beamlineConfiguration.getAngle() != null) 
+			createRay();
+		
+		if(beamlineConfiguration.getWavelength() != null && beamlineConfiguration.getCameraLength() != null)
+			createCalibrantRings();
+		
+		createMask();
+		
+		createEmptyTrace();
+		
+		rescalePlot();
+	}
+	
+	
 	protected void createDetectorRegion(){
+		if(!detectorIsPlot) {
+			removeRegion("Detector"); 
+			previousDetector = null;
+			detectorRegion = null;
+			return;
+		}
+		
+		DiffractionDetector detector = beamlineConfiguration.getDetector();
+		if(previousDetector != null && previousDetector.equals(detector)) return; 
+		previousDetector = detector;
+		
+		removeRegion("Detector"); 
 		try {
 			detectorRegion = system.createRegion("Detector", IRegion.RegionType.BOX);
 		} catch (Exception e) {
@@ -61,8 +104,13 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	
 	
 	protected void createBeamstopRegion(){
+		removeRegion("Beamstop");
+		removeRegion("Clearance");
+		if(!beamstopIsPlot) return;
+		
 		IRegion beamstopRegion;
 		IRegion clearanceRegion;
+		
 		try {
 			beamstopRegion = system.createRegion("Beamstop", IRegion.RegionType.ELLIPSE);
 			clearanceRegion = system.createRegion("Clearance", IRegion.RegionType.ELLIPSE);
@@ -88,6 +136,18 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	
 	
 	protected void createCameraTubeRegion(){
+		if(!cameraTubeIsPlot){
+			removeRegion("Camera Tube");
+			previousCameraTube = null;
+			cameraTubeRegion = null;
+			return;
+		}
+		
+		CameraTube cameraTube = beamlineConfiguration.getCameraTube();
+		if(previousCameraTube != null && previousCameraTube.equals(cameraTube)) return;
+		previousCameraTube = cameraTube;
+			
+		removeRegion("Camera Tube");
 		try {
 			cameraTubeRegion = system.createRegion("Camera Tube", IRegion.RegionType.ELLIPSE);
 		} catch (Exception e) {
@@ -104,6 +164,9 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	
 	
 	protected void createRay() {
+		removeRegions(new String[] {"Ray1", "Ray2", "Ray3", "Ray4"});
+		if(!rayIsPlot) return;
+		
 		IRegion visibleRangeRegion1;
 		IRegion visibleRangeRegion2;
 		IRegion inaccessibleRangeRegion;
@@ -166,7 +229,11 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	
 	
 	protected void createCalibrantRings(){
-	   if(selectedCalibrant == null) return;
+	   removeRegions(calibrantRingRegions);
+	   calibrantRingRegions = new ArrayList<>();
+	   
+	   if(selectedCalibrant == null || !calibrantIsPlot) return;
+	   
 	   List<HKL> hkls = selectedCalibrant.getHKLs();
 	   
 	   String ringName = "Ring";
@@ -180,6 +247,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		   IRegion ringRegion = null;
 		   try {
 				ringRegion = system.createRegion(ringName + i, IRegion.RegionType.ELLIPSE);
+				calibrantRingRegions.add(ringRegion);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return;
@@ -193,30 +261,10 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
-	/*protected void createMask(){
-		if(mask == null) return;
-		
-		int width = mask.getShape()[1]; // width is the number of columns
-		int height = mask.getShape()[0]; // height is the number of rows
-		
-		Dataset xAxis = DatasetFactory.createFromObject(new double[width]);
-		for(int i = 0; i < width; i++) 
-			xAxis.set(getDetectorTopLeftX() + getHorizontalLengthFromPixels(i), i);
-		
-		Dataset yAxis = DatasetFactory.createFromObject(new double[height]);
-		for(int i = 0; i < height; i++) 
-			yAxis.set(getDetectorTopLeftY() + getVerticalLengthFromPixels(i), i);
-		
-		
-		final IImageTrace image = system.createImageTrace("Mask");
-		image.setData(mask, Arrays.asList(xAxis, yAxis), false);
-		image.setGlobalRange(new double[]{-800, 450, -400, 450});
-		image.setAlpha(255);
-		system.addTrace(image);
-	}*/
-	
-	
 	protected void createMask(){
+		removeTrace("Mask");
+		if(!maskIsPlot) return;
+		
 		DiffractionDetector detector = beamlineConfiguration.getDetector();
 		
 		if(detector.getNumberOfHorizontalModules() == 0 || detector.getNumberOfVerticalModules() == 0 
@@ -268,12 +316,11 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		image.setGlobalRange(getGlobalRange());  
 		image.setAlpha(255);
 		system.addTrace(image);
-		
-		previousDetector = detector;
 	}
 	
 	
 	protected void createEmptyTrace(){
+		removeTrace("Dot");
 		final IImageTrace image = system.createImageTrace("Dot");
 		image.setData(DatasetFactory.createFromObject(new boolean[1][1]), 
 				      Arrays.asList(DatasetFactory.createFromObject(new boolean[1]),
@@ -319,6 +366,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 			List<IRegion> regions = Arrays.asList(detectorRegion, cameraTubeRegion);
 			
 			for(IRegion region : regions){
+				if(region == null) continue;
 				IROI roi = region.getROI();
 				if(roi != null){
 					IRectangularROI bounds = roi.getBounds();

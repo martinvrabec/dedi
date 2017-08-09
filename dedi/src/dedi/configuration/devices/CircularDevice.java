@@ -62,4 +62,44 @@ public class CircularDevice {
 	public Double getRadiusMM(){
 		return getDiameterMM()/2;
 	}
+
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((diameter == null) ? 0 : diameter.hashCode());
+		result = prime * result + ((xcentre == null) ? 0 : xcentre.hashCode());
+		result = prime * result + ((ycentre == null) ? 0 : ycentre.hashCode());
+		return result;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CircularDevice other = (CircularDevice) obj;
+		if (diameter == null) {
+			if (other.diameter != null)
+				return false;
+		} else if(other.diameter == null) return false; 
+		  else if (!diameter.equals(other.diameter) && diameter.doubleValue(SI.METER) != other.diameter.doubleValue(SI.METER))
+			return false;
+		if (xcentre == null) {
+			if (other.xcentre != null)
+				return false;
+		} else if (!xcentre.equals(other.xcentre))
+			return false;
+		if (ycentre == null) {
+			if (other.ycentre != null)
+				return false;
+		} else if (!ycentre.equals(other.ycentre))
+			return false;
+		return true;
+	}
 }

@@ -11,34 +11,6 @@ public class PhysicalSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 		super(view);
 	}
 	
-
-	@Override
-	public void updatePlot(){
-		clearPlot();
-		
-		if(beamlineConfiguration.getDetector() != null && detectorIsPlot) 
-			createDetectorRegion();
-		
-		if(beamlineConfiguration.getDetector() != null && beamlineConfiguration.getCameraTube() != null && cameraTubeIsPlot) 
-			createCameraTubeRegion();
-		
-		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null && beamstopIsPlot) 
-			createBeamstopRegion();
-		
-		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null && 
-		   beamlineConfiguration.getAngle() != null && rayIsPlot) 
-			createRay();
-		
-		if(beamlineConfiguration.getWavelength() != null && beamlineConfiguration.getCameraLength() != null && calibrantIsPlot)
-			createCalibrantRings();
-		
-		if(maskIsPlot) createMask();
-		
-		createEmptyTrace();
-		
-		rescalePlot();
-	}
-	
 	
 	@Override
 	protected double getDetectorTopLeftX() {

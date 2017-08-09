@@ -14,31 +14,10 @@ public class QSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
 
 	@Override
 	public void updatePlot(){
-		clearPlot();
-	    
 		if(beamlineConfiguration.getCameraLength() == null || beamlineConfiguration.getWavelength() == null) return;
 		scaleFactor = 2e-12*Math.PI/(beamlineConfiguration.getCameraLength()*beamlineConfiguration.getWavelength()); 
 		
-		if(beamlineConfiguration.getDetector() != null && detectorIsPlot) 
-			createDetectorRegion();
-		
-		if(beamlineConfiguration.getDetector() != null && beamlineConfiguration.getCameraTube() != null && cameraTubeIsPlot) 
-			createCameraTubeRegion();
-		
-		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null && beamstopIsPlot) 
-			createBeamstopRegion();
-		
-		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null && 
-		   beamlineConfiguration.getAngle() != null && rayIsPlot) 
-			createRay();
-		
-	    if(calibrantIsPlot) createCalibrantRings();
-	    
-	    if(maskIsPlot) createMask();
-	    
-	    createEmptyTrace();
-	    
-		rescalePlot();
+		super.updatePlot();
 	}
 	
 

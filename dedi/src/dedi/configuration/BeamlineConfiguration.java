@@ -1,5 +1,6 @@
 package dedi.configuration;
 
+import java.util.Objects;
 import java.util.Observable;
 
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
@@ -73,6 +74,7 @@ public final class BeamlineConfiguration extends Observable {
 	
 	
 	public void setDetector(DiffractionDetector detector) {
+		if(Objects.equals(detector, this.detector)) return;
 		this.detector = detector;
 		setChanged();
 		notifyObservers();
@@ -85,6 +87,7 @@ public final class BeamlineConfiguration extends Observable {
 
 	
 	public void setDetectorProperties(DetectorProperties detectorProperties) {
+		if(Objects.equals(detectorProperties, this.detectorProperties)) return;
 		this.detectorProperties = detectorProperties;
 		setChanged();
 		notifyObservers();
@@ -97,6 +100,7 @@ public final class BeamlineConfiguration extends Observable {
 
 	
 	public void setAngle(Double angle) {
+		if(Objects.equals(angle, this.angle)) return;
 		this.angle = angle;
 		setChanged();
 		notifyObservers();
@@ -109,6 +113,7 @@ public final class BeamlineConfiguration extends Observable {
 
 	
 	public void setCameraLength(Double cameraLength) {
+		if(Objects.equals(cameraLength, this.cameraLength)) return;
 		this.cameraLength = cameraLength;
 		setChanged();
 		notifyObservers();
@@ -169,6 +174,7 @@ public final class BeamlineConfiguration extends Observable {
 	
 	
 	public void setClearance(Integer clearance) {
+		if(Objects.equals(clearance, this.clearance)) return;
 		this.clearance = clearance;
 		setChanged();
 		notifyObservers();
@@ -181,6 +187,7 @@ public final class BeamlineConfiguration extends Observable {
 
 	
 	public void setWavelength(Double wavelength) {
+		if(Objects.equals(wavelength, this.wavelength)) return;
 		this.wavelength = wavelength;
 		setChanged();
 		notifyObservers();
@@ -215,6 +222,7 @@ public final class BeamlineConfiguration extends Observable {
 	
 	
 	public void setBeamstop(Beamstop beamstop) {
+		if(Objects.equals(beamstop, this.beamstop)) return;
 		this.beamstop = beamstop;
 		setChanged();
 		notifyObservers();
@@ -249,6 +257,7 @@ public final class BeamlineConfiguration extends Observable {
 	
 	
 	public void setCameraTube(CameraTube cameraTube) {
+		if(Objects.equals(cameraTube, this.cameraTube)) return;
 		this.cameraTube = cameraTube;
 		setChanged();
 		notifyObservers();
@@ -261,6 +270,7 @@ public final class BeamlineConfiguration extends Observable {
 
 	
 	public void setMaxWavelength(Double wavelength) {
+		if(Objects.equals(wavelength, this.wavelength)) return;
 		this.maxWavelength = wavelength;
 		setChanged();
 		notifyObservers();
@@ -273,6 +283,7 @@ public final class BeamlineConfiguration extends Observable {
 
 	
 	public void setMinWavelength(Double wavelength) {
+		if(Objects.equals(wavelength, this.wavelength)) return;
 		this.minWavelength = wavelength;
 		setChanged();
 		notifyObservers();
@@ -285,6 +296,7 @@ public final class BeamlineConfiguration extends Observable {
 
 	
 	public void setMinCameraLength(Double cameraLength) {
+		if(Objects.equals(cameraLength, this.cameraLength)) return;
 		this.minCameraLength = cameraLength;
 		setChanged();
 		notifyObservers();
@@ -297,6 +309,7 @@ public final class BeamlineConfiguration extends Observable {
 
 	
 	public void setMaxCameraLength(Double cameraLength) {
+		if(Objects.equals(cameraLength, this.cameraLength)) return;
 		this.maxCameraLength = cameraLength;
 		setChanged();
 		notifyObservers();
