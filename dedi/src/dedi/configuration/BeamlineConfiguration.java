@@ -296,7 +296,7 @@ public final class BeamlineConfiguration extends Observable {
 
 	
 	public void setMinCameraLength(Double cameraLength) {
-		if(Objects.equals(cameraLength, this.cameraLength)) return;
+		if(Objects.equals(cameraLength, this.minCameraLength)) return;
 		this.minCameraLength = cameraLength;
 		setChanged();
 		notifyObservers();
@@ -309,7 +309,7 @@ public final class BeamlineConfiguration extends Observable {
 
 	
 	public void setMaxCameraLength(Double cameraLength) {
-		if(Objects.equals(cameraLength, this.cameraLength)) return;
+		if(Objects.equals(cameraLength, this.maxCameraLength)) return;
 		this.maxCameraLength = cameraLength;
 		setChanged();
 		notifyObservers();

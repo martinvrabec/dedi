@@ -215,10 +215,13 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 			 e.gc.drawText("No solution", bounds.width/2 - 40, bounds.height/2 - 10);
 			 return;
 		 }
-		 if(controller.getRequestedMax() == null || controller.getRequestedMin() == null) return;
+		
+		 if(controller.getRequestedMax() == null || controller.getRequestedMin() == null ||
+		    controller.getFullRangeMax() == null || controller.getFullRangeMin() == null) return;
 		 
 		 if(controller.isSatisfied()) e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_GREEN));
 		 else e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_RED));
+		 
 		 
          double slope = (bounds.width-120)/
 				        		 (Math.log(controller.getFullRangeMax()) - 

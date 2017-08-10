@@ -98,6 +98,8 @@ public class ConfigurationView extends ViewPart implements Observer {
 		cameraLengthValueSpinner.addModifyListener( e -> ResultsService.getInstance().getBeamlineConfiguration().
 				                                         setCameraLength(cameraLengthValueSpinner.getSelection()/100.0));
 		cameraLengthValueSpinner.setValues(145, 120, 970, 2, 25, 1);
+		/*ResultsService.getInstance().getBeamlineConfiguration().setMinCameraLength(1.2);
+		ResultsService.getInstance().getBeamlineConfiguration().setMaxCameraLength(9.7);*/
 		GuiHelper.createLabel(cameraGroup, "m");
 		
 		
