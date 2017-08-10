@@ -49,6 +49,9 @@ import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeamlineConfigurationPlotter {	
 	private final String DETECTOR_REGION = "Detector";
 	private final String CAMERA_TUBE_REGION = "Camera Tube";
+	private final String BEAMSTOP_REGION = "Beamstop";
+	private final String CLEARANCE_REGION = "Clearance";
+	private final String MASK_TRACE = "Mask";
 	
 	private List<IRegion> calibrantRingRegions = new ArrayList<>();
 
@@ -56,6 +59,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	private final int MAX_CACHE_SIZE = 10;
 
 
+	@SuppressWarnings("serial")
 	public BaseBeamlineConfigurationPlotterImpl(IBeamlineConfigurationPlotView view) {
 		super(view);
 		
@@ -72,15 +76,15 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	public void updatePlot(){
 		if(beamlineConfiguration.getDetector() != null) 
 			createDetectorRegion();
-		else removeRegion("Detector");
+		else removeRegion(DETECTOR_REGION);
 		
 		if(beamlineConfiguration.getDetector() != null && beamlineConfiguration.getCameraTube() != null) 
 			createCameraTubeRegion();
-		else removeRegion("Camera Tube");
+		else removeRegion(CAMERA_TUBE_REGION);
 		
 		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null) 
 			createBeamstopRegion();
-		else removeRegions(new String[]{"Beamstop", "Clearance"});
+		else removeRegions(new String[]{BEAMSTOP_REGION, CLEARANCE_REGION});
 		
 		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null && 
 		   beamlineConfiguration.getAngle() != null) 
@@ -114,15 +118,15 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	
 	
 	protected void createBeamstopRegion(){
-		removeRegions(new String[]{"Beamstop", "Clearance"});
+		removeRegions(new String[]{BEAMSTOP_REGION, CLEARANCE_REGION});
 		if(!beamstopIsPlot) return;
 		
 		IRegion beamstopRegion;
 		IRegion clearanceRegion;
 		
 		try {
-			beamstopRegion = system.createRegion("Beamstop", IRegion.RegionType.ELLIPSE);
-			clearanceRegion = system.createRegion("Clearance", IRegion.RegionType.ELLIPSE);
+			beamstopRegion = system.createRegion(BEAMSTOP_REGION, IRegion.RegionType.ELLIPSE);
+			clearanceRegion = system.createRegion(CLEARANCE_REGION, IRegion.RegionType.ELLIPSE);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
@@ -257,70 +261,8 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
-	/*protected void createMask(){
-		removeTrace("Mask");
-		if(!maskIsPlot){
-			mask = null;
-			return;
-		}
-		
-		DiffractionDetector detector = beamlineConfiguration.getDetector();
-		
-		if(detector.getNumberOfHorizontalModules() == 0 || detector.getNumberOfVerticalModules() == 0 
-		   || (detector.getXGap() == 0 && detector.getYGap() == 0)) return;
-		
-		
-		int detectorWidth = detector.getNumberOfPixelsX();  // Number of columns
-		int detectorHeight = detector.getNumberOfPixelsY(); // Number of rows
-		
-		int gapWidth = detector.getXGap();
-		int gapHeight = detector.getYGap();
-		
-		int moduleWidth = (detectorWidth - (detector.getNumberOfHorizontalModules()-1)*gapWidth)/
-				          detector.getNumberOfHorizontalModules();
-		int moduleHeight = (detectorHeight - (detector.getNumberOfVerticalModules()-1)*gapHeight)/
-				           detector.getNumberOfVerticalModules();
-		
-		if(mask == null || previousMaskDetector == null || (previousMaskDetector != null && !previousMaskDetector.equals(detector))){
-			mask = DatasetFactory.ones(new int[]{detectorHeight, detectorWidth}, Dataset.BOOL);
-		
-			for(int row = 0; row < detectorHeight; row++){
-				for(int i = moduleWidth; i < detectorWidth; i += moduleWidth + gapWidth){
-					for(int j = 0; j < gapWidth && i+j < detectorWidth; j++){
-						mask.set(false, row, i+j);
-					}
-				}
-			}
-			for(int col = 0; col < detectorWidth; col++){
-				for(int i = moduleHeight; i < detectorHeight; i += moduleHeight + gapHeight){
-					for(int j = 0; j < gapHeight && i+j < detectorHeight; j++){
-						mask.set(false,  i+j, col);
-					}
-				}
-			}
-		}
-		
-		
-		Dataset xAxis = DatasetFactory.createFromObject(new double[detectorWidth]);
-		for(int i = 0; i < detectorWidth; i++) 
-			xAxis.set(getDetectorTopLeftX() + getHorizontalLengthFromPixels(i), i);
-		
-		Dataset yAxis = DatasetFactory.createFromObject(new double[detectorHeight]);
-		for(int i = 0; i < detectorHeight; i++) 
-			yAxis.set(getDetectorTopLeftY() + getVerticalLengthFromPixels(i), i);
-		
-		
-		final IImageTrace image = system.createImageTrace("Mask");
-		image.setData(mask, Arrays.asList(xAxis, yAxis), false);
-		image.setGlobalRange(getGlobalRange());  
-		image.setAlpha(255);
-		system.addTrace(image);
-		
-		previousMaskDetector = detector;
-	}*/
-	
 	protected void createMask(){
-		removeTrace("Mask");
+		removeTrace(MASK_TRACE);
 		if(!maskIsPlot) return;
 		
 		DiffractionDetector detector = beamlineConfiguration.getDetector();
@@ -359,7 +301,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		Dataset xAxis = DatasetFactory.createRange(getDetectorTopLeftX(), getDetectorTopLeftX() + getHorizontalLengthFromPixels(detectorWidth), getHorizontalLengthFromPixels(1), Dataset.FLOAT64);
 		Dataset yAxis = DatasetFactory.createRange(getDetectorTopLeftY(),getDetectorTopLeftY() + getVerticalLengthFromPixels(detectorHeight), getVerticalLengthFromPixels(1), Dataset.FLOAT64);
 				
-		final IImageTrace image = system.createImageTrace("Mask");
+		final IImageTrace image = system.createImageTrace(MASK_TRACE);
 		image.setDownsampleType(DownsampleType.POINT);
 		image.setRescaleHistogram(false);
 		image.setData(mask, Arrays.asList(xAxis, yAxis), false);
@@ -412,7 +354,8 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 			double minY = Double.MAX_VALUE;
 			
 			// The regions to take into account when scaling the plot
-			List<IRegion> regions = Arrays.asList(system.getRegion(DETECTOR_REGION), system.getRegion(CAMERA_TUBE_REGION));
+			List<IRegion> regions = Arrays.asList(system.getRegion(DETECTOR_REGION), 
+					                              system.getRegion(CAMERA_TUBE_REGION));
 			
 			for(IRegion region : regions){
 				if(region == null) continue;

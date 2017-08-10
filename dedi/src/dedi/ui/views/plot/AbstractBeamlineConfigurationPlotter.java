@@ -55,9 +55,11 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 
 
 /**
- * Defines what items should be plotted and how their properties can be configured, but leaves the actual implementation
- *  of the plotting to subclasses.
- * The default implementation is the {@link BaseBeamlineConfigurationPlotterImpl}.
+ * Abstract class that defines what items should be plotted by a BeamlineConfigurationPlotter
+ * and how the items' properties can be configured, but leaves the actual implementation
+ * of the plotting to subclasses.
+ * The default implementation is the {@link BaseBeamlineConfigurationPlotterImpl} which uses {@link IRegion}s 
+ * and {@link ITrace}s to render the items on the plot.
  */
 public abstract class AbstractBeamlineConfigurationPlotter 
                       implements IBeamlineConfigurationPlotter, PropertyChangeListener, Observer, ColourChangeListener, 
@@ -69,8 +71,14 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	protected BeamlineConfiguration beamlineConfiguration;
 	protected AbstractResultsController resultsController;
 
-	private List<Control> controls;
+	// List of controls that will be created and need to be properly disposed when
+	// the dispose() method from the IBeamlineConfigurationPlotter interface is called.
+	private List<Control> controls; 
+	
+	// These strings must be exactly as they are, because I'm using java reflection to 
+	// access the corresponding ...IsPlot fields below.
 	private String[]  plotItems = {"detector", "beamstop", "cameraTube", "ray", "mask", "calibrant"};
+	// The names that will appear in the ControlsPanel next to the check boxes. (Can be modified).
 	private String[] plotItemNames = {"Detector", "Beamstop", "Camera tube", "Q range", "Mask", "Calibrant"};
 	
 	protected boolean detectorIsPlot = true;
@@ -83,13 +91,12 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	protected CalibrantSpacing selectedCalibrant;
 	private Label selectedCalibrantLabel;
 	
-	protected IDataset mask;
 			
-	//Default colours of the objects to be plotted
-	private Color detectorColour = new Color(Display.getDefault(), 30, 144, 255);
+	// Default colours of the objects to be plotted
+	private Color detectorColour = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 	private Color beamstopColour = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
 	private Color clearanceColour = Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
-	private Color cameraTubeColour = new Color(Display.getDefault(), 255, 255, 0);
+	private Color cameraTubeColour = Display.getDefault().getSystemColor(SWT.COLOR_YELLOW);
 	
 	private final String[] legendLabels = {"Detector", "Beamstop", "Clearance", "Camera tube"};
 	private final Color[] legendColours = {detectorColour, beamstopColour, clearanceColour, cameraTubeColour};
@@ -161,7 +168,6 @@ public abstract class AbstractBeamlineConfigurationPlotter
 		selectedCalibrantLabel = GuiHelper.createLabel(plotConfigurationPanel, "");
 		controls.add(selectedCalibrantLabel);
 		if(selectedCalibrant != null) selectedCalibrantLabel.setText(selectedCalibrant.getName());
-		//controls.add(GuiHelper.createLabel(plotConfigurationPanel, "(You can select another calibrant in diffraction preferences)"));
 		Button configureCalibrantButton = new Button(plotConfigurationPanel, SWT.PUSH);
 		configureCalibrantButton.setText("Configure calibrant ...");
 		configureCalibrantButton.addSelectionListener(new SelectionAdapter() {
@@ -175,16 +181,6 @@ public abstract class AbstractBeamlineConfigurationPlotter
 		controls.add(configureCalibrantButton);
 		
 		CalibrationFactory.addCalibrantSelectionListener(this);
-		
-		
-		IPersistenceService service;
-		try {
-			service = (IPersistenceService) ServiceManager.getService(IPersistenceService.class);
-			IPersistentFile pf = service.getPersistentFile("/home/kce75424/Documents/Martin/DAWN/runtime-org.dawnsci.base.product/data/examples/I22 Beamline Calibrants/Masks/SAXS_mask.nxs");
-			mask = pf.getMask(pf.getMaskNames(null).get(0),null);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}  
 		
 		plotConfigurationPanel.layout();
 		updatePlot();
@@ -218,18 +214,6 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	}
 	
 	
-	public void dispose(){
-		clearPlot();
-		beamlineConfiguration.deleteObserver(this);
-		resultsController.removeView(this);
-		view = null;
-		system = null;
-		for(LegendItem item : legendItems) item.removeColourChangeListener(this);
-		CalibrationFactory.removeCalibrantSelectionListener(this);
-		for(Control control : controls) control.dispose();
-	}
-	
-
 	protected void clearPlot(){
 		system.clearRegions();
 		for(IRegion region : system.getRegions()) system.removeRegion(region);
@@ -257,4 +241,17 @@ public abstract class AbstractBeamlineConfigurationPlotter
 		for(IRegion region : regions)
 			if(region != null) system.removeRegion(region);
 	}
+	
+
+	public void dispose(){
+		clearPlot();
+		beamlineConfiguration.deleteObserver(this);
+		resultsController.removeView(this);
+		view = null;
+		system = null;
+		for(LegendItem item : legendItems) item.removeColourChangeListener(this);
+		CalibrationFactory.removeCalibrantSelectionListener(this);
+		for(Control control : controls) control.dispose();
+	}
+	
 }
