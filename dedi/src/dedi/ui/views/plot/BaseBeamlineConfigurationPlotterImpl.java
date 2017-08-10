@@ -2,7 +2,10 @@ package dedi.ui.views.plot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import javax.measure.unit.SI;
 import javax.vecmath.Vector2d;
@@ -19,6 +22,8 @@ import org.eclipse.dawnsci.plotting.api.axis.IPositionListener;
 import org.eclipse.dawnsci.plotting.api.axis.PositionEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DoubleDataset;
@@ -40,17 +45,25 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 
 public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeamlineConfigurationPlotter {	
-	private Dataset mask;
-	private DiffractionDetector previousDetectorForDetectorRegion;
-	private DiffractionDetector previousMaskDetector;
+	private DiffractionDetector previousDetector;
 	private CameraTube previousCameraTube;
 	private IRegion detectorRegion;
 	private IRegion cameraTubeRegion;
 	private List<IRegion> calibrantRingRegions = new ArrayList<>();
+	
+	private Map<Integer, Dataset> maskCache;
+	private final int MAX_CACHE_SIZE = 10;
 
 
 	public BaseBeamlineConfigurationPlotterImpl(IBeamlineConfigurationPlotView view) {
 		super(view);
+		
+		maskCache = new LinkedHashMap<Integer, Dataset>(MAX_CACHE_SIZE+1, 0.75F, true){
+			@Override
+			protected boolean removeEldestEntry(java.util.Map.Entry<Integer, Dataset> eldest) {
+				return size() > MAX_CACHE_SIZE;
+			}
+		};
 	}
 	
 	
@@ -86,14 +99,14 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	protected void createDetectorRegion(){
 		if(!detectorIsPlot) {
 			removeRegion("Detector"); 
-			previousDetectorForDetectorRegion = null;
+			previousDetector = null;
 			detectorRegion = null;
 			return;
 		}
 		
 		DiffractionDetector detector = beamlineConfiguration.getDetector();
-		if(previousDetectorForDetectorRegion != null && previousDetectorForDetectorRegion.equals(detector)) return; 
-		previousDetectorForDetectorRegion = detector;
+		if(previousDetector != null && previousDetector.equals(detector)) return; 
+		previousDetector = detector;
 		
 		removeRegion("Detector"); 
 		try {
@@ -260,7 +273,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
-	protected void createMask(){
+	/*protected void createMask(){
 		removeTrace("Mask");
 		if(!maskIsPlot){
 			mask = null;
@@ -320,19 +333,81 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		system.addTrace(image);
 		
 		previousMaskDetector = detector;
+	}*/
+	
+	protected void createMask(){
+		removeTrace("Mask");
+		if(!maskIsPlot) return;
+		
+		DiffractionDetector detector = beamlineConfiguration.getDetector();
+		
+		if(detector.getNumberOfHorizontalModules() == 0 || detector.getNumberOfVerticalModules() == 0 ||
+		   (detector.getXGap() == 0 && detector.getYGap() == 0)) return;
+		
+		int detectorWidth = detector.getNumberOfPixelsX();  // Number of columns
+		int detectorHeight = detector.getNumberOfPixelsY(); // Number of rows
+		
+		int gapWidth = detector.getXGap();
+		int gapHeight = detector.getYGap();
+		
+		int moduleWidth = (detectorWidth - (detector.getNumberOfHorizontalModules()-1)*gapWidth)/
+				          detector.getNumberOfHorizontalModules();
+		int moduleHeight = (detectorHeight - (detector.getNumberOfVerticalModules()-1)*gapHeight)/
+				           detector.getNumberOfVerticalModules();
+		
+		
+		Dataset mask = maskCache.get(Objects.hash(detectorWidth, detectorHeight, gapWidth, gapHeight,
+				                                  moduleWidth, moduleHeight));
+		
+		if(mask == null){
+			mask = DatasetFactory.ones(new int[]{detectorHeight, detectorWidth}, Dataset.BOOL);
+			
+			for(int row = 0; row < detectorHeight; row++){
+				for(int i = moduleWidth; i < detectorWidth; i += moduleWidth + gapWidth){
+					for(int j = 0; j < gapWidth && i+j < detectorWidth; j++){
+						mask.set(false, row, i+j);
+					}
+				}
+			}
+			for(int col = 0; col < detectorWidth; col++){
+				for(int i = moduleHeight; i < detectorHeight; i += moduleHeight + gapHeight){
+					for(int j = 0; j < gapHeight && i+j < detectorHeight; j++){
+						mask.set(false,  i+j, col);
+					}
+				}
+			}
+			maskCache.put(Objects.hash(detectorWidth, detectorHeight, gapWidth, gapHeight,
+				                                  moduleWidth, moduleHeight), mask);
+		}
+		
+		Dataset xAxis = DatasetFactory.createFromObject(new double[detectorWidth]);
+		for(int i = 0; i < detectorWidth; i++) 
+			xAxis.set(getDetectorTopLeftX() + getHorizontalLengthFromPixels(i), i);
+		
+		Dataset yAxis = DatasetFactory.createFromObject(new double[detectorHeight]);
+		for(int i = 0; i < detectorHeight; i++) 
+			yAxis.set(getDetectorTopLeftY() + getVerticalLengthFromPixels(i), i);
+		
+		
+		final IImageTrace image = system.createImageTrace("Mask");
+		image.setDownsampleType(DownsampleType.POINT);
+		image.setRescaleHistogram(false);
+		image.setData(mask, Arrays.asList(xAxis, yAxis), false);
+		image.setGlobalRange(getGlobalRange());  
+		system.addTrace(image);
 	}
 	
 	
 	protected void createEmptyTrace(){
 		removeTrace("Dot");
 		final IImageTrace image = system.createImageTrace("Dot");
+		image.setRescaleHistogram(false);
 		image.setData(DatasetFactory.createFromObject(new boolean[1][1]), 
 				      Arrays.asList(DatasetFactory.createFromObject(new boolean[1]),
 				    		  		DatasetFactory.createFromObject(new boolean[1])), false);
 		image.setGlobalRange(getGlobalRange());
 		image.setAlpha(0);
 		system.addTrace(image);
-	    
 	}
 	
 	
