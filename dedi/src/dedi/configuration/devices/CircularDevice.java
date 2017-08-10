@@ -5,10 +5,19 @@ import javax.measure.unit.SI;
 
 import org.jscience.physics.amount.Amount;
 
+// TODO Test immutability.
+
+/**
+ * A class to represent any device that has a circular shape with a {@link Amount<Length>} diameter,
+ * that is placed on a 2D screen consisting of pixels.
+ * The subclasses of this class are meant to be immutable, although there is no way to enforce this.
+ * The 2 known subclasses are {@link Beamstop} and {@link CameraTube}. Both are immutable.
+ *
+ */
 public class CircularDevice {
 	private Amount<Length> diameter;
-	private Double xcentre;
-	private Double ycentre;
+	private Double xcentre; // in pixels
+	private Double ycentre; // in pixels
 	
 	
 	/**
@@ -21,14 +30,14 @@ public class CircularDevice {
 	 */
 	public CircularDevice(Amount<Length> diameter, Double xcentre, Double ycentre) {
 		super();
-		this.diameter = diameter.copy();
+		this.diameter = (diameter == null) ? null : diameter.copy();
 		this.xcentre = xcentre;
 		this.ycentre = ycentre;
 	}
 
 
 	public Amount<Length> getDiameter() {
-		return diameter.copy();
+		return (diameter == null) ? null : diameter.copy();
 	}
 
 

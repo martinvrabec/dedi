@@ -93,7 +93,7 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	
 			
 	// Default colours of the objects to be plotted
-	private Color detectorColour = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
+	private Color detectorColour = Display.getDefault().getSystemColor(SWT.COLOR_CYAN);
 	private Color beamstopColour = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
 	private Color clearanceColour = Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
 	private Color cameraTubeColour = Display.getDefault().getSystemColor(SWT.COLOR_YELLOW);
