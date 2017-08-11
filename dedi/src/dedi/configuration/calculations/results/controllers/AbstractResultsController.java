@@ -38,6 +38,9 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	}
 	
 	
+	public abstract Double getQResolution(double qValue);
+	
+	
 	public NumericRange getVisibleQRange() {
 		return (NumericRange) getModelProperty(IResultsModel.VISIBLE_Q_RANGE_PROPERTY);
 	}

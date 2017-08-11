@@ -1,15 +1,10 @@
 package dedi.configuration.calculations.results.controllers;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Objects;
 import java.util.Observable;
-import java.util.Observer;
 
-import javax.measure.unit.SI;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
@@ -20,12 +15,10 @@ import dedi.configuration.calculations.BeamlineConfigurationUtil;
 import dedi.configuration.calculations.NumericRange;
 import dedi.configuration.calculations.geometry.Ray;
 import dedi.configuration.calculations.results.models.IResultsModel;
-import dedi.configuration.calculations.results.models.Results;
 import dedi.configuration.calculations.scattering.Q;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.devices.CameraTube;
-import dedi.ui.views.results.ResultsView;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 
 /**
@@ -260,6 +253,8 @@ public class DefaultResultsController extends AbstractResultsController {
 		thread.start();
 	}
 	
+	
+	@Override
 	public Double getQResolution(double qValue){
 		updateState();
 		

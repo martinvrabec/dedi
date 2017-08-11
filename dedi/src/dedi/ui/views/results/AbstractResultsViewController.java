@@ -55,6 +55,8 @@ public abstract class AbstractResultsViewController extends AbstractController<I
 	protected abstract void updateFullRangeMax(Double newMax);
 	
 	
+	public abstract Double getQResolution(Double value);
+	
 	public Double getRequestedMin(){
 		return (Double) getModelProperty(ResultsViewConstants.REQUESTED_MIN_PROPERTY);
 	}

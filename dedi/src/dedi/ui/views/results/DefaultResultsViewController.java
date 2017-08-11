@@ -236,4 +236,13 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 		setModelProperty(ResultsViewConstants.FULL_RANGE_MAX_PROPERTY, newMax, Double.class);
 	}
 	
+	
+	@Override
+	public Double getQResolution(Double value) {
+		if(value == null || getCurrentQuantity() == null || getCurrentUnit() == null)
+			return null;
+		
+		double qValue = convert(value, getCurrentQuantity(), new Q(), getCurrentUnit(), Q.BASE_UNIT);
+		return resultsController.getQResolution(qValue);
+	}
 }
