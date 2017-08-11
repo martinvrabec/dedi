@@ -5,6 +5,9 @@ import java.io.Serializable;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 
 public class BeamlineConfigurationBean implements Serializable {
+	/**
+	 * Update this when there are any serious changes to API
+	 */
 	private static final long serialVersionUID = -1133345866155946032L;
 	
 	private String name;

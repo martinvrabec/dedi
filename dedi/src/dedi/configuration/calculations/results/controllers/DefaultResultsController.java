@@ -7,9 +7,12 @@ import java.util.Observer;
 
 import javax.measure.unit.SI;
 import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
+import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
+import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
 import org.eclipse.swt.widgets.Display;
 
 import dedi.configuration.BeamlineConfiguration;
@@ -23,6 +26,7 @@ import dedi.configuration.calculations.scattering.ScatteringQuantity;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.devices.CameraTube;
 import dedi.ui.views.results.ResultsView;
+import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 
 /**
  * This is the default implementation of a controller that performs the calculations of all the results stored in an {@link IResultsModel} 
@@ -32,12 +36,21 @@ import dedi.ui.views.results.ResultsView;
  * as well as the end points for the user-requested Q range. The bulk of the computation is in the computeQRanges() method. 
  */
 public class DefaultResultsController extends AbstractResultsController {
-	// Need to keep a copy of the BeamlineConfiguration state,
-	// because the computations are performed in a separate thread.
+	// Need to create a copy of the BeamlineConfiguration state each time update() is called,
+	// because the computations are performed in a separate thread and
+	// the configuration state could change while the calculations are being performed.
 	private DiffractionDetector detector;
+	private Double detectorWidthMM;
+	private Double detectorHeightMM;
 	private Beamstop beamstop;
+	private Double beamstopXCentreMM;
+	private Double beamstopYCentreMM;
 	private CameraTube cameraTube;
+	private Double cameraTubeXCentreMM;
+	private Double cameraTubeYCentreMM;
 	private Integer clearance;
+	private Double clearanceRegionMajorMM;
+	private Double clearanceRegionMinorMM;
 	private Double angle;
 	private Double wavelength;
 	private Double minWavelength;
@@ -99,10 +112,18 @@ public class DefaultResultsController extends AbstractResultsController {
 		// (Note that Beamstop, CameraTube and primitive wrapper classes are immutable,
 		// so do not need to create a copy of those).
 		detector = (configuration.getDetector() == null) ? null : new DiffractionDetector(configuration.getDetector());
+		detectorWidthMM = configuration.getDetectorWidthMM();
+		detectorHeightMM = configuration.getDetectorHeightMM();
 		beamstop = configuration.getBeamstop(); 
+		beamstopXCentreMM = configuration.getBeamstopXCentreMM();
+		beamstopYCentreMM = configuration.getBeamstopYCentreMM();
 		cameraTube = configuration.getCameraTube(); 
+		cameraTubeXCentreMM = configuration.getCameraTubeXCentreMM();
+		cameraTubeYCentreMM = configuration.getCameraTubeYCentreMM();
 		angle = configuration.getAngle();
 		clearance = configuration.getClearance();
+		clearanceRegionMajorMM = configuration.getClearanceAndBeamstopMajorMM();
+		clearanceRegionMinorMM = configuration.getClearanceAndBeamstopMinorMM();
 		wavelength = configuration.getWavelength();
 		minWavelength = configuration.getMinWavelength();
 		maxWavelength = configuration.getMaxWavelength();
@@ -117,13 +138,19 @@ public class DefaultResultsController extends AbstractResultsController {
 	
 	private void computeQRanges(){
 		// Perform the computations in a separate thread.
+		// However, the updates of the results have to be done in the UI thread,
+		// because they modify the GUI, so use Display.getDefault().asyncExec(Runnable).
+		// Any variables that need to be passed to that Runnable that are liable to get modified  
+		// in this thread before the update in the UI thread has finished must be passed as deep copies.
 		Thread thread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				// Update just the end points; the requested range is always user-defined
+				// Update just the end points of the requested range - the range itself is always user-defined
                 // and is set via updateRequestedQRange() by the views that handle user input.
 				Display.getDefault().asyncExec(() -> updateRequestedQRangeEndPoints()); 
 				
+				
+				// Deal with special cases.
 				if(detector == null || beamstop == null || angle == null || clearance == null){
 					Display.getDefault().asyncExec(() -> setVisibleQRange(null, null, null));
 					Display.getDefault().asyncExec(() -> setFullQRange(null));
@@ -132,17 +159,15 @@ public class DefaultResultsController extends AbstractResultsController {
 				
 
 				// Find the intersection pt of the clearance region with a line at the given angle starting at the beamstop centre.
-				double initialPositionX = (clearance*detector.getXPixelMM() + beamstop.getRadiusMM())*Math.cos(angle) +
-						                   configuration.getBeamstopXCentreMM();
-				double initialPositionY = (clearance*detector.getYPixelMM() + beamstop.getRadiusMM())*Math.sin(angle) + 
-						                   configuration.getBeamstopYCentreMM();
+				double initialPositionX = clearanceRegionMajorMM*Math.cos(angle) + beamstopXCentreMM; 
+				double initialPositionY = clearanceRegionMinorMM*Math.sin(angle) + beamstopYCentreMM;
 				Vector2d initialPosition = new Vector2d(initialPositionX, initialPositionY);
 				
 				
-				// Find the region of a ray from the initial position that lies within the detector face.
+				// Find the portion of a ray from the initial position at the given angle that lies within the detector face.
 				Ray ray = new Ray(new Vector2d(Math.cos(angle), Math.sin(angle)), initialPosition);
-				NumericRange t1 = ray.getRectangleIntersectionParameterRange(new Vector2d(0, configuration.getDetectorHeightMM()), 
-						                                                     configuration.getDetectorWidthMM(), configuration.getDetectorHeightMM());
+				NumericRange t1 = ray.getRectangleIntersectionParameterRange(new Vector2d(0, detectorHeightMM), 
+						                									 detectorWidthMM, detectorHeightMM);
 				
 				
 				// Check whether the intersection is empty.
@@ -153,10 +178,10 @@ public class DefaultResultsController extends AbstractResultsController {
 				}
 				
 				
-				// Find the region of the ray that lies within the camera tubes projection onto the detector face.
+				// Find the portion of the ray that lies within the camera tube's projection onto the detector face.
 				if(cameraTube != null && cameraTube.getRadiusMM() != 0)
 					t1 = t1.intersect(ray.getCircleIntersectionParameterRange(cameraTube.getRadiusMM(), 
-		                              new Vector2d(configuration.getCameraTubeXCentreMM(),configuration.getCameraTubeYCentreMM())));
+		                                           new Vector2d(cameraTubeXCentreMM, cameraTubeYCentreMM)));
 				
 				
 				// Check whether the intersection is empty.
@@ -173,44 +198,58 @@ public class DefaultResultsController extends AbstractResultsController {
 				
 				// Find the points that correspond to the end points of the range and their distance from the beamstop centre.
 				Vector2d ptMin = new Vector2d(ray.getPt(t1.getMin()));
-				ptMin.sub(new Vector2d(configuration.getBeamstopXCentreMM(), configuration.getBeamstopYCentreMM()));
-				
 				Vector2d ptMax = new Vector2d(ray.getPt(t1.getMax()));
-				ptMax.sub(new Vector2d(configuration.getBeamstopXCentreMM(), configuration.getBeamstopYCentreMM()));
 				
-				double ptMinx = ray.getPt(t1.getMin()).x;
-				double ptMiny = ray.getPt(t1.getMin()).y;
-				double ptMaxx = ray.getPt(t1.getMax()).x;
-				double ptMaxy = ray.getPt(t1.getMax()).y;
 				
-				// If the wavelength or camera length are not known then can't actually calculate the visible Q value from the above distances,
+				// If the wavelength or camera length are not known then can't actually calculate the visible Q values from the above distances,
 				// so just set the end points of the Q ranges.
 				if(wavelength == null || cameraLength == null){
-					Display.getDefault().asyncExec(() -> setVisibleQRange(null, new Vector2d(ptMinx, ptMiny), new Vector2d(ptMaxx, ptMaxy)));
+					Display.getDefault().asyncExec(() -> setVisibleQRange(null, new Vector2d(ptMin), new Vector2d(ptMax)));
 					Display.getDefault().asyncExec(() -> setFullQRange(null));
 					return;
 				}
 				
 				
 				// Calculate the visible Q range.
-				Display.getDefault().asyncExec(() -> setVisibleQRange(new NumericRange(BeamlineConfigurationUtil.calculateQValue(ptMin.length()*1.0e-3, cameraLength, wavelength), 
-						                                                               BeamlineConfigurationUtil.calculateQValue(ptMax.length()*1.0e-3, cameraLength, wavelength)),
-						                                              new Vector2d(ptMinx, ptMiny), new Vector2d(ptMaxx, ptMaxy)));
+				DetectorProperties detectorProperties = 
+						new DetectorProperties(cameraLength*1e3, 
+										       beamstopXCentreMM, beamstopYCentreMM, 
+											   detector.getNumberOfPixelsY(), detector.getNumberOfPixelsX(), 
+											   detector.getYPixelMM(), detector.getXPixelMM()); // Convert lengths to mm.
+				QSpace qSpace = new QSpace(detectorProperties, new DiffractionCrystalEnvironment(wavelength*1e10)); // Need to convert wavelength to Angstroms.
+				
+				Vector3d visibleQMin = qSpace.qFromPixelPosition(ptMin.x/detector.getXPixelMM(), ptMin.y/detector.getYPixelMM());
+				Vector3d visibleQMax = qSpace.qFromPixelPosition(ptMax.x/detector.getXPixelMM(), ptMax.y/detector.getYPixelMM());
 				
 				
+				// Create a deep copy of ptMin and ptMax to pass to the Runnable below,
+				// because the code that follows might modify them,
+				// but we want the UI thread to use their current values.
+				// (It's not enough to create the copy in the call to setVisibleQRange()).
+				// Assume visibleQMin and visibleQMax won't change.
+				Vector2d ptMinCopy = new Vector2d(ptMin);
+				Vector2d ptMaxCopy = new Vector2d(ptMax);
+				Display.getDefault().asyncExec(() -> 
+					setVisibleQRange(new NumericRange(visibleQMin.length()*1e10, visibleQMax.length()*1e10), ptMinCopy, ptMaxCopy));
+				
+			
 				// If min/max camera length or wavelength are not known then can't calculate the full range.
 				if(maxCameraLength == null || minCameraLength == null || maxWavelength == null || minWavelength == null){
 					Display.getDefault().asyncExec(() -> setFullQRange(null));
 					return;
 				}
 				
-				
 				// Compute the full range.
-				NumericRange fullRange = 
-						new NumericRange(BeamlineConfigurationUtil.calculateQValue(ptMin.length()*1.0e-3, maxCameraLength, maxWavelength), 
-										 BeamlineConfigurationUtil.calculateQValue(ptMax.length()*1.0e-3, minCameraLength, minWavelength));
+				detectorProperties.getOrigin().z = minCameraLength*1e3;
+				qSpace.setDiffractionCrystalEnvironment(new DiffractionCrystalEnvironment(minWavelength*1e10));
+				Vector3d fullQMin = qSpace.qFromPixelPosition(ptMax.x/detector.getXPixelMM(), ptMax.y/detector.getYPixelMM());
 				
-				Display.getDefault().asyncExec(() -> setFullQRange(fullRange));
+				detectorProperties.getOrigin().z = maxCameraLength*1e3;
+				qSpace.setDiffractionCrystalEnvironment(new DiffractionCrystalEnvironment(maxWavelength*1e10));
+				Vector3d fullQMax = qSpace.qFromPixelPosition(ptMin.x/detector.getXPixelMM(), ptMin.y/detector.getYPixelMM());
+				
+				// Set the full range.
+				Display.getDefault().asyncExec(() -> setFullQRange(new NumericRange(fullQMin.length()*1e10, fullQMax.length()*1e10)));
 			}
 		});
 		

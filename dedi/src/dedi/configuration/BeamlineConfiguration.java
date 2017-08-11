@@ -55,10 +55,11 @@ public final class BeamlineConfiguration extends Observable {
 	 * A convenience method that provides the width of the detector in millimetres,
 	 * as the {@link DiffractionDetector} class provides it in pixels only.
 	 * 
-	 * @return The detector width in millimetres.
+	 * @return The detector width in millimetres. Returns null if the detector is null.
 	 */
-	public double getDetectorWidthMM(){
-		return getDetector().getNumberOfPixelsX()*getDetector().getXPixelMM();
+	public Double getDetectorWidthMM(){
+		if(detector == null) return null;
+		return detector.getNumberOfPixelsX()*detector.getXPixelMM();
 	}
 	
 	
@@ -66,10 +67,11 @@ public final class BeamlineConfiguration extends Observable {
 	 * A convenience method that provides the height of the detector in millimetres,
 	 * as the {@link DiffractionDetector} class provides it in pixels only.
 	 * 
-	 * @return The detector height in millimetres.
+	 * @return The detector height in millimetres. Returns null if the detector is null.
 	 */
-	public double getDetectorHeightMM(){
-		return getDetector().getNumberOfPixelsY()*getDetector().getYPixelMM();
+	public Double getDetectorHeightMM(){
+		if(detector == null) return null;
+		return detector.getNumberOfPixelsY()*detector.getYPixelMM();
 	}
 	
 	
@@ -132,10 +134,12 @@ public final class BeamlineConfiguration extends Observable {
 	 * the clearance actually becomes an ellipse. 
 	 * This method returns the length of this ellipse's semi-major axis.
 	 * 
-	 * @return The length of the semi-major axis of the clearance in millimetres.
+	 * @return The length of the semi-major axis of the clearance in millimetres. 
+	 * Returns null if the clearance or the detector is null. 
 	 */
-	public double getClearanceMajorMM() {
-		return getClearance()*getDetector().getXPixelMM();
+	public Double getClearanceMajorMM() {
+		if(detector == null || clearance == null) return null;
+		return clearance*detector.getXPixelMM();
 	}
 	
 	
@@ -147,29 +151,35 @@ public final class BeamlineConfiguration extends Observable {
 	 * This method returns the length of this ellipse's semi-minor axis.
 	 * 
 	 * @return The length of the semi-minor axis of the clearance in millimetres.
+	 * Returns null if the clearance or the detector is null. 
 	 */
-	public double getClearanceMinorMM() {
-		return getClearance()*getDetector().getYPixelMM();
+	public Double getClearanceMinorMM() {
+		if(detector == null || clearance == null) return null;
+		return clearance*detector.getYPixelMM();
 	}
 	
     
-	public double getClearanceAndBeamstopMajorMM(){
-		return getClearanceMajorMM() + getBeamstop().getRadiusMM();
+	public Double getClearanceAndBeamstopMajorMM(){
+		if(getClearanceMajorMM() == null || beamstop == null) return null;
+		return getClearanceMajorMM() + beamstop.getRadiusMM();
 	}
 	
 	
-	public double getClearanceAndBeamstopMinorMM(){
-		return getClearanceMinorMM() + getBeamstop().getRadiusMM();
+	public Double getClearanceAndBeamstopMinorMM(){
+		if(getClearanceMinorMM() == null || beamstop == null) return null;
+		return getClearanceMinorMM() + beamstop.getRadiusMM();
 	}
 	
 	
-	public double getClearanceAndBeamstopMajorPixels(){
-		return getClearance() + getBeamstopMajorPixels();
+	public Double getClearanceAndBeamstopMajorPixels(){
+		if(clearance == null || getBeamstopMajorPixels() == null) return null;
+		return clearance + getBeamstopMajorPixels();
 	}
 	
 	
-	public double getClearanceAndBeamstopMinorPixels(){
-		return getClearance() + getBeamstopMinorPixels();
+	public Double getClearanceAndBeamstopMinorPixels(){
+		if(clearance == null || getBeamstopMinorPixels() == null) return null;
+		return clearance + getBeamstopMinorPixels();
 	}
 	
 	
@@ -199,25 +209,27 @@ public final class BeamlineConfiguration extends Observable {
 	}
 
 	
-	public double getBeamstopMajorPixels(){
-		return getBeamstop().getRadiusMM()
-                /getDetector().getXPixelMM();
+	public Double getBeamstopMajorPixels(){
+		if(beamstop == null || detector == null) return null;
+		return beamstop.getRadiusMM()/detector.getXPixelMM();
 	}
 	
 	
-	public double getBeamstopMinorPixels(){
-		return getBeamstop().getRadiusMM()
-                /getDetector().getYPixelMM();
+	public Double getBeamstopMinorPixels(){
+		if(beamstop == null || detector == null) return null;
+		return beamstop.getRadiusMM()/detector.getYPixelMM();
 	}
 	
 	
-	public double getBeamstopXCentreMM(){
-		return getBeamstop().getXCentre()*getDetector().getXPixelMM();
+	public Double getBeamstopXCentreMM(){
+		if(beamstop == null || detector == null) return null;
+		return beamstop.getXCentre()*detector.getXPixelMM();
 	}
 	
 	
-	public double getBeamstopYCentreMM(){
-		return getBeamstop().getYCentre()*getDetector().getYPixelMM();
+	public Double getBeamstopYCentreMM(){
+		if(beamstop == null || detector == null) return null;
+		return beamstop.getYCentre()*detector.getYPixelMM();
 	}
 	
 	
@@ -234,25 +246,27 @@ public final class BeamlineConfiguration extends Observable {
 	}
 	
 	
-	public double getCameraTubeMajorPixels(){
-		return getCameraTube().getRadiusMM()
-                /getDetector().getXPixelMM();
+	public Double getCameraTubeMajorPixels(){
+		if(cameraTube == null || detector == null) return null;
+		return cameraTube.getRadiusMM()/detector.getXPixelMM();
 	}
 	
 	
-	public double getCameraTubeMinorPixels(){
-		return getCameraTube().getRadiusMM()
-                /getDetector().getYPixelMM();
+	public Double getCameraTubeMinorPixels(){
+		if(cameraTube == null || detector == null) return null;
+		return cameraTube.getRadiusMM()/detector.getYPixelMM();
 	}
 	
 	
-	public double getCameraTubeXCentreMM(){
-		return getCameraTube().getXCentre()*getDetector().getXPixelMM();
+	public Double getCameraTubeXCentreMM(){
+		if(cameraTube == null || detector == null) return null;
+		return cameraTube.getXCentre()*detector.getXPixelMM();
 	}
 
 	
-	public double getCameraTubeYCentreMM(){
-		return getCameraTube().getYCentre()*getDetector().getYPixelMM();
+	public Double getCameraTubeYCentreMM(){
+		if(cameraTube == null || detector == null) return null;
+		return cameraTube.getYCentre()*detector.getYPixelMM();
 	}
 	
 	
