@@ -65,7 +65,6 @@ public abstract class AbstractBeamlineConfigurationPlotter
                       implements IBeamlineConfigurationPlotter, PropertyChangeListener, Observer, ColourChangeListener, 
                                  CalibrantSelectedListener {
 	
-	private AbstractBeamlineConfigurationPlotter thisInstance;
 	protected IPlottingSystem<Composite> system;
 	protected IBeamlineConfigurationPlotView view;
 	protected BeamlineConfiguration beamlineConfiguration;
@@ -93,7 +92,7 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	
 			
 	// Default colours of the objects to be plotted
-	private Color detectorColour = Display.getDefault().getSystemColor(SWT.COLOR_CYAN);
+	private Color detectorColour = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 	private Color beamstopColour = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
 	private Color clearanceColour = Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
 	private Color cameraTubeColour = Display.getDefault().getSystemColor(SWT.COLOR_YELLOW);
@@ -116,8 +115,6 @@ public abstract class AbstractBeamlineConfigurationPlotter
 		
 		resultsController = ResultsService.getInstance().getController();
 		resultsController.addView(this);
-		
-		thisInstance = this;
 	}
 	
 	
@@ -146,7 +143,7 @@ public abstract class AbstractBeamlineConfigurationPlotter
 				public void widgetSelected(SelectionEvent e){
 					try {
 						Field field = AbstractBeamlineConfigurationPlotter.class.getDeclaredField(plotItem + "IsPlot");
-						field.setBoolean(thisInstance, ((Button) e.getSource()).getSelection());
+						field.setBoolean(AbstractBeamlineConfigurationPlotter.this, ((Button) e.getSource()).getSelection());
 						updatePlot();
 					} catch (Exception ex) {
 						ex.printStackTrace();
@@ -155,7 +152,7 @@ public abstract class AbstractBeamlineConfigurationPlotter
 			});
 			try {
 				Field field = AbstractBeamlineConfigurationPlotter.class.getDeclaredField(plotItem + "IsPlot");
-				button.setSelection(field.getBoolean(thisInstance));
+				button.setSelection(field.getBoolean(AbstractBeamlineConfigurationPlotter.this));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}

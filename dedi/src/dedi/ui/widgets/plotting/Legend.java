@@ -85,47 +85,4 @@ public class Legend extends Composite {
 		return null;
 	}
 	
-	/*public Legend(Composite parent, String[] labels, Color[] colours) {
-		super(parent, SWT.NONE);
-		Group legendGroup = GuiHelper.createGroup(parent, "Legend", 3);
-		
-		for(int i = 0; i < labels.length; i++){
-			legendColours.put(labels[i], colours[i]);
-			Label label = GuiHelper.createLabel(legendGroup, labels[i]);
-			Label colourLabel = GuiHelper.createLabel(legendGroup, "   ");
-			Color colour = legendColours.get(label.getText());
-			PaintListener listener = new PaintListener() {
-				@Override
-				public void paintControl(PaintEvent e) {
-					createLegendColourLabel(e, colourLabel, legendColours.get(label.getText()));
-				}
-			};
-			colourLabel.addPaintListener(listener);
-			Button chooseColourButton = new Button(legendGroup, SWT.PUSH); 
-			chooseColourButton.setText("Change colour");
-			chooseColourButton.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e){
-					ColorDialog cd = new ColorDialog(parent.getShell());
-					cd.setText("Choose colour");
-					RGB newColour = cd.open();
-					if(newColour == null) return;
-					legendColours.put(label.getText(), new Color(Display.getDefault(), newColour));
-					colourLabel.redraw();
-				}
-			});
-		}
-		
-		legendGroup.setSize(legendGroup.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-	}
-	
-	private void createLegendColourLabel(PaintEvent e, Label label, Color colour){
-		e.gc.setBackground(colour);
-        e.gc.fillRectangle(0, 0, label.getBounds().width, label.getBounds().height);
-	}
-	
-	
-	public Color getColor(String label){
-		return legendColours.get(label);
-	}*/
 }

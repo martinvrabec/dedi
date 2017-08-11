@@ -80,6 +80,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
+            category="org.dawnsci.preferences.root"
             class="dedi.configuration.preferences.BeamlineConfigurationPreferencePage"
             id="dedi.configuration.preferences.beamlineconfiguration"
             name="Beamline Configuration ">

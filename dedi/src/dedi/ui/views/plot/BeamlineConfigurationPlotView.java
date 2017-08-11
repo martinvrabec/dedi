@@ -25,7 +25,6 @@ import dedi.ui.widgets.plotting.Legend;
 
 public class BeamlineConfigurationPlotView extends ViewPart implements IBeamlineConfigurationPlotView {
 
-	private IBeamlineConfigurationPlotView thisInstance;
 	private PageBook plotComposite; // The composite on which the PlottingSystem goes.
 	private IPlottingSystem<Composite> system;
 	private IBeamlineConfigurationPlotter plotter;
@@ -37,8 +36,6 @@ public class BeamlineConfigurationPlotView extends ViewPart implements IBeamline
 	public static String ID = "dedi.plottingview";
 	
 	public BeamlineConfigurationPlotView() {
-		thisInstance = this;
-		
 		try {
 			system = PlottingFactory.createPlottingSystem(); 
 		} catch (Exception ne) {
@@ -85,7 +82,7 @@ public class BeamlineConfigurationPlotView extends ViewPart implements IBeamline
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				if(((Button) e.getSource()).getSelection()) 
-					setPlotType(new PhysicalSpacePlotter(thisInstance));
+					setPlotType(new PhysicalSpacePlotter(BeamlineConfigurationPlotView.this));
 		}
 		});
 		
@@ -95,7 +92,7 @@ public class BeamlineConfigurationPlotView extends ViewPart implements IBeamline
 	    	@Override
 			public void widgetSelected(SelectionEvent e){
 	    		if(((Button) e.getSource()).getSelection()) 
-	    			setPlotType(new PixelSpacePlotter(thisInstance));
+	    			setPlotType(new PixelSpacePlotter(BeamlineConfigurationPlotView.this));
 					
 		}
 		});
@@ -106,7 +103,7 @@ public class BeamlineConfigurationPlotView extends ViewPart implements IBeamline
 	    	@Override
 			public void widgetSelected(SelectionEvent e){
 	    		if(((Button) e.getSource()).getSelection()) 
-	    			setPlotType(new QSpacePlotter(thisInstance));
+	    			setPlotType(new QSpacePlotter(BeamlineConfigurationPlotView.this));
 					
 		}
 		});

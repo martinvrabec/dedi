@@ -194,14 +194,12 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 			return;
 		}
 		
-		
 		IROI inaccessibleRangeROI = new LinearROI(new double[] {getBeamstopCentreX(), 
 				                                           getBeamstopCentreY()},
 											 new double[] {getVisibleRangeStartPointX(), 
 											 		       getVisibleRangeStartPointY()});
 		
 		addRegion(inaccessibleRangeRegion, inaccessibleRangeROI, Display.getDefault().getSystemColor(SWT.COLOR_RED));
-		
 		
 		if(!resultsController.getIsSatisfied() || requestedRangeStartPoint == null || requestedRangeEndPoint == null){	
 			IROI visibleRangeROI1 = new LinearROI(new double[] {getVisibleRangeStartPointX(), 
@@ -273,17 +271,21 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 		int detectorWidth = detector.getNumberOfPixelsX();  // Number of columns
 		int detectorHeight = detector.getNumberOfPixelsY(); // Number of rows
 		
+		int numberOfHorizontalModules = detector.getNumberOfHorizontalModules();
+		int numberOfVerticalModules = detector.getNumberOfVerticalModules();
+		
 		int gapWidth = detector.getXGap();
 		int gapHeight = detector.getYGap();
 		
-		int moduleWidth = (detectorWidth - (detector.getNumberOfHorizontalModules()-1)*gapWidth)/
-				          detector.getNumberOfHorizontalModules();
-		int moduleHeight = (detectorHeight - (detector.getNumberOfVerticalModules()-1)*gapHeight)/
-				           detector.getNumberOfVerticalModules();
+		int moduleWidth = (detectorWidth - (numberOfHorizontalModules-1)*gapWidth)/
+							numberOfHorizontalModules;
+		int moduleHeight = (detectorHeight - (numberOfVerticalModules-1)*gapHeight)/
+							numberOfVerticalModules;
 		
+		List<Integer> missingModules = detector.getMissingModules();
 		
 		Dataset mask = maskCache.get(Objects.hash(detectorWidth, detectorHeight, gapWidth, gapHeight,
-				                                  moduleWidth, moduleHeight));
+													numberOfHorizontalModules, numberOfVerticalModules, missingModules));
 		
 		if(mask == null){
 			mask = DatasetFactory.ones(new int[]{detectorHeight, detectorWidth}, Dataset.BOOL);
@@ -294,8 +296,19 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 			for(int i = moduleHeight; i < detectorHeight; i += moduleHeight + gapHeight)
 				mask.setSlice(false, new Slice(i, i + gapHeight));
 			
+			if(missingModules != null){
+				for(Integer index : missingModules){
+					int x = index % numberOfHorizontalModules;
+					int y = index/numberOfHorizontalModules;
+					int rowSliceStart = y*(moduleHeight + gapHeight);
+					int colSliceStart = x*(moduleWidth + gapWidth);
+					mask.setSlice(false, new Slice(rowSliceStart, rowSliceStart + moduleHeight),
+							             new Slice(colSliceStart, colSliceStart + moduleWidth));
+				}
+			}
+			
 			maskCache.put(Objects.hash(detectorWidth, detectorHeight, gapWidth, gapHeight,
-				                                  moduleWidth, moduleHeight), mask);
+										numberOfHorizontalModules, numberOfVerticalModules, missingModules), mask);
 		}
 		
 		Dataset xAxis = DatasetFactory.createRange(getDetectorTopLeftX(), getDetectorTopLeftX() + getHorizontalLengthFromPixels(detectorWidth), getHorizontalLengthFromPixels(1), Dataset.FLOAT64);
