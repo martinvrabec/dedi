@@ -143,43 +143,4 @@ public class Ray {
 		
 		return new NumericRange(t_min, t_max); 
 	}
-	
-	/*public Range<Dimensionless> getCircleIntersectionParameterRange(Circle circle){
-		double radius = circle.getRadius().doubleValue(SI.METER);
-		Vector ptRelativeToCentre = pt.getSubtracted(circle.getCentre());
-		double relativeDistance = ptRelativeToCentre.getLength();
-		double l = Math.pow(relativeDistance, 2) - Math.pow(radius, 2);
-		double b = direction.getDotProduct(ptRelativeToCentre);
-		
-		double discriminant = Math.pow(b, 2) - l;
-		if(discriminant < 0) return null;
-		
-		double t_plus = -b + Math.sqrt(Math.pow(b, 2) - l);
-		double t_minus = -b - Math.sqrt(Math.pow(b, 2) - l);
-		
-		if(t_minus < 0 && t_plus < 0) return null;
-		if(t_minus < 0) t_minus = 0;
-		return new Range<>(Amount.valueOf(t_minus, Unit.ONE), Amount.valueOf(t_plus, Unit.ONE)); 
-	}
-	
-	
-	public Range<Dimensionless> getRectangleIntersectionParameterRange(double width, double height){
-		Range<Dimensionless> result;
-		
-		if(direction.x == 0){
-			if(! new Range<Dimensionless>(Amount.valueOf(0, Unit.ONE), Amount.valueOf(width, Unit.ONE))
-					.contains(Amount.valueOf(pt.x, Unit.ONE))) return null;
-		} 
-		result = new Range<>(Amount.valueOf((width-pt.x)/direction.x, Unit.ONE),
-							 Amount.valueOf(-pt.x/direction.x, Unit.ONE));
-		
-		if(direction.y == 0){
-			if(! new Range<Dimensionless>(Amount.valueOf(0, Unit.ONE), Amount.valueOf(height, Unit.ONE))
-					.contains(Amount.valueOf(pt.y, Unit.ONE))) return null;
-		} 
-		result = result.intersect(new Range<>(Amount.valueOf((height-pt.y)/direction.y, Unit.ONE),
-							 Amount.valueOf(-pt.y/direction.y, Unit.ONE)));
-		
-		return result;
-	}*/
 }
