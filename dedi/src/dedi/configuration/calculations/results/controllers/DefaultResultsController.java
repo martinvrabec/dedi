@@ -108,6 +108,14 @@ public class DefaultResultsController extends AbstractResultsController {
 	
 	@Override
 	public void update(Observable o, Object arg) {
+		updateState();
+		
+		// Compute the new results and store them in the model
+		computeQRanges();
+	}
+	
+	
+	private void updateState(){
 		// Create a deep copy of the current BeamlineConfiguration state.
 		// (Note that Beamstop, CameraTube and primitive wrapper classes are immutable,
 		// so do not need to create a copy of those).
@@ -130,11 +138,7 @@ public class DefaultResultsController extends AbstractResultsController {
 		cameraLength = configuration.getCameraLength();
 		minCameraLength = configuration.getMinCameraLength();
 		maxCameraLength = configuration.getMaxCameraLength();
-		
-		// Compute the new results and store them in the model
-		computeQRanges();
 	}
-	
 	
 	private void computeQRanges(){
 		// Perform the computations in a separate thread.
@@ -232,7 +236,7 @@ public class DefaultResultsController extends AbstractResultsController {
 				Display.getDefault().asyncExec(() -> 
 					setVisibleQRange(new NumericRange(visibleQMin.length()*1e10, visibleQMax.length()*1e10), ptMinCopy, ptMaxCopy));
 				
-			
+				
 				// If min/max camera length or wavelength are not known then can't calculate the full range.
 				if(maxCameraLength == null || minCameraLength == null || maxWavelength == null || minWavelength == null){
 					Display.getDefault().asyncExec(() -> setFullQRange(null));
@@ -254,5 +258,39 @@ public class DefaultResultsController extends AbstractResultsController {
 		});
 		
 		thread.start();
+	}
+	
+	public Double getQResolution(double qValue){
+		updateState();
+		
+		Vector2d pt = getPtForQ(qValue);
+		if(pt == null) return null;
+		
+		DetectorProperties detectorProperties = new DetectorProperties(cameraLength*1e3, 
+												       beamstopXCentreMM, beamstopYCentreMM, 
+													   detector.getNumberOfPixelsY(), detector.getNumberOfPixelsX(), 
+													   detector.getYPixelMM(), detector.getXPixelMM()); // Convert lengths to mm.
+		QSpace qSpace = new QSpace(detectorProperties, new DiffractionCrystalEnvironment(wavelength*1e10)); // Need to convert wavelength to Angstroms.
+		
+		Vector3d q = qSpace.qFromPixelPosition(pt.x/detector.getXPixelMM(), pt.y/detector.getYPixelMM());
+		
+		int[] pixelCoords = qSpace.pixelPosition(q);
+		
+		Vector2d bottomLeftPixel = new Vector2d(pixelCoords[0]*detector.getXPixelMM(), pixelCoords[1]*detector.getYPixelMM());
+		
+		Ray ray = new Ray(new Vector2d(Math.cos(angle), Math.sin(angle)), new Vector2d(beamstopXCentreMM, beamstopYCentreMM));
+		NumericRange t = ray.getRectangleIntersectionParameterRange(new Vector2d(bottomLeftPixel.x, bottomLeftPixel.y + detector.getYPixelMM()),
+				                                                    detector.getXPixelMM(), detector.getYPixelMM());
+		
+		if(t == null || t.getMax() < 0) return null;
+		if(t.getMin() < 0) t.setMin(0);
+		
+		Vector2d ptMin = new Vector2d(ray.getPt(t.getMin()));
+		Vector2d ptMax = new Vector2d(ray.getPt(t.getMax()));
+		
+		double qMin = qSpace.qFromPixelPosition(ptMin.x/detector.getXPixelMM(), ptMin.y/detector.getYPixelMM()).length()*1e10;
+		double qMax = qSpace.qFromPixelPosition(ptMax.x/detector.getXPixelMM(), ptMax.y/detector.getYPixelMM()).length()*1e10;
+		
+		return Math.max(qValue - qMin, qMax - qValue);
 	}
 }
