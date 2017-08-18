@@ -47,8 +47,8 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		bc1.setCameraTubeXCentre(737.5);
 		bc1.setCameraTubeYCentre(839.5);
 		bc1.setClearance(10);
-		bc1.setMinWavelength(0.1);
-		bc1.setMaxWavelength(0.5);
+		bc1.setMinWavelength(0.059);
+		bc1.setMaxWavelength(0.335);
 		bc1.setMinCameraLength(1.2);
 		bc1.setMaxCameraLength(9.7);
 		bc1.setCameraLengthStepSize(0.25);
@@ -63,8 +63,8 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		bc2.setCameraTubeXCentre(0);
 		bc2.setCameraTubeYCentre(0);
 		bc2.setClearance(10);
-		bc2.setMinWavelength(0.1);
-		bc2.setMaxWavelength(0.5);
+		bc2.setMinWavelength(0.059);
+		bc2.setMaxWavelength(0.335);
 		bc2.setMinCameraLength(0.1);
 		bc2.setMaxCameraLength(9.7);
 		bc2.setCameraLengthStepSize(0.01);

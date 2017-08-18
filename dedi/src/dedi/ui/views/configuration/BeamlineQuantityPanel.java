@@ -4,6 +4,7 @@ import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.jscience.physics.amount.Amount;
 
 import dedi.configuration.BeamlineConfiguration;
@@ -38,11 +39,14 @@ public class BeamlineQuantityPanel implements Observer {
 	private Amount<Length> maxWavelength;
 	private Amount<Energy> minEnergy;
 	private Amount<Energy> maxEnergy;
+	private Label minEnergyLabel;
+	private Label maxEnergyLabel;
 	
 	private boolean isEdited = true;
 	
 	private final static List<Unit<Energy>> ENERGY_UNITS = new ArrayList<>(Arrays.asList(SI.KILO(NonSI.ELECTRON_VOLT), NonSI.ELECTRON_VOLT));
 	private final static List<Unit<Length>> WAVELENGTH_UNITS = new ArrayList<>(Arrays.asList(SI.NANO(SI.METER), NonSI.ANGSTROM));
+
 	
 	
 	public BeamlineQuantityPanel(Composite parent, BeamlineConfigurationTemplatesPanel panel) {
@@ -72,10 +76,19 @@ public class BeamlineQuantityPanel implements Observer {
 		GridDataFactory.fillDefaults().span(2, 1).applyTo(wavelength);
 		wavelengthUnitsCombo.moveBelow(wavelength);
 		
-		setToolTipTexts();
 		
-		wavelength.addUnitsChangeListener(() -> setToolTipTexts());
-		energy.addUnitsChangeListener(() -> setToolTipTexts());
+		GuiHelper.createLabel(beamlineQuantityGroup, "Minimum allowable energy:");
+		minEnergyLabel = GuiHelper.createLabel(beamlineQuantityGroup, "");
+		GuiHelper.createLabel(beamlineQuantityGroup, "");
+		
+		GuiHelper.createLabel(beamlineQuantityGroup, "Maximum allowable energy:");
+		maxEnergyLabel = GuiHelper.createLabel(beamlineQuantityGroup, "");
+		GuiHelper.createLabel(beamlineQuantityGroup, "");
+		
+		setToolTipTextsAndLabels();
+		
+		wavelength.addUnitsChangeListener(() -> setToolTipTextsAndLabels());
+		energy.addUnitsChangeListener(() -> setToolTipTextsAndLabels());
 		
 		update(null, null);
 	}
@@ -130,11 +143,11 @@ public class BeamlineQuantityPanel implements Observer {
 			          .to(new dedi.configuration.calculations.scattering.Energy()).getAmount().to(SI.JOULE);
 		ResultsService.getInstance().getBeamlineConfiguration().setMaxWavelength(maxWavelength.doubleValue(SI.METER));
 		ResultsService.getInstance().getBeamlineConfiguration().setMinWavelength(minWavelength.doubleValue(SI.METER));
-		setToolTipTexts();
+		setToolTipTextsAndLabels();
 	}
 	
 	
-	private void setToolTipTexts(){
+	private void setToolTipTextsAndLabels(){
 		if(minEnergy == null || maxEnergy == null || minWavelength == null || maxWavelength == null){
 			energy.setToolTipText("");
 			wavelength.setToolTipText("");
@@ -142,6 +155,8 @@ public class BeamlineQuantityPanel implements Observer {
 		}
 		energy.setToolTipText("Min energy: " + TextUtil.format(minEnergy.doubleValue(energy.getCurrentUnit())) + 
 				              "\nMax energy: " + TextUtil.format(maxEnergy.doubleValue(energy.getCurrentUnit())));
+		minEnergyLabel.setText(TextUtil.format(minEnergy.doubleValue(energy.getCurrentUnit())) + " " + energy.getCurrentUnit().toString());
+		maxEnergyLabel.setText(TextUtil.format(maxEnergy.doubleValue(energy.getCurrentUnit())) + " " + energy.getCurrentUnit().toString());
 		wavelength.setToolTipText("Min wavelength: " + TextUtil.format(minWavelength.doubleValue(wavelength.getCurrentUnit())) + 
 	              "\nMax wavelength: " + TextUtil.format(maxWavelength.doubleValue(wavelength.getCurrentUnit())));
 	}
