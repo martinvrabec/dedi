@@ -7,9 +7,13 @@ import java.util.List;
 public class BeamlineConfigurations implements Serializable {
 	private static final long serialVersionUID = 7297838000309018662L;
 	
-	private List<BeamlineConfigurationBean> beamlineConfigurations = new ArrayList<>();
+	private List<BeamlineConfigurationBean> beamlineConfigurations;
 	private BeamlineConfigurationBean selected;
 
+	public BeamlineConfigurations() {
+		beamlineConfigurations = new ArrayList<BeamlineConfigurationBean>();
+	}
+	
 	public List<BeamlineConfigurationBean> getBeamlineConfigurations() {
 		return beamlineConfigurations;
 	}

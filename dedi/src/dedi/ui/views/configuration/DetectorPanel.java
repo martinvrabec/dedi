@@ -1,72 +1,46 @@
 package dedi.ui.views.configuration;
 
 
-import java.beans.XMLDecoder;
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.stream.Collectors;
 
 import javax.measure.quantity.Length;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
-import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorConstants;
-import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorHelper;
-import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorPreferencePage;
-import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectors;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.fieldassist.AutoCompleteField;
-import org.eclipse.jface.fieldassist.ComboContentAdapter;
-import org.eclipse.jface.preference.IPersistentPreferenceStore;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
-import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
+import dedi.configuration.preferences.BeamlineConfigurationPreferenceHelper;
 import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
-import dedi.ui.widgets.units.ComboUnitsProvider;
-import dedi.ui.widgets.units.LabelWithUnits;
+
 
 public class DetectorPanel implements Observer {
 	private final static String TITLE =  "Detector";
 	
 	private BeamlineConfigurationTemplatesPanel templatesPanel;
-	private static IPreferenceStore detectorPreferenceStore;
-	private static List<DiffractionDetector> detectors;
+	private List<DiffractionDetector> detectors;
 	private Combo detectorTypesCombo; 
 	private ComboViewer detectorTypesComboViewer;
 	
@@ -196,16 +170,16 @@ public class DetectorPanel implements Observer {
 		
 		
 		 // Load detector preferences
-		 getDetectorPreferences();
+		 detectors = BeamlineConfigurationPreferenceHelper.getDetectorsListFromPreference(); 
 		 sendDetectorsToCombo();
 		 detectorGroup.layout();
 		 
-		 detectorPreferenceStore.addPropertyChangeListener(new IPropertyChangeListener() {
+		 BeamlineConfigurationPreferenceHelper.addDetectorPropertyChangeListener(new IPropertyChangeListener() {
 				@Override
 				public void propertyChange(PropertyChangeEvent event) {
 					if(event.getProperty() == DiffractionDetectorConstants.DETECTOR){
 						try{
-							detectors = DiffractionDetectorHelper.getDetectorsFromPreferences().getDiffractionDetectors();
+							detectors = BeamlineConfigurationPreferenceHelper.getDetectorsListFromPreference(); 
 							sendDetectorsToCombo();
 							if(detectors != null && !detectors.isEmpty())
 								detectorTypesComboViewer.setSelection(new StructuredSelection(detectors.get(0)));
@@ -227,18 +201,6 @@ public class DetectorPanel implements Observer {
 	}
 
 
-	private void getDetectorPreferences() {
-		 detectorPreferenceStore = Activator.getPlottingPreferenceStore();
-		 String xml = detectorPreferenceStore.getString(DiffractionDetectorConstants.DETECTOR);
-		 try{
-			 XMLDecoder xmlDecoder = new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
-			 DiffractionDetectors diffDetectors = (DiffractionDetectors) xmlDecoder.readObject();
-			 detectors = diffDetectors.getDiffractionDetectors();
-			 xmlDecoder.close();
-		 }catch(Exception e){
-		 }
-	}
-
 	
 	private void sendDetectorsToCombo(){
 		 detectorTypesComboViewer.setInput(detectors);
@@ -252,7 +214,7 @@ public class DetectorPanel implements Observer {
 		try{
 			detectorTypesComboViewer.setSelection(new StructuredSelection(beamlineConfiguration.getDetector()));
 		} catch(Exception e){
-			detectorTypesComboViewer.setSelection(new StructuredSelection(detectors.get(0)));
+			if(detectors != null && !detectors.isEmpty()) detectorTypesComboViewer.setSelection(new StructuredSelection(detectors.get(0)));
 		}
 		
 	}
