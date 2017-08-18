@@ -60,7 +60,7 @@ public class Legend extends Composite {
 		Iterator<LegendItem> iter = items.iterator();
 		while(iter.hasNext()){
 			LegendItem item = iter.next();
-			if(Objects.equals(item.getItemName(), name)){
+			if(item != null && Objects.equals(item.getItemName(), name)){
 				iter.remove();
 				item.dispose();
 			}
@@ -70,7 +70,7 @@ public class Legend extends Composite {
 	
 	public Color getColour(String name){
 		for(LegendItem item : items){
-			if(Objects.equals(item.getItemName(), name))
+			if(item != null && Objects.equals(item.getItemName(), name))
 				return item.getColour();
 		}
 		return null;
@@ -79,7 +79,7 @@ public class Legend extends Composite {
 	
 	private LegendItem getItem(String name){
 		for(LegendItem item : items){
-			if(Objects.equals(item.getItemName(), name))
+			if(item != null && Objects.equals(item.getItemName(), name))
 				return item;
 		}
 		return null;

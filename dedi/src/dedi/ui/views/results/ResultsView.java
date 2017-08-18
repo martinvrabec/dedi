@@ -3,15 +3,8 @@ package dedi.ui.views.results;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-
-import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
-import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -22,14 +15,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -37,17 +23,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.part.ViewPart;
-import org.jscience.physics.amount.Amount;
 
-import dedi.configuration.BeamlineConfiguration;
-import dedi.configuration.calculations.NumericRange;
-import dedi.configuration.calculations.results.models.Results;
-import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.calculations.scattering.D;
 import dedi.configuration.calculations.scattering.DoubleTheta;
 import dedi.configuration.calculations.scattering.Q;
@@ -74,6 +53,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 	private Canvas drawingArea;
 	
 	private DoubleTheta doubleTheta;
+	
 	private boolean isUserEdited = true;
 	
 	public static final String ID = "dedi.views.results";
@@ -151,7 +131,6 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		});
 		
 		
-		
 		minValueLabel = GuiHelper.createLabel(resultsPanel, "");
 		minValue = GuiHelper.createLabel(resultsPanel, "");
 		minValue.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
@@ -180,7 +159,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		
 		drawingArea = new Canvas(resultsPanel, SWT.NONE);
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		data.horizontalSpan = 3;
+		data.horizontalSpan = 4;
 		data.widthHint = 700;
 		data.heightHint = 70;
 		drawingArea.setLayoutData(data);
@@ -199,6 +178,8 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		resultsPanel.layout();
 		scrolledComposite.setContent(resultsPanel);	
 		scrolledComposite.setMinSize(resultsPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		controller.init();
 	}
 
 	
@@ -322,5 +303,13 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 			drawingArea.redraw();
 			resultsPanel.layout();
 		}
+	}
+	
+	@Override
+	public void dispose() {
+		controller.removeView(this);
+		controller = null;
+		doubleTheta = null;
+		super.dispose();
 	}
 }

@@ -248,7 +248,10 @@ public abstract class AbstractBeamlineConfigurationPlotter
 		system = null;
 		for(LegendItem item : legendItems) item.removeColourChangeListener(this);
 		CalibrationFactory.removeCalibrantSelectionListener(this);
-		for(Control control : controls) control.dispose();
+		for(Control control : controls){
+			if(!control.isDisposed())
+				control.dispose();
+		}
 	}
 	
 }

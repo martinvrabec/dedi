@@ -4,13 +4,17 @@ import java.util.List;
 import java.util.Observer;
 
 import javax.measure.unit.Unit;
+import javax.naming.spi.DirStateFactory.Result;
 
 import dedi.configuration.BeamlineConfiguration;
+import dedi.configuration.calculations.NumericRange;
 import dedi.configuration.calculations.results.controllers.AbstractController;
 import dedi.configuration.calculations.results.controllers.AbstractResultsController;
 import dedi.configuration.calculations.results.models.IModel;
 import dedi.configuration.calculations.results.models.IResultsModel;
+import dedi.configuration.calculations.results.models.Results;
 import dedi.configuration.calculations.results.models.ResultsService;
+import dedi.configuration.calculations.scattering.Q;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
 
 public abstract class AbstractResultsViewController extends AbstractController<IModel> implements Observer {
@@ -27,6 +31,22 @@ public abstract class AbstractResultsViewController extends AbstractController<I
 		this.viewModel = viewModel;
 		addModel(viewModel);
 		addModel(resultsModel);
+		
+	}
+	
+	
+	/**
+	 * At the moment of the construction of this controller, the underlying {@link Results} model upon which the results
+	 * are based, obtained from the {@link ResultsService} in the constructor, might already contain some pre-existing values. 
+	 * This controller won't get any updates from that model unless the values change. 
+	 * Hence, to initialise this controller, it is necessary to manually request these values.
+	 * Call this method to perform that initialisation.
+	 */
+	public void init(){
+		// Initialise the viewModel in accordance with the values that are already present in resultsModel.
+		getVisibleRangeFromResultsController();
+		getRequestedRangeFromResultsController();
+		getFullRangeFromResultsController();
 	}
 	
 	
@@ -40,20 +60,21 @@ public abstract class AbstractResultsViewController extends AbstractController<I
 	
 	public abstract void updateRequestedMin(String newMin);
 	
-	public abstract void updateRequestedMin(Double newMin);
-	
 	public abstract void updateRequestedMax(String newMax);
+	
+	public abstract void updateRequestedMin(Double newMin);
 	
 	public abstract void updateRequestedMax(Double newMax);
 	
-	protected abstract void updateVisibleMin(Double newMin);
 	
-	protected abstract void updateVisibleMax(Double newMax);
+	protected abstract void getVisibleRangeFromResultsController();
 	
-	protected abstract void updateFullRangeMin(Double newMin);
+	protected abstract void getRequestedRangeFromResultsController();
 	
-	protected abstract void updateFullRangeMax(Double newMax);
+	protected abstract void getFullRangeFromResultsController();
 	
+	
+	// Public getters
 	
 	public abstract Double getQResolution(Double value);
 	

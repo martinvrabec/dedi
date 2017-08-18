@@ -22,6 +22,7 @@ public class Perspective implements IPerspectiveFactory {
          layout.addView(BeamlineConfigurationPlotView.ID, IPageLayout.TOP, 0.7f, editorArea);
          
 		 topLeft.addView(ConfigurationView.ID);
+		 layout.getViewLayout(ConfigurationView.ID).setCloseable(false);
 		 topLeft.addPlaceholder(IPageLayout.ID_BOOKMARKS);
 		 
 		 layout.addView(ResultsView.ID, IPageLayout.BOTTOM, 0.05f, editorArea);

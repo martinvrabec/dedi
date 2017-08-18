@@ -169,4 +169,13 @@ public class BeamlineConfigurationPlotView extends ViewPart implements IBeamline
 	public void setFocus() {
 		system.setFocus();
 	}
+	
+	
+	@Override
+	public void dispose() {
+		plotter.dispose();
+		plotter = null;
+		super.dispose();
+	}
+	
 }

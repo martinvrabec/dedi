@@ -4,9 +4,7 @@ import java.util.Objects;
 import java.util.Observable;
 
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
-import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 
-import dedi.configuration.calculations.results.models.AbstractModel;
 import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.devices.CameraTube;
@@ -17,7 +15,6 @@ import dedi.configuration.devices.CameraTube;
  */
 public final class BeamlineConfiguration extends Observable {
 	private DiffractionDetector detector;
-	private DetectorProperties detectorProperties;  // Currently not used.
 	private Beamstop beamstop;
 	private CameraTube cameraTube;
 	private Double angle;
@@ -32,7 +29,6 @@ public final class BeamlineConfiguration extends Observable {
 	
 	public BeamlineConfiguration() {
 		detector = null;
-		detectorProperties = null;
 		beamstop = null;
 		cameraTube = null;
 		angle = null;
@@ -78,19 +74,6 @@ public final class BeamlineConfiguration extends Observable {
 	public void setDetector(DiffractionDetector detector) {
 		if(Objects.equals(detector, this.detector)) return;
 		this.detector = detector;
-		setChanged();
-		notifyObservers();
-	}
-
-	
-	public DetectorProperties getDetectorProperties() {
-		return detectorProperties;
-	}
-
-	
-	public void setDetectorProperties(DetectorProperties detectorProperties) {
-		if(Objects.equals(detectorProperties, this.detectorProperties)) return;
-		this.detectorProperties = detectorProperties;
 		setChanged();
 		notifyObservers();
 	}

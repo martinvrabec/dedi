@@ -26,39 +26,11 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		if(evt.getPropertyName().equals(IResultsModel.VISIBLE_Q_RANGE_PROPERTY)){
-			NumericRange visibleQRange = resultsController.getVisibleQRange();
-			if(visibleQRange != null){
-				double minQ = visibleQRange.getMin();
-				double maxQ = visibleQRange.getMax();
-				if(getCurrentQuantity() != null || getCurrentUnit() != null){
-					minQ = convert(minQ, new Q(), getCurrentQuantity(), Q.BASE_UNIT, getCurrentUnit());
-					maxQ = convert(maxQ, new Q(), getCurrentQuantity(), Q.BASE_UNIT, getCurrentUnit());
-					updateVisibleMin(minQ);
-					updateVisibleMax(maxQ);
-				}
-			} else {
-				updateVisibleMin((Double) null);
-				updateVisibleMax((Double) null);
-			}
-			
-		}
-		if(evt.getPropertyName().equals(IResultsModel.FULL_Q_RANGE_PROPERTY)){
-			NumericRange fullQRange = resultsController.getFullQRange();
-			if(fullQRange != null){
-				double minQ = fullQRange.getMin();
-				double maxQ = fullQRange.getMax();
-				if(getCurrentQuantity() != null || getCurrentUnit() != null){
-					minQ = convert(minQ, new Q(), getCurrentQuantity(), Q.BASE_UNIT, getCurrentUnit());
-					maxQ = convert(maxQ, new Q(), getCurrentQuantity(), Q.BASE_UNIT, getCurrentUnit());
-					updateFullRangeMin(minQ);
-					updateFullRangeMax(maxQ);
-				}
-			} else {
-				updateFullRangeMin((Double) null);
-				updateFullRangeMax((Double) null);
-			}
-		}
+		if(evt.getPropertyName().equals(IResultsModel.VISIBLE_Q_RANGE_PROPERTY))
+			getVisibleRangeFromResultsController();
+		if(evt.getPropertyName().equals(IResultsModel.FULL_Q_RANGE_PROPERTY))
+			getFullRangeFromResultsController();
+		
 		super.propertyChange(evt);
     }
 	
@@ -213,25 +185,25 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 	}
 	
 	
-	@Override
+	
 	protected void updateVisibleMin(Double newMin){
 		setModelProperty(ResultsViewConstants.VISIBLE_MIN_PROPERTY, newMin, Double.class);
 	}
 	
 	
-	@Override
+	
 	protected void updateVisibleMax(Double newMax){
 		setModelProperty(ResultsViewConstants.VISIBLE_MAX_PROPERTY, newMax, Double.class);
 	}
 
 
-	@Override
+	
 	protected void updateFullRangeMin(Double newMin) {
 		setModelProperty(ResultsViewConstants.FULL_RANGE_MIN_PROPERTY, newMin, Double.class);
 	}
 
 
-	@Override
+	
 	protected void updateFullRangeMax(Double newMax) {
 		setModelProperty(ResultsViewConstants.FULL_RANGE_MAX_PROPERTY, newMax, Double.class);
 	}
@@ -244,5 +216,64 @@ public class DefaultResultsViewController extends AbstractResultsViewController 
 		
 		double qValue = convert(value, getCurrentQuantity(), new Q(), getCurrentUnit(), Q.BASE_UNIT);
 		return resultsController.getQResolution(qValue);
+	}
+
+
+	@Override
+	protected void getVisibleRangeFromResultsController() {
+		NumericRange visibleQRange = resultsController.getVisibleQRange();
+		if(visibleQRange != null){
+			double minQ = visibleQRange.getMin();
+			double maxQ = visibleQRange.getMax();
+			if(getCurrentQuantity() != null || getCurrentUnit() != null){
+				minQ = convert(minQ, new Q(), getCurrentQuantity(), Q.BASE_UNIT, getCurrentUnit());
+				maxQ = convert(maxQ, new Q(), getCurrentQuantity(), Q.BASE_UNIT, getCurrentUnit());
+				updateVisibleMin(minQ);
+				updateVisibleMax(maxQ);
+			}
+		} else {
+			updateVisibleMin((Double) null);
+			updateVisibleMax((Double) null);
+		}
+		
+	}
+	
+	
+	@Override
+	protected void getRequestedRangeFromResultsController() {
+		NumericRange requestedQRange = resultsController.getRequestedQRange();
+		if(requestedQRange != null){
+			double minQ = requestedQRange.getMin();
+			double maxQ = requestedQRange.getMax();
+			if(getCurrentQuantity() != null || getCurrentUnit() != null){
+				minQ = convert(minQ, new Q(), getCurrentQuantity(), Q.BASE_UNIT, getCurrentUnit());
+				maxQ = convert(maxQ, new Q(), getCurrentQuantity(), Q.BASE_UNIT, getCurrentUnit());
+				updateRequestedMin(minQ);
+				updateRequestedMax(maxQ);
+			}
+		} else {
+			updateRequestedMin((Double) null);
+			updateRequestedMax((Double) null);
+		}
+		
+	}
+
+
+	@Override
+	protected void getFullRangeFromResultsController() {
+		NumericRange fullQRange = resultsController.getFullQRange();
+		if(fullQRange != null){
+			double minQ = fullQRange.getMin();
+			double maxQ = fullQRange.getMax();
+			if(getCurrentQuantity() != null || getCurrentUnit() != null){
+				minQ = convert(minQ, new Q(), getCurrentQuantity(), Q.BASE_UNIT, getCurrentUnit());
+				maxQ = convert(maxQ, new Q(), getCurrentQuantity(), Q.BASE_UNIT, getCurrentUnit());
+				updateFullRangeMin(minQ);
+				updateFullRangeMax(maxQ);
+			}
+		} else {
+			updateFullRangeMin((Double) null);
+			updateFullRangeMax((Double) null);
+		}
 	}
 }
