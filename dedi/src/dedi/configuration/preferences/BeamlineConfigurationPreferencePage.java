@@ -6,7 +6,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import org.dawb.common.ui.util.GridUtils;
-import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorConstants;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.richbeans.api.binding.IBeanController;
 import org.eclipse.richbeans.api.binding.IBeanService;

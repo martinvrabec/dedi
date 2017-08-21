@@ -13,16 +13,11 @@ import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.jscience.physics.amount.Amount;
 
-import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.devices.CameraTube;
 import dedi.configuration.preferences.BeamlineConfigurationBean;

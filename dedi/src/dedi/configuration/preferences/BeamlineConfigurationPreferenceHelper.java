@@ -1,6 +1,5 @@
 package dedi.configuration.preferences;
 
-
 import java.beans.XMLDecoder;
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -9,16 +8,15 @@ import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorConstants;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorPreferenceInitializer;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectors;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import dedi.Activator;
 
 public class BeamlineConfigurationPreferenceHelper {
 	private static IPreferenceStore detectorStore = org.dawnsci.plotting.tools.Activator.getPlottingPreferenceStore();
 	private static IPreferenceStore beamlineConfigurationsPreferenceStore = Activator.getDefault().getPreferenceStore();
+	
 	
 	public static List<DiffractionDetector> getDetectorsListFromPreference(){
 		List<DiffractionDetector> detectors = null;

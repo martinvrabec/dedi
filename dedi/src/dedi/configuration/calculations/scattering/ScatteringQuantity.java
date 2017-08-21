@@ -1,7 +1,5 @@
 package dedi.configuration.calculations.scattering;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.measure.quantity.Quantity;

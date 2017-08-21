@@ -7,51 +7,28 @@ import java.util.Observable;
 import java.util.Observer;
 
 import javax.measure.quantity.Angle;
-import javax.measure.quantity.Length;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Spinner;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.about.ISystemSummarySection;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
+
 import org.jscience.physics.amount.Amount;
 
-import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
-import dedi.configuration.preferences.PreferenceConstants;
 import dedi.ui.GuiHelper;
 import dedi.ui.widgets.units.ComboUnitsProvider;
-import dedi.ui.widgets.units.IAmountChangeListener;
-import dedi.ui.widgets.units.LabelUnitsProvider;
 import dedi.ui.widgets.units.TextWithUnits;
 
 

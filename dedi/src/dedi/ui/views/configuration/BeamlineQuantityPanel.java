@@ -1,19 +1,16 @@
 package dedi.ui.views.configuration;
 
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.jscience.physics.amount.Amount;
 
-import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
 import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
 import dedi.ui.widgets.units.ComboUnitsProvider;
-import dedi.ui.widgets.units.IAmountInputValidator;
 import dedi.ui.widgets.units.TextWithUnits;
 
 import java.util.ArrayList;

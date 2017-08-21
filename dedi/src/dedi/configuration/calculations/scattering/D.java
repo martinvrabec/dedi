@@ -34,6 +34,7 @@ public class D extends ScatteringQuantity {
 		return D.UNITS;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public D fromQ(Q q) {
 		return new D(q.getValue().inverse().times(2*Math.PI));

@@ -1,16 +1,7 @@
 package dedi.configuration.calculations.geometry;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.Length;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
 import javax.vecmath.Vector2d;
 
-import org.eclipse.draw2d.geometry.Vector;
-import org.jscience.physics.amount.Amount;
 
 import dedi.configuration.calculations.NumericRange;
 
@@ -84,12 +75,6 @@ public class Ray {
 	}
 	
 	
-	public NumericRange getConicIntersectionParameterRange(Conic conic){
-		return getConicIntersectionParameterRange(conic.getCoeffOfx2(), conic.getCoeffOfxy(), 
-												  conic.getCoeffOfy2(), conic.getCoeffOfx(), conic.getCoeffOfy(), 
-												  conic.getConstant());
-	}
-	
 	
 	public NumericRange getEllipseIntersectionParameterRange(double a, double b, Vector2d centre){
 		double xcentre = centre.x;
@@ -126,10 +111,12 @@ public class Ray {
 		
 		if(direction.y == 0){
 			if(! new NumericRange(ymin, ymax).contains(direction.y)) return null;
-			return result;
+			return getParameterRange(result);
 		}
 		
-		return result.intersect(new NumericRange((ymin-pt.y)/direction.y, (ymax-pt.y)/direction.y));
+		result = result.intersect(new NumericRange((ymin-pt.y)/direction.y, (ymax-pt.y)/direction.y));
+		
+		return getParameterRange(result);
 	}
 	
 	
@@ -142,5 +129,10 @@ public class Ray {
 		if(t_min < 0) t_min = 0;
 		
 		return new NumericRange(t_min, t_max); 
+	}
+	
+	
+	private NumericRange getParameterRange(NumericRange range) {
+		return getParameterRange(range.getMin(), range.getMax());
 	}
 }

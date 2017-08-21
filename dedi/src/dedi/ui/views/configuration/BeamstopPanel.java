@@ -13,48 +13,20 @@ import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Spinner;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jscience.physics.amount.Amount;
 
-import dedi.Activator;
-import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.devices.Beamstop;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
-import dedi.configuration.preferences.PreferenceConstants;
 import dedi.ui.GuiHelper;
 import dedi.ui.widgets.units.ComboUnitsProvider;
 import dedi.ui.widgets.units.LabelUnitsProvider;
@@ -175,6 +147,7 @@ public class BeamstopPanel implements Observer {
 		 xPositionText.setValue(beamstopX);
 		 yPositionText.setValue(beamstopY);
 		 clearanceValueSpinner.setSelection(clearance);
+		 clearanceGroup.layout();
 		 textChanged();
 	}
 	

@@ -23,9 +23,9 @@ import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 
 /**
  * This is the default implementation of a controller that performs the calculations of all the results stored in an {@link IResultsModel} 
- * and updates all registered models whenever the results change. 
+ * and updates all registered views whenever the results change. 
  * 
- * In particular, it computes the visible and full Q range and their end points on the detector,
+ * In particular, it computes the visible and full Q range and the positions of their end points on the detector face,
  * as well as the end points for the user-requested Q range. The bulk of the computation is in the computeQRanges() method. 
  */
 public class DefaultResultsController extends AbstractResultsController {
@@ -155,10 +155,9 @@ public class DefaultResultsController extends AbstractResultsController {
 				}
 				
 
-				// Find the intersection pt of the clearance region with a line at the given angle starting at the beamstop centre.
-				double initialPositionX = clearanceRegionMajorMM*Math.cos(angle) + beamstopXCentreMM; 
-				double initialPositionY = clearanceRegionMinorMM*Math.sin(angle) + beamstopYCentreMM;
-				Vector2d initialPosition = new Vector2d(initialPositionX, initialPositionY);
+				// Find the intersection pt of the clearance region (beamstop + clearance) with a line at the given angle starting at the beamstop centre.
+				Vector2d initialPosition = new Vector2d(clearanceRegionMajorMM*Math.cos(angle) + beamstopXCentreMM, 
+						                                clearanceRegionMinorMM*Math.sin(angle) + beamstopYCentreMM);
 				
 				
 				// Find the portion of a ray from the initial position at the given angle that lies within the detector face.
@@ -168,7 +167,7 @@ public class DefaultResultsController extends AbstractResultsController {
 				
 				
 				// Check whether the intersection is empty.
-				if(t1 == null || t1.getMax() < 0){
+				if(t1 == null){
 					Display.getDefault().asyncExec(() -> setVisibleQRange(null, null, null));
 					Display.getDefault().asyncExec(() -> setFullQRange(null));
 					return;
@@ -182,20 +181,17 @@ public class DefaultResultsController extends AbstractResultsController {
 				
 				
 				// Check whether the intersection is empty.
-				if(t1 == null || t1.getMax() < 0){
+				if(t1 == null){
 					Display.getDefault().asyncExec(() -> setVisibleQRange(null, null, null));
 					Display.getDefault().asyncExec(() -> setFullQRange(null));
 					return;
 				}
 				
 				
-				// Restrict the range to one that actually lies on the ray.
-				if(t1.getMin() < 0) t1.setMin(0);
 				
-				
-				// Find the points that correspond to the end points of the range and their distance from the beamstop centre.
-				Vector2d ptMin = new Vector2d(ray.getPt(t1.getMin()));
-				Vector2d ptMax = new Vector2d(ray.getPt(t1.getMax()));
+				// Find the points that correspond to the end points of the range.
+				Vector2d ptMin = ray.getPt(t1.getMin());
+				Vector2d ptMax = ray.getPt(t1.getMax());
 				
 				
 				// If the wavelength or camera length are not known then can't actually calculate the visible Q values from the above distances,

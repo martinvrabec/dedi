@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.measure.unit.BaseUnit;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
@@ -44,6 +43,7 @@ public class Q extends ScatteringQuantity {
 		return scatteringQuantity.fromQ(this);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Q fromQ(Q q) {
 		return q;

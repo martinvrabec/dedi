@@ -1,19 +1,15 @@
 package dedi.configuration.calculations;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
 
-import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
-import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
-import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
-import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 
 import dedi.configuration.BeamlineConfiguration;
-import dedi.configuration.calculations.geometry.Conic;
 import dedi.configuration.calculations.geometry.Ray;
 
 public class BeamlineConfigurationUtil {
+	
+	private BeamlineConfigurationUtil(){
+	}
 	
 	public static double calculateQValue(double distance, double cameraLength, double wavelength){
 		return 4*Math.PI*Math.sin(Math.atan(distance/cameraLength)/2)/wavelength;

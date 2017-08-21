@@ -1,33 +1,19 @@
 package dedi.configuration.preferences;
 
-import java.beans.XMLDecoder;
-import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
-import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorConstants;
-import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectors;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.richbeans.widgets.scalebox.NumberBox;
 import org.eclipse.richbeans.widgets.scalebox.ScaleBox;
 import org.eclipse.richbeans.widgets.wrappers.ComboWrapper;
-import org.eclipse.richbeans.widgets.wrappers.ComboWrapperWithGetCombo;
 import org.eclipse.richbeans.widgets.wrappers.TextWrapper;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 public class BeamlineConfigurationsComposite extends Composite {
 	private TextWrapper name;

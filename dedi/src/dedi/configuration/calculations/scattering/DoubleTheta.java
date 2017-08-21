@@ -53,6 +53,7 @@ public class DoubleTheta extends ScatteringQuantity {
 		return UNITS;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public DoubleTheta fromQ(Q q) {
 		if(wavelength == null) return null;

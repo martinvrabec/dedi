@@ -29,6 +29,7 @@ public class S extends ScatteringQuantity {
 		return S.UNITS;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public S fromQ(Q q) {
 		return new S(q.to(new D()).getValue().inverse());
