@@ -4,6 +4,10 @@ import javax.vecmath.Vector2d;
 
 import dedi.configuration.calculations.NumericRange;
 
+/**
+ * The default implementation of {@link IResultsModel}.
+ *
+ */
 public class Results extends AbstractModel implements IResultsModel {
 	private NumericRange visibleQRange;
 	private NumericRange fullQRange;
@@ -73,7 +77,7 @@ public class Results extends AbstractModel implements IResultsModel {
 		visibleRangeEndPoint = endPt;
 		isSatisfied = isSatisfied();
 		hasSolution = (visibleQRange != null);
-		if(isStateValid()) firePropertyChange(VISIBLE_Q_RANGE_PROPERTY, oldRange, visibleQRange);
+		firePropertyChange(VISIBLE_Q_RANGE_PROPERTY, oldRange, visibleQRange);
 	}
 	
 	
@@ -90,23 +94,12 @@ public class Results extends AbstractModel implements IResultsModel {
 		requestedRangeStartPoint = startPt;
 		requestedRangeEndPoint = endPt;
 		isSatisfied = isSatisfied();
-		if(isStateValid()) firePropertyChange(REQUESTED_Q_RANGE_PROPERTY, oldRange, requestedQRange);
+		firePropertyChange(REQUESTED_Q_RANGE_PROPERTY, oldRange, requestedQRange);
 	}
 	
 	
 	private boolean isSatisfied(){
 		return  visibleQRange != null && requestedQRange != null &&
-					visibleQRange.contains(requestedQRange);
-	}
-	
-	
-	/**
-	 * Checks whether the state is valid.
-	 * To be used before firing PropertyChange events to prevent the listeners from 
-	 * accessing the results in an invalid state.
-	 */
-	private boolean isStateValid(){
-		// TODO Implement this method.
-		return true;
+				visibleQRange.contains(requestedQRange);
 	}
 }

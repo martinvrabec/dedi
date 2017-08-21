@@ -5,13 +5,34 @@ import javax.vecmath.Vector2d;
 
 import dedi.configuration.calculations.NumericRange;
 
+/**
+ * This class represent a (geometrical) ray (or half-line) - half of a line proceeding from an initial point 
+ * in a direction specified by a non-zero vector.
+ * 
+ * It uses the direction vector to parameterise the positions of the points lying on the ray
+ * by a parameter (conventionally called t) that belongs to the interval [0, infinity].
+ * 
+ * It provides useful methods for manipulating rays, such as getting the point that corresponds to 
+ * a certain value of the parameter t, getting a point at a given distance from the initial point,
+ * and finding the {@link NumericRange} of values of the parameter t that give the points that belong to the intersection
+ * of the ray with various geometrical figures, such as rectangle, conic (circle, ellipse, ...), etc.
+ */
 public class Ray {
-	private Vector2d direction;
-	private Vector2d pt;
+	private Vector2d direction;  // a vector pointing in the direction of the ray.  
+	private Vector2d pt;         // the initial point.
 	
 	
+	/**
+	 * Constructs a new ray.
+	 * 
+	 * @param direction - a vector pointing in the direction of the ray.
+	 * @param pt        - the initial point.
+	 * 
+	 * @throws IllegalArgumentException - if the direction vector is the zero vector.
+	 */
 	public Ray(Vector2d direction, Vector2d pt) {
 		super();
+		if(direction.length() == 0) throw new IllegalArgumentException("The direction vector of a ray cannot be the zero vector.");
 		this.direction = direction;
 		this.pt = pt;
 	}
@@ -21,18 +42,28 @@ public class Ray {
 		return direction;
 	}
 
+	
 	public void setDirection(Vector2d direction) {
 		this.direction = direction;
 	}
 
-	public Vector2d getStartingPt() {
+	
+	public Vector2d getInitialPt() {
 		return pt;
 	}
 
-	public void setStartingPt(Vector2d pt) {
+	
+	public void setInitialPt(Vector2d pt) {
 		this.pt = pt;
 	}
 	
+	
+	/**
+	 * @param t - value of the parameter t.
+	 * 
+	 * @return The point on the ray that corresponds to the given value of the parameter t that parameterises the ray.
+	 *         Returns null if t does not belong to [0, infinity].
+	 */
 	public Vector2d getPt(double t){
 		if(t < 0) return null;
 		Vector2d result = new Vector2d(direction);
@@ -42,12 +73,23 @@ public class Ray {
 	}
 	
 	
+	/**
+	 * @param distance - distance from the initial point.
+	 * 
+	 * @return The point on the ray at the given distance from the initial point.
+	 */
 	public Vector2d getPtAtDistance(double distance){
-		if(direction.length() == 0) return null;
 		return getPt(distance/direction.length());
 	}
 	
 	
+	/**
+	 * Returns the {@link NumericRange} of values of the parameter t that give the points that belong to the intersection
+     * of the ray with the given conic, specified by an equation of the following form:
+     * 
+     * coeffOfx2*x^2 + coeffOfxy*x*y + coeffOfy2*y^2 + coeffOfx*x + coeffOfy*y + constant = 0.
+	 * 
+	 */
 	public NumericRange getConicIntersectionParameterRange(double coeffOfx2, double coeffOfxy, double coeffOfy2,
 														   double coeffOfx, double coeffOfy, double constant){
 		
@@ -55,9 +97,9 @@ public class Ray {
 		double t2;
 		
 		double a = coeffOfx2*Math.pow(direction.x, 2) + coeffOfxy*direction.x*direction.y +
-				           coeffOfy2*Math.pow(direction.y, 2);
+				   coeffOfy2*Math.pow(direction.y, 2);
 		double b = 2*coeffOfx2*direction.x*pt.x + coeffOfxy*(direction.x*pt.y + direction.y*pt.x) +
-				           2*coeffOfy2*direction.y*pt.y + coeffOfx*direction.x + coeffOfy*direction.y;
+				   2*coeffOfy2*direction.y*pt.y + coeffOfx*direction.x + coeffOfy*direction.y;
 		double c = coeffOfx2*Math.pow(pt.x, 2) + coeffOfxy*pt.x*pt.y + coeffOfy2*Math.pow(pt.y, 2) + 
 		           coeffOfx*pt.x + coeffOfy*pt.y + constant;
 		
@@ -75,7 +117,10 @@ public class Ray {
 	}
 	
 	
-	
+	/*
+	 * Returns the {@link NumericRange} of values of the parameter t that give the points that belong to the intersection
+	 * of the ray with the given ellipse.
+	 */
 	public NumericRange getEllipseIntersectionParameterRange(double a, double b, Vector2d centre){
 		double xcentre = centre.x;
 		double ycentre = centre.y;
@@ -90,11 +135,19 @@ public class Ray {
 	}
 	
 	
+	/*
+	 * Returns the {@link NumericRange} of values of the parameter t that give the points that belong to the intersection
+	 * of the ray with the given circle.
+	 */
 	public NumericRange getCircleIntersectionParameterRange(double radius, Vector2d centre){
 		return getEllipseIntersectionParameterRange(radius, radius, centre);
 	}
 	
 	
+	/*
+	 * Returns the {@link NumericRange} of values of the parameter t that give the points that belong to the intersection
+	 * of the ray with the given rectangle.
+	 */
 	public NumericRange getRectangleIntersectionParameterRange(Vector2d topLeftCorner, double width, double height){
 		NumericRange result;
 		
@@ -132,6 +185,9 @@ public class Ray {
 	}
 	
 	
+	/**
+	 * Takes an arbitrary closed interval and restricts it to the interval [0, infinity]
+	 */
 	private NumericRange getParameterRange(NumericRange range) {
 		return getParameterRange(range.getMin(), range.getMax());
 	}

@@ -4,6 +4,10 @@ import javax.vecmath.Vector2d;
 
 import dedi.configuration.calculations.NumericRange;
 
+/**
+ * A model to store the data on the visible, full, and requested q range 
+ * for the current configuration of an X-ray scattering beamline.
+ */
 public interface IResultsModel extends IModel {
 	public static String FULL_Q_RANGE_PROPERTY = "FullQRange";
 	public static String VISIBLE_Q_RANGE_PROPERTY = "VisibleQRange";

@@ -7,9 +7,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import dedi.configuration.calculations.results.models.AbstractModel;
 import dedi.configuration.calculations.results.models.IModel;
-import dedi.configuration.calculations.results.models.IResultsModel;
 
 
 public abstract class AbstractController<T extends IModel> implements PropertyChangeListener {
@@ -67,7 +65,8 @@ public abstract class AbstractController<T extends IModel> implements PropertyCh
 	    }
 		
 
-	    protected void setModelProperty(String propertyName, Object newValue, Class clazz) {
+	    @SuppressWarnings("rawtypes")
+		protected void setModelProperty(String propertyName, Object newValue, Class clazz) {
 	        for (T model: registeredModels) {
 	            try {
 	            	Method method = model.getClass().

@@ -1,10 +1,21 @@
 package dedi.configuration.calculations;
 
+/**
+ * A class that represents a closed interval.
+ * Provides useful methods for operations with intervals, 
+ * such as intersection of two intervals.
+ * The empty set is represented by null.
+ *
+ */
 public class NumericRange {
 	private double min;
 	private double max;
 	
 	
+	/**
+	 * Constructs a new closed interval with the given end points. 
+	 * Swaps the arguments if the given min is greater than the given max.
+	 */
 	public NumericRange(double min, double max) {
 		super();
 		this.min = min;
@@ -18,6 +29,10 @@ public class NumericRange {
 	}
 
 
+	/**
+	 * Sets the left end point of the interval.
+	 * Swaps min and max if the new min is greater than max.
+	 */
 	public void setMin(double min) {
 		this.min = min;
 		checkMinMax();
@@ -29,6 +44,10 @@ public class NumericRange {
 	}
 
 
+	/**
+	 * Sets the right end point of the interval.
+	 * Swaps min and max if the max is less than min.
+	 */
 	public void setMax(double max) {
 		this.max = max;
 		checkMinMax();
@@ -44,17 +63,28 @@ public class NumericRange {
 	}
 	
 	
+	/**
+	 * @return Whether the given value lies in the closed interval.
+	 */
 	public boolean contains(double value){
 		return value >= min && value <= max;
 	}
 	
 	
+	/**
+	 * @return Whether the given NumericRange is a subset of this range.
+	 *         If the given range is null, returns true, as the empty set is a subset of all sets.
+	 */
 	public boolean contains(NumericRange other){
 		if(other == null) return true;
 		else return other.getMin() >= this.getMin() && other.getMax() <= this.getMax();
 	}
 	
 	
+	/**
+	 * @return A new NumericRange that is the intersection of this range with the given range.
+	 *         Returns null if the intersection is empty.
+	 */
 	public NumericRange intersect(NumericRange other){
 		if(other == null) return null;
 		
@@ -95,11 +125,9 @@ public class NumericRange {
 		if (getClass() != obj.getClass())
 			return false;
 		NumericRange other = (NumericRange) obj;
-		if (Double.doubleToLongBits(max) != Double.doubleToLongBits(other.max))
-			return false;
-		if (Double.doubleToLongBits(min) != Double.doubleToLongBits(other.min))
-			return false;
-		return true;
+		
+		return (Double.doubleToLongBits(max) == Double.doubleToLongBits(other.max)) &&
+				(Double.doubleToLongBits(min) == Double.doubleToLongBits(other.min));
 	}
 	
 	

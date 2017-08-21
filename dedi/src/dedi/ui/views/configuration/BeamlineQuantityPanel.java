@@ -41,8 +41,8 @@ public class BeamlineQuantityPanel implements Observer {
 	
 	private boolean isEdited = true;
 	
-	private final static List<Unit<Energy>> ENERGY_UNITS = new ArrayList<>(Arrays.asList(SI.KILO(NonSI.ELECTRON_VOLT), NonSI.ELECTRON_VOLT));
-	private final static List<Unit<Length>> WAVELENGTH_UNITS = new ArrayList<>(Arrays.asList(SI.NANO(SI.METER), NonSI.ANGSTROM));
+	private static final List<Unit<Energy>> ENERGY_UNITS = new ArrayList<>(Arrays.asList(SI.KILO(NonSI.ELECTRON_VOLT), NonSI.ELECTRON_VOLT));
+	private static final List<Unit<Length>> WAVELENGTH_UNITS = new ArrayList<>(Arrays.asList(SI.NANO(SI.METER), NonSI.ANGSTROM));
 
 	
 	
@@ -74,11 +74,11 @@ public class BeamlineQuantityPanel implements Observer {
 		wavelengthUnitsCombo.moveBelow(wavelength);
 		
 		
-		GuiHelper.createLabel(beamlineQuantityGroup, "Minimum allowable energy:");
+		GuiHelper.createLabel(beamlineQuantityGroup, "Minimum allowed energy:");
 		minEnergyLabel = GuiHelper.createLabel(beamlineQuantityGroup, "");
 		GuiHelper.createLabel(beamlineQuantityGroup, "");
 		
-		GuiHelper.createLabel(beamlineQuantityGroup, "Maximum allowable energy:");
+		GuiHelper.createLabel(beamlineQuantityGroup, "Maximum allowed energy:");
 		maxEnergyLabel = GuiHelper.createLabel(beamlineQuantityGroup, "");
 		GuiHelper.createLabel(beamlineQuantityGroup, "");
 		
@@ -148,6 +148,8 @@ public class BeamlineQuantityPanel implements Observer {
 		if(minEnergy == null || maxEnergy == null || minWavelength == null || maxWavelength == null){
 			energy.setToolTipText("");
 			wavelength.setToolTipText("");
+			minEnergyLabel.setText("");
+			maxEnergyLabel.setText("");
 			return;
 		}
 		energy.setToolTipText("Min energy: " + TextUtil.format(minEnergy.doubleValue(energy.getCurrentUnit())) + 

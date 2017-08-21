@@ -67,7 +67,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 	
 	
 	public AbstractResultsViewController createController(ResultsViewModel model){
-		return new DefaultResultsViewController(model);
+		return new DefaultResultsViewController1(model);
 	}
 	
 	
