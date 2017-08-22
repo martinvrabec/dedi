@@ -2,7 +2,6 @@ package dedi.ui;
 
 import java.util.List;
 
-import javax.measure.quantity.Length;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
@@ -21,8 +20,18 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ * Utility class for instantiating certain SWT elements with a predefined style and layout properties.
+ * Allows to achieve a consistent look across the DEDI perspective while avoiding code repetition. 
+ * Makes it easy to modify a property for all UI elements of the same class across the entire perspective.
+ */
 public class GuiHelper {
-	private static Font boldFont = JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
+	
+	private GuiHelper() {
+		throw new IllegalStateException("This class is not meant to be instantiated.");
+	}
+	
+	private static Font boldFont = JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT); 
 	
 	public static Font getBoldFont(){
 		return boldFont;
@@ -62,7 +71,7 @@ public class GuiHelper {
 	}
 	
 	
-	public static <T extends Quantity> ComboViewer createUnitsCombo(Composite parent, List<Unit<T>> UNITS){
+	public static <T extends Quantity> ComboViewer createUnitsCombo(Composite parent, List<Unit<T>> units){
 		Combo unitsCombo = new Combo(parent, SWT.READ_ONLY);
 		
 		ComboViewer unitsComboViewer = new ComboViewer(unitsCombo);
@@ -79,13 +88,10 @@ public class GuiHelper {
 				}
 		});
 		
-		unitsComboViewer.setInput(UNITS);
-		try{
-			unitsComboViewer.setSelection(new StructuredSelection(UNITS.get(0)));
-		} catch(Exception e){
-		}
+		unitsComboViewer.setInput(units);
+		if(units != null && !units.isEmpty())
+			unitsComboViewer.setSelection(new StructuredSelection(units.get(0)));
 		
 		return unitsComboViewer;
 	}
-	
 }
