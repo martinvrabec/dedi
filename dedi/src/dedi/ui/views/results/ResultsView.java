@@ -308,7 +308,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		Double requestedMin = controller.getRequestedRangeMin(currentQuantity, currentUnit);
 		if(requestedMin == null) return;
 		// Won't overwrite the value if it's the same as before.
-		if(TextUtil.equals(TextUtil.format(requestedMin), requestedMinValueText.getText())) return;
+		if(TextUtil.equalAsDoubles(TextUtil.format(requestedMin), requestedMinValueText.getText())) return;
 		requestedMinValueText.setText(TextUtil.format(requestedMin));
 	}
 	
@@ -318,7 +318,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		Double requestedMax = controller.getRequestedRangeMax(currentQuantity, currentUnit);
 		if(requestedMax == null) return;
 		// Won't overwrite the value if it's the same as before.
-		if(TextUtil.equals(TextUtil.format(requestedMax), requestedMaxValueText.getText())) return;
+		if(TextUtil.equalAsDoubles(TextUtil.format(requestedMax), requestedMaxValueText.getText())) return;
 		requestedMaxValueText.setText(TextUtil.format(requestedMax));
 	}
 	
@@ -333,11 +333,11 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		}
 		
 		Double newMinValue = newRange.getMin();
-		if(!TextUtil.equals(TextUtil.format(newMinValue), minValue.getText())) 
+		if(!TextUtil.equalAsDoubles(TextUtil.format(newMinValue), minValue.getText())) 
 			minValue.setText(TextUtil.format(newMinValue));
 		
 		Double newMaxValue = newRange.getMax();
-		if(!TextUtil.equals(TextUtil.format(newMaxValue), maxValue.getText())) 
+		if(!TextUtil.equalAsDoubles(TextUtil.format(newMaxValue), maxValue.getText())) 
 			maxValue.setText(TextUtil.format(newMaxValue));
 	}
 	

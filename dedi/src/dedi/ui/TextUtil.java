@@ -1,12 +1,15 @@
 package dedi.ui;
 
-import java.util.Objects;
 
+/**
+ * A utility class for handling text that represents numerical values.
+ */
 public class TextUtil {
 	
 	private TextUtil() {
 		throw new IllegalStateException("This class is not meant to be instantiated.");
 	}
+	
 	
 	public static String format(double value){
 		String s;
@@ -19,7 +22,6 @@ public class TextUtil {
 		
 		return s;
 	}
-	
 	
 	
 	public static String format(int value){
@@ -36,11 +38,10 @@ public class TextUtil {
 	
 	
 	/**
-	 * @return Returns true if the two strings are equal or if they represent the same numerical value (although maybe formatted differently).
+	 * @return Returns true if the two strings represent the same numerical value (although maybe formatted differently).
 	 *         Returns false otherwise.
 	 */
-	public static boolean equals(String s1, String s2){
-		if(Objects.equals(s1, s2)) return true;
+	public static boolean equalAsDoubles(String s1, String s2){
 		try{
 			double d1 = Double.parseDouble(s1);
 			double d2 = Double.parseDouble(s2);
@@ -51,9 +52,8 @@ public class TextUtil {
 	}
 	
 	
-	
 	/**
-	 * "Fail safe" method for parsing a String - returns null in case the String is null or cannot be interpreted as a double
+	 * "Fail safe" method for parsing a String - returns null in case the String is null or cannot be parsed as a double
 	 * rather than throwing an exception like Double.parseDouble() does.
 	 * 
 	 * @param s - the string to parse.
