@@ -54,11 +54,11 @@ public class TextUtil {
 	
 	/**
 	 * "Fail safe" method for parsing a String - returns null in case the String is null or cannot be parsed as a double
-	 * rather than throwing an exception like Double.parseDouble() does.
+	 * rather than throwing an exception like Double.parseDouble() would do.
 	 * 
 	 * @param s - the string to parse.
 	 */
-	public Double parseDouble(String s) {
+	public static Double parseDouble(String s) {
 		Double result;
 		try {
 			result = Double.parseDouble(s);

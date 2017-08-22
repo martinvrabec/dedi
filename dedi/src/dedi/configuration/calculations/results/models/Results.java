@@ -11,8 +11,7 @@ import dedi.configuration.calculations.NumericRange;
 public class Results extends AbstractModel implements IResultsModel {
 	private NumericRange visibleQRange;
 	private NumericRange fullQRange;
-	private Double requestedQRangeMin;
-	private Double requestedQRangeMax;
+	private NumericRange requestedQRange;
 	
 	private Vector2d visibleRangeStartPoint;
 	private Vector2d visibleRangeEndPoint;
@@ -22,52 +21,56 @@ public class Results extends AbstractModel implements IResultsModel {
 	
 	
 	// Getters
+	@Override
 	public NumericRange getVisibleQRange() {
 		return visibleQRange;
 	}
 
 
+	@Override
 	public NumericRange getFullQRange() {
 		return fullQRange;
 	}
 
 
-	public Double getRequestedQRangeMin() {
-		return requestedQRangeMin;
+	@Override
+	public NumericRange getRequestedQRange() {
+		return requestedQRange;
 	}
 	
 	
-	public Double getRequestedQRangeMax() {
-		return requestedQRangeMax;
-	}
-
-
+	@Override
 	public Vector2d getVisibleRangeStartPoint() {
 		return visibleRangeStartPoint;
 	}
 
 
+	@Override
 	public Vector2d getVisibleRangeEndPoint() {
 		return visibleRangeEndPoint;
 	}
 
 
+	@Override
 	public Vector2d getRequestedRangeStartPoint() {
 		return requestedRangeStartPoint;
 	}
 
 
+	@Override
 	public Vector2d getRequestedRangeEndPoint() {
 		return requestedRangeEndPoint;
 	}
 
 
+	@Override
 	public boolean getIsSatisfied() {
-		return  visibleQRange != null && requestedQRangeMin != null && requestedQRangeMax != null &&
-				visibleQRange.contains(new NumericRange(requestedQRangeMin, requestedQRangeMax));
+		return  visibleQRange != null && requestedQRange != null &&
+				visibleQRange.contains(requestedQRange);
 	}
 
-	
+
+	@Override
 	public boolean getHasSolution(){
 		return (visibleQRange != null);
 	}
@@ -91,18 +94,11 @@ public class Results extends AbstractModel implements IResultsModel {
 	
 	
 	@Override
-	public void setRequestedQRangeMin(Double min, Vector2d startPt) {
-		Double oldMin = requestedQRangeMin;
-		requestedQRangeMin = min;
+	public void setRequestedQRange(NumericRange range, Vector2d startPt, Vector2d endPt){
+		NumericRange oldRange = requestedQRange;
+		requestedQRange = range;
 		requestedRangeStartPoint = startPt;
-		firePropertyChange(ResultConstants.REQUESTED_Q_RANGE_MIN_PROPERTY, oldMin, requestedQRangeMin);
-	}
-	
-	@Override
-	public void setRequestedQRangeMax(Double max, Vector2d endPt) {
-		Double oldMax = requestedQRangeMax;
-		requestedQRangeMax = max;
 		requestedRangeEndPoint = endPt;
-		firePropertyChange(ResultConstants.REQUESTED_Q_RANGE_MAX_PROPERTY, oldMax, requestedQRangeMax);
+		firePropertyChange(ResultConstants.REQUESTED_Q_RANGE_PROPERTY, oldRange, requestedQRange);
 	}
 }

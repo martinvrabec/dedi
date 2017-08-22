@@ -1,8 +1,5 @@
 package dedi.configuration.calculations.results.controllers;
 
-import java.beans.PropertyChangeEvent;
-import java.util.Observable;
-
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
@@ -58,27 +55,17 @@ public class DefaultResultsController extends AbstractResultsController {
 
 	
 	@Override
-	public void updateRequestedQRangeMin(Double minRequested){
-		if(minRequested == null )
-			setRequestedQRangeMin(null, null);
-		else 
-			setRequestedQRangeMin(minRequested, getPtForQ(minRequested));
-		
-	}
-	
-	
-	@Override
-	public void updateRequestedQRangeMax(Double maxRequested){
-		if(maxRequested == null )
-			setRequestedQRangeMax(null, null);
-		else 
-			setRequestedQRangeMax(maxRequested, getPtForQ(maxRequested));
+	public void updateRequestedQRange(NumericRange requestedRange) {
+		if(requestedRange == null) 
+			setRequestedQRange(null, null, null);
+		else {
+			setRequestedQRange(requestedRange, getPtForQ(requestedRange.getMin()), getPtForQ(requestedRange.getMax()));
+		}
 	}
 	
 	
 	private void updateRequestedQRangeEndPoints(){
-		updateRequestedQRangeMin(getRequestedQRangeMin());
-		updateRequestedQRangeMax(getRequestedQRangeMax());
+		updateRequestedQRange(getRequestedQRange());
 	}
 	
 	
@@ -90,19 +77,6 @@ public class DefaultResultsController extends AbstractResultsController {
 				          new Vector2d(beamstopXCentreMM, beamstopYCentreMM));
 		
 		return ray.getPtAtDistance(1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(qvalue, cameraLength, wavelength));
-	}
-	
-
-	
-	@Override
-	public void update(Observable o, Object arg) {
-		// Notify views that one of the models changed, namely that the BeamlineConfiguration changed.
-		propertyChange(new PropertyChangeEvent(configuration, AbstractResultsController.BEAMLINE_CONFIGURATION_PROPERTY, null, configuration));
-		
-		updateState();
-		
-		// Compute the new results and store them in the model
-		computeQRanges();
 	}
 	
 	
@@ -131,7 +105,11 @@ public class DefaultResultsController extends AbstractResultsController {
 		maxCameraLength = configuration.getMaxCameraLength();
 	}
 	
-	private void computeQRanges(){
+	
+	@Override
+	protected void computeQRanges(){
+		updateState();
+		
 		// Perform the computations in a separate thread.
 		// However, the updates of the results have to be done in the UI thread,
 		// because they modify the GUI, so use Display.getDefault().asyncExec(Runnable).

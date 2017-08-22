@@ -42,11 +42,23 @@ import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
 
 public class ResultsView extends ViewPart implements PropertyChangeListener {
+	// The controller used to access and modify the results.
 	private AbstractResultsController controller;
 	
 	private ScatteringQuantity currentQuantity;
 	private List<Unit<?>> currentUnits;
 	private Unit<?> currentUnit;
+	// One of the scattering quantities 
+	private DoubleTheta doubleTheta;
+	
+	/*
+	 * Fields that store the current requested values locally, i.e. these values are not managed by the results controller -
+	 * the user input is likely to be invalid, at times, so requested values should be sent to the controller only once 
+	 * they become valid, in order to protect other views from working with invalid data.
+	 */
+	private Double requestedMin;
+	private Double requestedMax;
+	
 	
 	// UI elements
 	private Composite resultsPanel;
@@ -61,9 +73,13 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 	private Text requestedMaxValueText;
 	private Canvas drawingArea;
 	
-	// One of the scattering quantities 
-	private DoubleTheta doubleTheta;
 	
+	
+	/**
+	 * Flag that indicates whether the values displayed in this view are currently being modified by 
+	 * the user or by the view itself. Set this flag to false when programmatically setting the values
+	 * of a text field.
+	 */
 	private boolean isUserEdited = true;
 	
 	public static final String ID = "dedi.views.results";
@@ -89,7 +105,9 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		GuiHelper.createLabel(resultsPanel, "Scattering quantity:");
 		
 		
-		// Scattering quantities and units combos
+		/*
+		 * Scattering quantities and units combos.
+		 */
 		
 		Combo scatteringQuantitiesCombo = new Combo(resultsPanel, SWT.READ_ONLY | SWT.RIGHT);
 		ComboViewer scatteringQuantitiesComboViewer = new ComboViewer(scatteringQuantitiesCombo);
@@ -105,11 +123,17 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 			}
 		});
 		
+		
 		scatteringQuantitiesCombo.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		scatteringQuantitiesComboViewer.addSelectionChangedListener(e -> {
 			IStructuredSelection selection = (IStructuredSelection) e.getSelection();
 		    if (selection.size() > 0){
-		    	currentQuantity = (ScatteringQuantity) selection.getFirstElement();
+		    	ScatteringQuantity newQuantity = (ScatteringQuantity) selection.getFirstElement();
+		    	Unit<?> baseUnit = newQuantity.getBaseUnit();
+		    	requestedMin = controller.convertValue(requestedMin, currentQuantity, newQuantity, currentUnit, baseUnit);
+		    	requestedMax = controller.convertValue(requestedMax, currentQuantity, newQuantity, currentUnit, baseUnit);
+		    	currentQuantity = newQuantity;
+		    	currentUnit = baseUnit;
 		    	String quantityName = currentQuantity.getQuantityName();
 		    	minValueLabel.setText("Min " + quantityName + " value:");
 				maxValueLabel.setText("Max " + quantityName + " value:");
@@ -118,7 +142,6 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		    	currentUnits = currentQuantity.getUnits();
 		    	scatteringQuantitiesUnitsCombo.setInput(currentUnits);
 		    	scatteringQuantitiesUnitsCombo.setSelection(new StructuredSelection(currentUnits.get(0)));
-		    	// Assumes that a scattering quantity won't have an empty set of units.
 		    }
 		});
 		
@@ -127,14 +150,20 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		scatteringQuantitiesUnitsCombo.addSelectionChangedListener(e -> {
 			IStructuredSelection selection = (IStructuredSelection) e.getSelection();
 			if (selection.size() > 0){
-				 currentUnit = (Unit<?>) selection.getFirstElement();
-				 updateValues();  // Convert all the values to the new unit.
+				 Unit<?> newUnit = (Unit<?>) selection.getFirstElement();
+				 requestedMin = controller.convertValue(requestedMin, currentQuantity, currentQuantity, currentUnit, newUnit);
+			     requestedMax = controller.convertValue(requestedMax, currentQuantity, currentQuantity, currentUnit, newUnit);
+				 currentUnit =  newUnit;
+				 updateVisibleQRange();  // Convert the visible q range to the new unit.
+				 showRequestedMinMax();  // (see javadoc).
 			}
 		});
 		
 		
 		
-		// UI elements for displaying results
+		/*
+		 * UI elements for displaying results.
+		 */
 		
 		minValueLabel = GuiHelper.createLabel(resultsPanel, "");
 		minValue = GuiHelper.createLabel(resultsPanel, "");
@@ -151,13 +180,11 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		requestedMinValueLabel = GuiHelper.createLabel(resultsPanel, "");
 		requestedMinValueText = GuiHelper.createText(resultsPanel);
 		GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).hint(70, 20).applyTo(requestedMinValueText);
-		requestedMinValueText.addModifyListener(e -> {
-			if(isUserEdited) controller.updateRequestedMin(requestedMinValueText.getText(), currentQuantity, currentUnit);
-		});
+		requestedMinValueText.addModifyListener(e -> requestedRangeTextInputChanged());
 		requestedMinValueText.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				updateRequestedMinMax(); // Make sure requested min <= requested max.
+				showRequestedMinMax(); // Ensures requested min <= requested max.
 			}
 		}); 
 		new Label(resultsPanel, SWT.NONE); // Placeholder
@@ -166,19 +193,20 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		requestedMaxValueLabel = GuiHelper.createLabel(resultsPanel, "");
 		requestedMaxValueText = GuiHelper.createText(resultsPanel);
 		GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).hint(70, 20).applyTo(requestedMaxValueText);
-		requestedMaxValueText.addModifyListener(e -> {
-			if(isUserEdited) controller.updateRequestedMax(requestedMaxValueText.getText(), currentQuantity, currentUnit);
-		});
+		requestedMaxValueText.addModifyListener(e -> requestedRangeTextInputChanged());
 		requestedMaxValueText.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				updateRequestedMinMax(); // Make sure requested min <= requested max.
+				showRequestedMinMax(); // Ensures requested min <= requested max.
 			}
 		}); 
 		new Label(resultsPanel, SWT.NONE); // Placeholder
 		
 		
-		// The drawing that displays the results
+		
+		/*
+		 * The drawing that displays the results.
+		 */
 		drawingArea = new Canvas(resultsPanel, SWT.NONE);
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		data.horizontalSpan = 4;
@@ -188,7 +216,10 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		drawingArea.addPaintListener(e -> repaint(e));
 		
 		
-		// Initialise the scattering quantities
+		
+		/*
+		 * Initialise the scattering quantities.
+		 */
 		ArrayList<ScatteringQuantity> quantities = new ArrayList<>();
 		quantities.add(new Q());
 		quantities.add(new D());
@@ -203,9 +234,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		scrolledComposite.setContent(resultsPanel);	
 		scrolledComposite.setMinSize(resultsPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
-		
-		// Initialise values.
-		updateValues();
+		init();
 	}
 
 
@@ -225,12 +254,11 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 			 return;
 		 }
 		
-		Double requestedRangeMax = controller.getRequestedRangeMax(currentQuantity, currentUnit);
-		Double requestedRangeMin = controller.getRequestedRangeMin(currentQuantity, currentUnit);
+		NumericRange requestedRange = controller.getRequestedRange(currentQuantity, currentUnit);
 		NumericRange fullRange = controller.getFullRange(currentQuantity, currentUnit);
 		NumericRange visibleRange = controller.getVisibleRange(currentQuantity, currentUnit);
 		
-		 if(requestedRangeMax == null || requestedRangeMin == null || fullRange == null || visibleRange == null) 
+		 if(requestedRange == null || fullRange == null || visibleRange == null) 
 			 return;
 		 
 		 if(controller.getIsSatisfied()) 
@@ -240,8 +268,8 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		 
 		 
          double slope = (bounds.width-120)/ (Math.log(fullRange.getMax()) - Math.log(fullRange.getMin()));
-         double minRequestedX = slope*(Math.log(requestedRangeMin) - Math.log(fullRange.getMin())) + 60;
-         double maxRequestedX = slope*(Math.log(requestedRangeMax) - Math.log(fullRange.getMin())) + 60;
+         double minRequestedX = slope*(Math.log(requestedRange.getMin()) - Math.log(fullRange.getMin())) + 60;
+         double maxRequestedX = slope*(Math.log(requestedRange.getMax()) - Math.log(fullRange.getMin())) + 60;
          double minValueX = slope*(Math.log(visibleRange.getMin()) - Math.log(fullRange.getMin())) + 60;
          
          double maxValueX = slope*(Math.log(visibleRange.getMax()) - Math.log(fullRange.getMin())) + 60;
@@ -258,71 +286,61 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent e) {
-		try{
-			isUserEdited = false;
-			
-			if(e.getPropertyName().equals(ResultConstants.REQUESTED_Q_RANGE_MIN_PROPERTY))
-				updateRequestedQRangeMin();
-			else if(e.getPropertyName().equals(ResultConstants.REQUESTED_Q_RANGE_MAX_PROPERTY))
-				updateRequestedQRangeMax();
-			else if(e.getPropertyName().equals(ResultConstants.VISIBLE_Q_RANGE_PROPERTY))
-				updateVisibleQRange();
-			else if(e.getPropertyName().equals(AbstractResultsController.BEAMLINE_CONFIGURATION_PROPERTY))
-				doubleTheta.setWavelength(controller.getBeamlineConfiguration().getWavelength());
-		} finally {
-			isUserEdited = true;
-			drawingArea.redraw();
-			resultsPanel.layout();
-		}
+		if(!isUserEdited) return;
+		
+		if(e.getPropertyName().equals(ResultConstants.REQUESTED_Q_RANGE_PROPERTY))
+			updateRequestedQRange();
+		else if(e.getPropertyName().equals(ResultConstants.VISIBLE_Q_RANGE_PROPERTY))
+			updateVisibleQRange();
+		else if(e.getPropertyName().equals(AbstractResultsController.BEAMLINE_CONFIGURATION_PROPERTY))
+			doubleTheta.setWavelength(controller.getBeamlineConfiguration().getWavelength());
+	
+		drawingArea.redraw();
+		resultsPanel.layout();	
 	}
 	
 	
-	private void updateValues() {
-		updateRequestedMinMax();
+	/*
+	 * Gets any already existing results from the controller, displays them in the UI, 
+	 * and initialises the private fields that hold the current state of the UI.
+	 */
+	private void init() {
+		updateRequestedQRange();
 		updateVisibleQRange();
 		drawingArea.redraw();
 		resultsPanel.layout();
 	}
 	
 	
-	// Updates the requested values. Ensures requested min <= requested max.
-	private void updateRequestedMinMax() {
-		Double requestedMin = controller.getRequestedRangeMin(currentQuantity, currentUnit);
-		Double requestedMax = controller.getRequestedRangeMax(currentQuantity, currentUnit);
+	/**
+	 * Gets the requested range from the controller and displays it.
+	 * Should be used only when the requested range changed due to an external action,
+	 * (e.g. the requested values were changed in another view),
+	 * otherwise use the requested min/max values stored locally inside this class' private fields.
+	 */
+	private void updateRequestedQRange() {
+		NumericRange newRequestedRange = controller.getRequestedRange(currentQuantity, currentUnit);
 		
-		if(requestedMin != null && requestedMax != null && requestedMin > requestedMax) {
-			// Swap the values
-			double temp = requestedMin;
-			requestedMin = requestedMax;
-			requestedMax = temp;
+		// If the range is null (which could possibly be because the user input was invalid), 
+		// do not overwrite the text fields - allow the user to correct the input.
+		if(newRequestedRange == null) return;
+		
+		try {
+			isUserEdited = false;
+			
+			requestedMin = newRequestedRange.getMin();
+			requestedMinValueText.setText(TextUtil.format(requestedMin));
+			requestedMax = newRequestedRange.getMax();
+			requestedMaxValueText.setText(TextUtil.format(requestedMax));
+		} finally {
+			isUserEdited = true;
 		}
-		
-		// This will cause the values in the model to get updated as well.
-		if(requestedMax != null) requestedMaxValueText.setText(TextUtil.format(requestedMax));
-		if(requestedMin != null) requestedMinValueText.setText(TextUtil.format(requestedMin));
 	}
 	
 	
-	// Updates just the min requested value. Does not ensure requested min <= requested max.
-	private void updateRequestedQRangeMin() {
-		Double requestedMin = controller.getRequestedRangeMin(currentQuantity, currentUnit);
-		if(requestedMin == null) return;
-		// Won't overwrite the value if it's the same as before.
-		if(TextUtil.equalAsDoubles(TextUtil.format(requestedMin), requestedMinValueText.getText())) return;
-		requestedMinValueText.setText(TextUtil.format(requestedMin));
-	}
-	
-	
-	// Updates just the max requested value. Does not ensure requested min <= requested max.
-	private void updateRequestedQRangeMax() {
-		Double requestedMax = controller.getRequestedRangeMax(currentQuantity, currentUnit);
-		if(requestedMax == null) return;
-		// Won't overwrite the value if it's the same as before.
-		if(TextUtil.equalAsDoubles(TextUtil.format(requestedMax), requestedMaxValueText.getText())) return;
-		requestedMaxValueText.setText(TextUtil.format(requestedMax));
-	}
-	
-	
+	/**
+	 * Gets the visible range from the controller and displays it.
+	 */
 	private void updateVisibleQRange(){
 		NumericRange newRange = controller.getVisibleRange(currentQuantity, currentUnit);
 		
@@ -339,6 +357,68 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		Double newMaxValue = newRange.getMax();
 		if(!TextUtil.equalAsDoubles(TextUtil.format(newMaxValue), maxValue.getText())) 
 			maxValue.setText(TextUtil.format(newMaxValue));
+	}
+	
+	
+	/**
+	 * Ensures requested min <= requested max.
+	 */
+	private void checkRequestedMinMax() {
+		if(requestedMin != null && requestedMax != null && requestedMin > requestedMax) {
+			// Swap the values
+			double temp = requestedMin;
+			requestedMin = requestedMax;
+			requestedMax = temp;
+		}
+	}
+		
+	
+	/**
+	 * Displays the locally stored requested min/max values in the UI without triggering 
+	 * a notification to the controller that the range has changed, because it hasn't.
+	 */
+	private void showRequestedMinMax() {
+		checkRequestedMinMax();
+		
+		try {
+			isUserEdited = false;
+			if(requestedMax != null) requestedMaxValueText.setText(TextUtil.format(requestedMax));
+			if(requestedMin != null) requestedMinValueText.setText(TextUtil.format(requestedMin));
+		} finally {
+			isUserEdited = true;
+		}
+		
+		resultsPanel.layout();
+		drawingArea.redraw();
+	}
+	
+	
+	/**
+	 * Parses the user input and updates the results accordingly.
+	 * Does not check whether the input makes sense, i.e. whether requested min 
+	 * is less than requested max.
+	 */
+	private void requestedRangeTextInputChanged() {
+		if(!isUserEdited) return;
+		
+		requestedMax = TextUtil.parseDouble(requestedMaxValueText.getText());
+		requestedMin = TextUtil.parseDouble(requestedMinValueText.getText());
+		
+		try {
+			// Want to update the value in the model, but ignore the subsequent notification that will
+			// be sent by the model via the propertyChange() method.
+			isUserEdited = false;
+			// Only update the range when both boundary values are specified.
+			// Otherwise the range is invalid so set it to null. 
+			if(requestedMax != null && requestedMin != null) 
+				controller.updateRequestedRange(new NumericRange(requestedMin, requestedMax), currentQuantity, currentUnit);
+			else
+				controller.updateRequestedQRange(null);
+		} finally {
+			isUserEdited = true;
+			resultsPanel.layout();
+			drawingArea.redraw();
+		}
 	}
 	
 	

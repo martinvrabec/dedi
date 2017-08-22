@@ -1,5 +1,7 @@
 package dedi.configuration.calculations.results.controllers;
 
+import java.beans.PropertyChangeEvent;
+import java.util.Observable;
 import java.util.Observer;
 
 import javax.measure.unit.Unit;
@@ -16,52 +18,51 @@ import dedi.configuration.calculations.scattering.ScatteringQuantity;
 
 
 public abstract class AbstractResultsController extends AbstractController<IResultsModel> implements Observer {
+	/**
+	 * The beamline configuration for which the results should be calculated.
+	 */
 	protected BeamlineConfiguration configuration;
 	
-	// PROPERTY constant used to notify listeners that the beamline configuration has changed.
+	/**
+	 * PROPERTY constant used to notify listeners that the beamline configuration has changed.
+	 */
 	public static final String BEAMLINE_CONFIGURATION_PROPERTY = "BeamlineConfiguration";
 	
 	
+	/**
+	 * Constructs a new controller, with no models or views registered with it, initially.
+	 * All interested views need to register themselves with the controller;
+	 * and also need to register models where the results should be stored.
+	 * 
+	 * @param configuration - the beamline configuration for which the results will be calculated.
+	 */
 	public AbstractResultsController(BeamlineConfiguration configuration) {
 		this.configuration = configuration;
 		configuration.addObserver(this);
 	}
 	
 	
-	// Methods that allow views to set the requested range entered by the user.
-
-	public abstract void updateRequestedQRangeMin(Double minRequested);
-	
-	public abstract void updateRequestedQRangeMax(Double maxRequested);
-	
-	
-	public void updateRequestedMin(String newMin, ScatteringQuantity quantity, Unit<?> unit){
-		double minValue;
-		try{
-			minValue = Double.parseDouble(newMin);
-			quantity.setValue(Amount.valueOf(minValue, unit));
-			updateRequestedQRangeMin(quantity.toQ().getValue().to(Q.BASE_UNIT).getEstimatedValue());
-		} catch(NumberFormatException ex){
-			updateRequestedQRangeMin(null);
-		}
-	}
-	
-	
-	public void updateRequestedMax(String newMax, ScatteringQuantity quantity, Unit<?> unit){
-		double maxValue;
-		try{
-			maxValue = Double.parseDouble(newMax);
-			quantity.setValue(Amount.valueOf(maxValue, unit));
-			updateRequestedQRangeMax(quantity.toQ().getValue().to(Q.BASE_UNIT).getEstimatedValue());
-		} catch(NumberFormatException ex){
-			updateRequestedQRangeMax(null);
-		}
-	}
-	
-	
-	
-	// Convenience setter methods that can be used by concrete controllers to update the data in the registered models.
+	@Override
+	public void update(Observable o, Object arg) {
+		// Notify views that the BeamlineConfiguration changed.
+		propertyChange(new PropertyChangeEvent(configuration, AbstractResultsController.BEAMLINE_CONFIGURATION_PROPERTY, null, configuration));
 		
+		// Compute the new results and store them in the models.
+		computeQRanges();
+	}
+	
+	
+	/**
+	 * Computes and sets the results.
+	 */
+	protected abstract void computeQRanges();
+	
+	
+	
+	/*
+	 * Convenience setter methods that can be used by concrete controllers to update the data in the registered models.
+	 */
+	
 	protected void setVisibleQRange(NumericRange range, Vector2d startPt, Vector2d endPt){
 		for(IResultsModel model : registeredModels) model.setVisibleQRange(range, startPt, endPt);
 	}
@@ -72,21 +73,31 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	}
 	
 	
-	protected void setRequestedQRangeMin(Double min, Vector2d startPt){
-		for(IResultsModel model : registeredModels) model.setRequestedQRangeMin(min, startPt);
+	protected void setRequestedQRange(NumericRange range, Vector2d startPt, Vector2d endPt){
+		for(IResultsModel model : registeredModels) model.setRequestedQRange(range, startPt, endPt);
+	}
+
+	
+	
+	/*
+	 * Methods that allow views to set the requested range entered by the user.
+	 */
+	
+	public abstract void updateRequestedQRange(NumericRange requestedRange);
+	
+	
+	public void updateRequestedRange(NumericRange requestedRange, ScatteringQuantity quantity, Unit<?> unit) {
+		updateRequestedQRange(convertRange(requestedRange, quantity, new Q(), unit, Q.BASE_UNIT));
 	}
 	
 	
-	protected void setRequestedQRangeMax(Double max, Vector2d endPt){
-		for(IResultsModel model : registeredModels) model.setRequestedQRangeMax(max, endPt);
-	}
 	
-	
-	
-	// Getter methods that allow views to access the data stored in the models.
-	// They allow views to be entirely independent of the underlying models, and interact only with the controller.
-	// The controller also provides convenient methods for converting the model data into different forms that might 
-	// be required by the views, such as converting q values to other scattering quantities.
+	/*
+	 * Getter methods that allow views to access the data stored in the models.
+	 * They allow views to be entirely independent of the underlying models, and interact only with the controller.
+	 * The controller also provides convenient methods for converting the model data into different forms that might 
+	 * be required by the views, such as converting q values to other scattering quantities (see below).
+	 */
 	
 	
 	public NumericRange getVisibleQRange() {
@@ -99,13 +110,8 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	}
 	
 
-	public Double getRequestedQRangeMin() {
-		return  (Double) getModelProperty(ResultConstants.REQUESTED_Q_RANGE_MIN_PROPERTY);
-	}
-	
-	
-	public Double getRequestedQRangeMax() {
-		return  (Double) getModelProperty(ResultConstants.REQUESTED_Q_RANGE_MAX_PROPERTY);
+	public NumericRange getRequestedQRange() {
+		return  (NumericRange) getModelProperty(ResultConstants.REQUESTED_Q_RANGE_PROPERTY);
 	}
 	
 	
@@ -128,12 +134,21 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 		return (Vector2d) getModelProperty(ResultConstants.REQUESTED_RANGE_END_POINT_PROPERTY);
 	}
 
-
+	
+	public abstract Double getQResolution(double qValue);
+	
+	
+	/**
+	 * @return Whether the requested q range is within the visible q range.
+	 */
 	public boolean getIsSatisfied() {
 		return (boolean) getModelProperty(ResultConstants.IS_SATISFIED_PROPERTY);
 	}
 
 
+	/**
+	 * @return Whether there is a visible q range.
+	 */
 	public boolean getHasSolution() {
 		return (boolean) getModelProperty(ResultConstants.HAS_SOLUTION_PROPERTY);
 	}
@@ -147,6 +162,9 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	}
 	
 	
+	
+	// Methods that allow views to obtain the results in the required quantities and units.
+	
 	public NumericRange getVisibleRange(ScatteringQuantity quantity, Unit<?> unit) {
 		return convertRange(getVisibleQRange(), new Q(), quantity, Q.BASE_UNIT, unit);
 	}
@@ -157,17 +175,12 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	}
 	
 	
-	public Double getRequestedRangeMin(ScatteringQuantity quantity, Unit<?> unit) {
-		return convertValue(getRequestedQRangeMin(), new Q(), quantity, Q.BASE_UNIT, unit);
+	public NumericRange getRequestedRange(ScatteringQuantity quantity, Unit<?> unit) {
+		return convertRange(getRequestedQRange(), new Q(), quantity, Q.BASE_UNIT, unit);
 	}
 	
 	
-	public Double getRequestedRangeMax(ScatteringQuantity quantity, Unit<?> unit) {
-		return convertValue(getRequestedQRangeMax(), new Q(), quantity, Q.BASE_UNIT, unit);
-	}
-	
-	
-	private NumericRange convertRange(NumericRange range, ScatteringQuantity oldQuantity, ScatteringQuantity newQuantity, 
+	public NumericRange convertRange(NumericRange range, ScatteringQuantity oldQuantity, ScatteringQuantity newQuantity, 
             Unit<?> oldUnit, Unit<?> newUnit){
 		
 		if(range == null) return null;
@@ -179,7 +192,7 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	}
 	
 	
-	private Double convertValue(Double value, ScatteringQuantity oldQuantity, ScatteringQuantity newQuantity, 
+	public Double convertValue(Double value, ScatteringQuantity oldQuantity, ScatteringQuantity newQuantity, 
                            Unit<?> oldUnit, Unit<?> newUnit){
 		if(value == null) return null;
 		oldQuantity.setValue(Amount.valueOf(value, oldUnit));
@@ -187,7 +200,4 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 		
 		return (newSQ == null) ? null : newSQ.getValue().to(newUnit).getEstimatedValue();
 	}
-	
-	
-	public abstract Double getQResolution(double qValue);
 }
