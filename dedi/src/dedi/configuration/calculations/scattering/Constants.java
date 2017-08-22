@@ -10,19 +10,19 @@ public class Constants {
 	/**
 	 * Holds the speed of light in vacuum (exact). 299792458m/s
 	 */
-	public final static Amount<Velocity> c = Amount.valueOf(299792458, SI.METERS_PER_SECOND);
+	public static final Amount<Velocity> c = Amount.valueOf(299792458, SI.METERS_PER_SECOND);
 
 	/**
 	 * Holds the Planck constant. 6.6260693E-34 Js
 	 * 
 	 * @see <a href="http://en.wikipedia.org/wiki/Planck_constant"> Wikipedia: Plank%27s constant</a>
 	 */
-	public final static Amount<?> h = Amount.valueOf(6.6260693E-34, 0.0000011E-34, SI.JOULE.times(SI.SECOND));
+	public static final Amount<?> h = Amount.valueOf(6.6260693E-34, 0.0000011E-34, SI.JOULE.times(SI.SECOND));
 
 	/**
 	 * Holds the elementary charge (positron charge). 1.60217653E-19C
 	 * 
 	 * @see <a href="http://en.wikipedia.org/wiki/Elementary_charge"> Wikipedia: Elementary Charge</a>
 	 */
-	public final static Amount<ElectricCharge> e = Amount.valueOf(1.60217653E-19, 0.00000014E-19, SI.COULOMB);
+	public static final Amount<ElectricCharge> e = Amount.valueOf(1.60217653E-19, 0.00000014E-19, SI.COULOMB);
 }

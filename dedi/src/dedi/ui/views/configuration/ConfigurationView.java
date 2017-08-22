@@ -35,16 +35,13 @@ import dedi.ui.widgets.units.TextWithUnits;
 public class ConfigurationView extends ViewPart implements Observer {
 	
 	private BeamlineConfigurationTemplatesPanel templatesPanel;
+	private BeamlineQuantityPanel beamlineQuantityPanel;
 	
 	private TextWithUnits<Angle> angle;
 	private Spinner cameraLengthValueSpinner;
 
 	public static final String ID = "dedi.configurationpanel";
 	
-	
-	public ConfigurationView() {
-	}
-
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -65,7 +62,7 @@ public class ConfigurationView extends ViewPart implements Observer {
 	    new DetectorPanel(mainPanel, templatesPanel);
 		new BeamstopPanel(mainPanel, templatesPanel);
 		new CameraTubePanel(mainPanel, templatesPanel);
-		new BeamlineQuantityPanel(mainPanel, templatesPanel); 
+		beamlineQuantityPanel = new BeamlineQuantityPanel(mainPanel, templatesPanel); 
 		
 		
 		Group cameraGroup = GuiHelper.createGroup(mainPanel, "", 3);
@@ -75,14 +72,12 @@ public class ConfigurationView extends ViewPart implements Observer {
 		cameraLengthValueSpinner.addModifyListener( e -> ResultsService.getInstance().getBeamlineConfiguration().
 				                                         setCameraLength(cameraLengthValueSpinner.getSelection()/100.0));
 		cameraLengthValueSpinner.setValues(145, 120, 970, 2, 25, 1);
-		/*ResultsService.getInstance().getBeamlineConfiguration().setMinCameraLength(1.2);
-		ResultsService.getInstance().getBeamlineConfiguration().setMaxCameraLength(9.7);*/
 		GuiHelper.createLabel(cameraGroup, "m");
 		
 		
 		Group angleGroup = GuiHelper.createGroup(mainPanel, "", 3);
 		ComboUnitsProvider<Angle> combo = new ComboUnitsProvider<>(angleGroup, new ArrayList<>(Arrays.asList(SI.RADIAN, NonSI.DEGREE_ANGLE)));
-		angle = new TextWithUnits<>(angleGroup, "Angle", combo);  
+		angle = new TextWithUnits<>(angleGroup, "Angle:", combo);  
 		angle.addAmountChangeListener(() -> angleChanged());
 		angle.setValue(Amount.valueOf(90, NonSI.DEGREE_ANGLE));
 		GridDataFactory.fillDefaults().span(2, 1).applyTo(angle);
@@ -110,6 +105,7 @@ public class ConfigurationView extends ViewPart implements Observer {
 	
 	@Override
 	public void setFocus() {
+		beamlineQuantityPanel.setFocus();
 	}
 	
 	

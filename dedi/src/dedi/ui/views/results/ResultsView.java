@@ -3,18 +3,20 @@ package dedi.ui.views.results;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.List;
+
 import javax.measure.unit.Unit;
 
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -27,6 +29,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.part.ViewPart;
 
+import dedi.configuration.calculations.NumericRange;
+import dedi.configuration.calculations.results.controllers.AbstractResultsController;
+import dedi.configuration.calculations.results.models.ResultConstants;
+import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.configuration.calculations.scattering.D;
 import dedi.configuration.calculations.scattering.DoubleTheta;
 import dedi.configuration.calculations.scattering.Q;
@@ -36,11 +42,14 @@ import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
 
 public class ResultsView extends ViewPart implements PropertyChangeListener {
-	private AbstractResultsViewController controller;
+	private AbstractResultsController controller;
 	
+	private ScatteringQuantity currentQuantity;
+	private List<Unit<?>> currentUnits;
+	private Unit<?> currentUnit;
+	
+	// UI elements
 	private Composite resultsPanel;
-	private Combo scatteringQuantitiesCombo;
-	private ComboViewer scatteringQuantitiesComboViewer;
 	private ComboViewer scatteringQuantitiesUnitsCombo;
 	private Label minValueLabel;
 	private Label maxValueLabel;
@@ -52,6 +61,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 	private Text requestedMaxValueText;
 	private Canvas drawingArea;
 	
+	// One of the scattering quantities 
 	private DoubleTheta doubleTheta;
 	
 	private boolean isUserEdited = true;
@@ -60,19 +70,8 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 	
 	
 	public ResultsView() {
-		ResultsViewModel model = createModel();
-		controller = createController(model);
+		controller = ResultsService.getInstance().getController();
 		controller.addView(this);
-	}
-	
-	
-	public AbstractResultsViewController createController(ResultsViewModel model){
-		return new DefaultResultsViewController1(model);
-	}
-	
-	
-	public ResultsViewModel createModel(){
-		return new ResultsViewModel();
 	}
 	
 	
@@ -84,15 +83,16 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		scrolledComposite.setExpandVertical(true);
 		scrolledComposite.setExpandHorizontal(true);
 		
-		
 		resultsPanel = new Composite(scrolledComposite, SWT.NONE);
 		resultsPanel.setLayout(new GridLayout(3, true));
 		
-		
 		GuiHelper.createLabel(resultsPanel, "Scattering quantity:");
 		
-		scatteringQuantitiesCombo = new Combo(resultsPanel, SWT.READ_ONLY | SWT.RIGHT);
-		scatteringQuantitiesComboViewer = new ComboViewer(scatteringQuantitiesCombo);
+		
+		// Scattering quantities and units combos
+		
+		Combo scatteringQuantitiesCombo = new Combo(resultsPanel, SWT.READ_ONLY | SWT.RIGHT);
+		ComboViewer scatteringQuantitiesComboViewer = new ComboViewer(scatteringQuantitiesCombo);
 		scatteringQuantitiesComboViewer.setContentProvider(ArrayContentProvider.getInstance());
 		scatteringQuantitiesComboViewer.setLabelProvider(new LabelProvider(){
 			@Override
@@ -104,59 +104,81 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 				return super.getText(element);
 			}
 		});
-		scatteringQuantitiesCombo.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		scatteringQuantitiesComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				if(!isUserEdited) return;
-				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-			    if (selection.size() > 0){
-			    	controller.updateCurrentQuantity((ScatteringQuantity) selection.getFirstElement());
-			    }
-			}
-		});
 		
+		scatteringQuantitiesCombo.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+		scatteringQuantitiesComboViewer.addSelectionChangedListener(e -> {
+			IStructuredSelection selection = (IStructuredSelection) e.getSelection();
+		    if (selection.size() > 0){
+		    	currentQuantity = (ScatteringQuantity) selection.getFirstElement();
+		    	String quantityName = currentQuantity.getQuantityName();
+		    	minValueLabel.setText("Min " + quantityName + " value:");
+				maxValueLabel.setText("Max " + quantityName + " value:");
+				requestedMinValueLabel.setText("Requested min " + quantityName + " value:");
+				requestedMaxValueLabel.setText("Requested max " + quantityName + " value:");
+		    	currentUnits = currentQuantity.getUnits();
+		    	scatteringQuantitiesUnitsCombo.setInput(currentUnits);
+		    	scatteringQuantitiesUnitsCombo.setSelection(new StructuredSelection(currentUnits.get(0)));
+		    	// Assumes that a scattering quantity won't have an empty set of units.
+		    }
+		});
 		
 		
 		scatteringQuantitiesUnitsCombo = GuiHelper.createUnitsCombo(resultsPanel, null);
-		scatteringQuantitiesUnitsCombo.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event){
-				if(!isUserEdited) return;
-				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-				if (selection.size() > 0){
-					 controller.updateCurrentUnit((Unit<?>) selection.getFirstElement());
-				}
+		scatteringQuantitiesUnitsCombo.addSelectionChangedListener(e -> {
+			IStructuredSelection selection = (IStructuredSelection) e.getSelection();
+			if (selection.size() > 0){
+				 currentUnit = (Unit<?>) selection.getFirstElement();
+				 updateValues();  // Convert all the values to the new unit.
 			}
 		});
 		
+		
+		
+		// UI elements for displaying results
 		
 		minValueLabel = GuiHelper.createLabel(resultsPanel, "");
 		minValue = GuiHelper.createLabel(resultsPanel, "");
 		minValue.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		new Label(resultsPanel, SWT.NONE);
+		new Label(resultsPanel, SWT.NONE);  // Placeholder
 		
 		
 		maxValueLabel = GuiHelper.createLabel(resultsPanel, "");
 		maxValue = GuiHelper.createLabel(resultsPanel, "");
 		maxValue.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
-		new Label(resultsPanel, SWT.NONE);
+		new Label(resultsPanel, SWT.NONE); // Placeholder
 		
 		
 		requestedMinValueLabel = GuiHelper.createLabel(resultsPanel, "");
 		requestedMinValueText = GuiHelper.createText(resultsPanel);
 		GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).hint(70, 20).applyTo(requestedMinValueText);
-		requestedMinValueText.addModifyListener(e -> {if(isUserEdited) controller.updateRequestedMin(requestedMinValueText.getText());});
-		new Label(resultsPanel, SWT.NONE);
+		requestedMinValueText.addModifyListener(e -> {
+			if(isUserEdited) controller.updateRequestedMin(requestedMinValueText.getText(), currentQuantity, currentUnit);
+		});
+		requestedMinValueText.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				updateRequestedMinMax(); // Make sure requested min <= requested max.
+			}
+		}); 
+		new Label(resultsPanel, SWT.NONE); // Placeholder
 		
 		
 		requestedMaxValueLabel = GuiHelper.createLabel(resultsPanel, "");
 		requestedMaxValueText = GuiHelper.createText(resultsPanel);
 		GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).hint(70, 20).applyTo(requestedMaxValueText);
-		requestedMaxValueText.addModifyListener(e -> {if(isUserEdited) controller.updateRequestedMax(requestedMaxValueText.getText());});
-		new Label(resultsPanel, SWT.NONE);
+		requestedMaxValueText.addModifyListener(e -> {
+			if(isUserEdited) controller.updateRequestedMax(requestedMaxValueText.getText(), currentQuantity, currentUnit);
+		});
+		requestedMaxValueText.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				updateRequestedMinMax(); // Make sure requested min <= requested max.
+			}
+		}); 
+		new Label(resultsPanel, SWT.NONE); // Placeholder
 		
 		
+		// The drawing that displays the results
 		drawingArea = new Canvas(resultsPanel, SWT.NONE);
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		data.horizontalSpan = 4;
@@ -166,59 +188,63 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		drawingArea.addPaintListener(e -> repaint(e));
 		
 		
+		// Initialise the scattering quantities
 		ArrayList<ScatteringQuantity> quantities = new ArrayList<>();
 		quantities.add(new Q());
 		quantities.add(new D());
 		quantities.add(new S());
 		doubleTheta = new DoubleTheta();
 		quantities.add(doubleTheta);
-		controller.updateQuantities(quantities);
+		scatteringQuantitiesComboViewer.setInput(quantities);
+        scatteringQuantitiesComboViewer.setSelection(new StructuredSelection(quantities.get(0)));		
 		
-		
+        
 		resultsPanel.layout();
 		scrolledComposite.setContent(resultsPanel);	
 		scrolledComposite.setMinSize(resultsPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
-		controller.init();
+		
+		// Initialise values.
+		updateValues();
 	}
 
-	
+
 	@Override
 	public void setFocus() {
+		requestedMinValueText.setFocus();
 	}
 
 	
 	public void repaint(PaintEvent e){
 		Rectangle bounds = drawingArea.getClientArea();
+		
 		e.gc.setForeground(e.display.getSystemColor(SWT.COLOR_BLACK));
 		
-		if(controller.hasSolution() == false) {
+		if(!controller.getHasSolution()) {
 			 e.gc.drawText("No solution", bounds.width/2 - 40, bounds.height/2 - 10);
 			 return;
 		 }
 		
-		 if(controller.getRequestedMax() == null || controller.getRequestedMin() == null ||
-		    controller.getFullRangeMax() == null || controller.getFullRangeMin() == null) return;
+		Double requestedRangeMax = controller.getRequestedRangeMax(currentQuantity, currentUnit);
+		Double requestedRangeMin = controller.getRequestedRangeMin(currentQuantity, currentUnit);
+		NumericRange fullRange = controller.getFullRange(currentQuantity, currentUnit);
+		NumericRange visibleRange = controller.getVisibleRange(currentQuantity, currentUnit);
+		
+		 if(requestedRangeMax == null || requestedRangeMin == null || fullRange == null || visibleRange == null) 
+			 return;
 		 
-		 if(controller.isSatisfied()) e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_GREEN));
-		 else e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_RED));
+		 if(controller.getIsSatisfied()) 
+			 e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_GREEN));
+		 else 
+			 e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_RED));
 		 
 		 
-         double slope = (bounds.width-120)/
-				        		 (Math.log(controller.getFullRangeMax()) - 
-				        		  Math.log(controller.getFullRangeMin()));
+         double slope = (bounds.width-120)/ (Math.log(fullRange.getMax()) - Math.log(fullRange.getMin()));
+         double minRequestedX = slope*(Math.log(requestedRangeMin) - Math.log(fullRange.getMin())) + 60;
+         double maxRequestedX = slope*(Math.log(requestedRangeMax) - Math.log(fullRange.getMin())) + 60;
+         double minValueX = slope*(Math.log(visibleRange.getMin()) - Math.log(fullRange.getMin())) + 60;
          
-         double minRequestedX = slope*(Math.log(controller.getRequestedMin()) - 
-        		  Math.log(controller.getFullRangeMin())) + 60;
-         
-         double maxRequestedX = slope*(Math.log(controller.getRequestedMax()) - 
-        		  Math.log(controller.getFullRangeMin())) + 60;
-         
-         double minValueX = slope*(Math.log(controller.getVisibleMin()) - 
-        		  Math.log(controller.getFullRangeMin())) + 60;
-         
-         double maxValueX = slope*(Math.log(controller.getVisibleMax()) - 
-        		  Math.log(controller.getFullRangeMin())) + 60;
+         double maxValueX = slope*(Math.log(visibleRange.getMax()) - Math.log(fullRange.getMin())) + 60;
          
          e.gc.fillRectangle((int) minValueX, bounds.height/2, (int) (maxValueX - minValueX), bounds.height/2);
          e.gc.drawLine((int) minRequestedX, 5, (int) minRequestedX, bounds.height);
@@ -235,75 +261,86 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		try{
 			isUserEdited = false;
 			
-			// Deal with special cases
-			if(e.getOldValue() != null && e.getNewValue() != null && e.getOldValue().equals(e.getNewValue())) return;
-			if(e.getOldValue() == null && e.getNewValue() == null) return;
-			
-			if(e.getPropertyName().equals(ResultsViewConstants.CURRENT_QUANTITY_PROPERTY)){
-				// If the two quantities have the same class, then they are equivalent as far as the quantities combo is concerned.
-				if(e.getOldValue() != null && e.getNewValue() != null && e.getNewValue().getClass().equals(e.getOldValue().getClass())) return;
-				ScatteringQuantity currentQuantity = (ScatteringQuantity) e.getNewValue();
-				if(currentQuantity != null){
-					minValueLabel.setText("Min " + currentQuantity.getQuantityName() + " value:");
-					maxValueLabel.setText("Max " + currentQuantity.getQuantityName() + " value:");
-					requestedMinValueLabel.setText("Requested min " + currentQuantity.getQuantityName() + " value:");
-					requestedMaxValueLabel.setText("Requested max " + currentQuantity.getQuantityName() + " value:");
-				} else {
-					minValueLabel.setText("");
-					maxValueLabel.setText("");
-					requestedMinValueLabel.setText("");
-					requestedMaxValueLabel.setText("");
-				}
-				scatteringQuantitiesComboViewer.setSelection(new StructuredSelection(currentQuantity));
-			}
-			else if(e.getPropertyName().equals(ResultsViewConstants.CURRENT_UNITS_PROPERTY)){
-				scatteringQuantitiesUnitsCombo.setInput(e.getNewValue());
-			}
-			else if(e.getPropertyName().equals(ResultsViewConstants.CURRENT_UNIT_PROPERTY)){
-				scatteringQuantitiesUnitsCombo.setSelection(new StructuredSelection(e.getNewValue()));
-			}
-			else if(e.getPropertyName().equals(ResultsViewConstants.QUANTITIES_PROPERTY)){
-				scatteringQuantitiesComboViewer.setInput(e.getNewValue());
-			}
-			else if(e.getPropertyName().equals(ResultsViewConstants.REQUESTED_MIN_PROPERTY)){
-				if(e.getNewValue() == null) return;
-				Double newValue = (Double) e.getNewValue();
-				if(TextUtil.equals(String.valueOf(newValue), requestedMinValueText.getText())) return;
-				requestedMinValueText.setText(TextUtil.format(newValue));
-			}
-			else if(e.getPropertyName().equals(ResultsViewConstants.REQUESTED_MAX_PROPERTY)){
-				if(e.getNewValue() == null) return;
-				Double newValue = (Double) e.getNewValue();
-				if(TextUtil.equals(String.valueOf(newValue), requestedMaxValueText.getText())) return;
-				requestedMaxValueText.setText(TextUtil.format(newValue));
-			}
-			else if(e.getPropertyName().equals(ResultsViewConstants.VISIBLE_MIN_PROPERTY)){
-				if(e.getNewValue() == null) {
-					minValue.setText("");
-					return;
-				}
-				Double newValue = (Double) e.getNewValue();
-				if(TextUtil.equals(String.valueOf(newValue), minValue.getText())) return;
-				minValue.setText(TextUtil.format(newValue));
-			}
-			else if(e.getPropertyName().equals(ResultsViewConstants.VISIBLE_MAX_PROPERTY)){
-				if(e.getNewValue() == null) {
-					maxValue.setText("");
-					return;
-				}
-				Double newValue = (Double) e.getNewValue();
-				if(TextUtil.equals(String.valueOf(newValue), maxValue.getText())) return;
-				maxValue.setText(TextUtil.format(newValue));
-			}
-			else if(e.getPropertyName().equals(ResultsViewConstants.BEAMLINE_CONFIGURATION_PROPERTY)){
-				doubleTheta.setWavelength(controller.getWavelength());
-			}
+			if(e.getPropertyName().equals(ResultConstants.REQUESTED_Q_RANGE_MIN_PROPERTY))
+				updateRequestedQRangeMin();
+			else if(e.getPropertyName().equals(ResultConstants.REQUESTED_Q_RANGE_MAX_PROPERTY))
+				updateRequestedQRangeMax();
+			else if(e.getPropertyName().equals(ResultConstants.VISIBLE_Q_RANGE_PROPERTY))
+				updateVisibleQRange();
+			else if(e.getPropertyName().equals(AbstractResultsController.BEAMLINE_CONFIGURATION_PROPERTY))
+				doubleTheta.setWavelength(controller.getBeamlineConfiguration().getWavelength());
 		} finally {
 			isUserEdited = true;
 			drawingArea.redraw();
 			resultsPanel.layout();
 		}
 	}
+	
+	
+	private void updateValues() {
+		updateRequestedMinMax();
+		updateVisibleQRange();
+		drawingArea.redraw();
+		resultsPanel.layout();
+	}
+	
+	
+	// Updates the requested values. Ensures requested min <= requested max.
+	private void updateRequestedMinMax() {
+		Double requestedMin = controller.getRequestedRangeMin(currentQuantity, currentUnit);
+		Double requestedMax = controller.getRequestedRangeMax(currentQuantity, currentUnit);
+		
+		if(requestedMin != null && requestedMax != null && requestedMin > requestedMax) {
+			// Swap the values
+			double temp = requestedMin;
+			requestedMin = requestedMax;
+			requestedMax = temp;
+		}
+		
+		// This will cause the values in the model to get updated as well.
+		if(requestedMax != null) requestedMaxValueText.setText(TextUtil.format(requestedMax));
+		if(requestedMin != null) requestedMinValueText.setText(TextUtil.format(requestedMin));
+	}
+	
+	
+	// Updates just the min requested value. Does not ensure requested min <= requested max.
+	private void updateRequestedQRangeMin() {
+		Double requestedMin = controller.getRequestedRangeMin(currentQuantity, currentUnit);
+		if(requestedMin == null) return;
+		// Won't overwrite the value if it's the same as before.
+		if(TextUtil.equals(TextUtil.format(requestedMin), requestedMinValueText.getText())) return;
+		requestedMinValueText.setText(TextUtil.format(requestedMin));
+	}
+	
+	
+	// Updates just the max requested value. Does not ensure requested min <= requested max.
+	private void updateRequestedQRangeMax() {
+		Double requestedMax = controller.getRequestedRangeMax(currentQuantity, currentUnit);
+		if(requestedMax == null) return;
+		// Won't overwrite the value if it's the same as before.
+		if(TextUtil.equals(TextUtil.format(requestedMax), requestedMaxValueText.getText())) return;
+		requestedMaxValueText.setText(TextUtil.format(requestedMax));
+	}
+	
+	
+	private void updateVisibleQRange(){
+		NumericRange newRange = controller.getVisibleRange(currentQuantity, currentUnit);
+		
+		if(newRange == null) {
+			minValue.setText("");
+			maxValue.setText("");
+			return;
+		}
+		
+		Double newMinValue = newRange.getMin();
+		if(!TextUtil.equals(TextUtil.format(newMinValue), minValue.getText())) 
+			minValue.setText(TextUtil.format(newMinValue));
+		
+		Double newMaxValue = newRange.getMax();
+		if(!TextUtil.equals(TextUtil.format(newMaxValue), maxValue.getText())) 
+			maxValue.setText(TextUtil.format(newMaxValue));
+	}
+	
 	
 	@Override
 	public void dispose() {

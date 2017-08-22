@@ -160,4 +160,8 @@ public class BeamlineQuantityPanel implements Observer {
 	              "\nMax wavelength: " + TextUtil.format(maxWavelength.doubleValue(wavelength.getCurrentUnit())));
 	}
 	
+	
+	public void setFocus() {
+		energy.setFocus();
+	}
 }
