@@ -6,7 +6,7 @@ import javax.measure.unit.SI;
 
 import org.jscience.physics.amount.Amount;
 
-public class Constants {
+public class PhysicalConstants {
 	/**
 	 * Holds the speed of light in vacuum (exact). 299792458m/s
 	 */

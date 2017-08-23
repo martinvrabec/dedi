@@ -27,7 +27,7 @@ import javax.measure.unit.Unit;
 
 import static dedi.configuration.calculations.scattering.BeamQuantity.Quantities;
 
-public class BeamlineQuantityPanel implements Observer {
+public class BeamPropertiesPanel implements Observer {
 	private BeamlineConfigurationTemplatesPanel templatesPanel;
 	
 	private TextWithUnits<Energy> energy;
@@ -46,11 +46,11 @@ public class BeamlineQuantityPanel implements Observer {
 
 	
 	
-	public BeamlineQuantityPanel(Composite parent, BeamlineConfigurationTemplatesPanel panel) {
+	public BeamPropertiesPanel(Composite parent, BeamlineConfigurationTemplatesPanel panel) {
 		templatesPanel = panel;
 		panel.addObserver(this);
 		
-		Group beamlineQuantityGroup = GuiHelper.createGroup(parent, "Beamline quantity", 3);
+		Group beamlineQuantityGroup = GuiHelper.createGroup(parent, "Beam properties", 3);
 		
 		minWavelength = Amount.valueOf(0, SI.METER);
 		maxWavelength = Amount.valueOf(Double.MAX_VALUE, SI.METER);

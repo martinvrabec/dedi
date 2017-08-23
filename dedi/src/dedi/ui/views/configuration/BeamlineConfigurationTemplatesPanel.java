@@ -37,7 +37,7 @@ public class BeamlineConfigurationTemplatesPanel extends Observable {
 		
 		beamlineConfigurationGroup = GuiHelper.createGroup(parent, TITLE, 2);
 		
-		GuiHelper.createLabel(beamlineConfigurationGroup, "Predefined beamline configuration");
+		GuiHelper.createLabel(beamlineConfigurationGroup, "Choose a predefined beamline configuration");
 		
 		Combo beamlineConfigurationsCombo = new Combo(beamlineConfigurationGroup, SWT.READ_ONLY | SWT.H_SCROLL);
 		ComboViewer beamlineConfigurationsComboViewer = new ComboViewer(beamlineConfigurationsCombo);

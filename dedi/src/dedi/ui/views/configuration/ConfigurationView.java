@@ -35,7 +35,7 @@ import dedi.ui.widgets.units.TextWithUnits;
 public class ConfigurationView extends ViewPart implements Observer {
 	
 	private BeamlineConfigurationTemplatesPanel templatesPanel;
-	private BeamlineQuantityPanel beamlineQuantityPanel;
+	private BeamPropertiesPanel beamlineQuantityPanel;
 	
 	private TextWithUnits<Angle> angle;
 	private Spinner cameraLengthValueSpinner;
@@ -62,7 +62,7 @@ public class ConfigurationView extends ViewPart implements Observer {
 	    new DetectorPanel(mainPanel, templatesPanel);
 		new BeamstopPanel(mainPanel, templatesPanel);
 		new CameraTubePanel(mainPanel, templatesPanel);
-		beamlineQuantityPanel = new BeamlineQuantityPanel(mainPanel, templatesPanel); 
+		beamlineQuantityPanel = new BeamPropertiesPanel(mainPanel, templatesPanel); 
 		
 		
 		Group cameraGroup = GuiHelper.createGroup(mainPanel, "", 3);
@@ -120,11 +120,11 @@ public class ConfigurationView extends ViewPart implements Observer {
 	public void update(Observable o, Object arg) {
 		BeamlineConfigurationBean beamlineConfiguration = templatesPanel.getPredefinedBeamlineConfiguration();
 		if(beamlineConfiguration == null) return;
-		cameraLengthValueSpinner.setValues((int) (beamlineConfiguration.getMinCameraLength()*100), 
-				                           (int) (beamlineConfiguration.getMinCameraLength()*100), 
-				                           (int) (beamlineConfiguration.getMaxCameraLength()*100), 2, 
-				                           (int) (beamlineConfiguration.getCameraLengthStepSize()*100), 1);
-		cameraLengthValueSpinner.setSelection((int) (beamlineConfiguration.getMinCameraLength()*100));
+		cameraLengthValueSpinner.setValues((int) Math.round(beamlineConfiguration.getMinCameraLength()*100), 
+				                           (int) Math.round(beamlineConfiguration.getMinCameraLength()*100), 
+				                           (int) Math.round(beamlineConfiguration.getMaxCameraLength()*100), 2, 
+				                           (int) Math.round(beamlineConfiguration.getCameraLengthStepSize()*100), 1);
+		cameraLengthValueSpinner.setSelection((int) Math.round(beamlineConfiguration.getMinCameraLength()*100));
 		ResultsService.getInstance().getBeamlineConfiguration().setMinCameraLength(beamlineConfiguration.getMinCameraLength());
 		ResultsService.getInstance().getBeamlineConfiguration().setMaxCameraLength(beamlineConfiguration.getMaxCameraLength());
 	}
