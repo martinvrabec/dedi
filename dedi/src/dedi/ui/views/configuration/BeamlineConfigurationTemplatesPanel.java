@@ -7,10 +7,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Combo;
@@ -24,76 +21,81 @@ import dedi.ui.GuiHelper;
 
 
 public class BeamlineConfigurationTemplatesPanel extends Observable {
-	
-	private List<BeamlineConfigurationBean> beamlineConfigurations;
+	/**
+	 * The currently selected beamline configuration template.
+	 */
 	private BeamlineConfigurationBean beamlineConfigurationTemplate;
-	private Group beamlineConfigurationGroup;
+	/**
+	 * The combo holding the list of predefined beamline configuration templates.
+	 */
+	private ComboViewer beamlineConfigurationsComboViewer;
 	
-	private final static String TITLE =  "Beamline configuration templates";
+	private static final String TITLE =  "Beamline configuration templates";
 	
 	
 	public BeamlineConfigurationTemplatesPanel(Composite parent) {
 		beamlineConfigurationTemplate = null;
 		
-		beamlineConfigurationGroup = GuiHelper.createGroup(parent, TITLE, 2);
+		Group beamlineConfigurationGroup = GuiHelper.createGroup(parent, TITLE, 2);
 		
 		GuiHelper.createLabel(beamlineConfigurationGroup, "Choose a predefined beamline configuration");
 		
+		/*
+		 * Create the combo with the list of predefined beamline configuration templates.
+		 */
 		Combo beamlineConfigurationsCombo = new Combo(beamlineConfigurationGroup, SWT.READ_ONLY | SWT.H_SCROLL);
-		ComboViewer beamlineConfigurationsComboViewer = new ComboViewer(beamlineConfigurationsCombo);
+		beamlineConfigurationsComboViewer = new ComboViewer(beamlineConfigurationsCombo);
 		beamlineConfigurationsComboViewer.setContentProvider(ArrayContentProvider.getInstance());
-		beamlineConfigurationsComboViewer.setLabelProvider(new LabelProvider(){
-			@Override
-			public String getText(Object element){
-				if(element instanceof BeamlineConfigurationBean){
-					BeamlineConfigurationBean beamlineConfiguration = (BeamlineConfigurationBean) element;
-					return beamlineConfiguration.getName();
-				}
-				return super.getText(element);
-			}
-		});
 		
 		
-		beamlineConfigurationsComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
+        /*
+         * Add a handler to the combo.
+         */
+		beamlineConfigurationsComboViewer.addSelectionChangedListener(event -> {
 				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
 			    if (selection.size() > 0){
 			    	beamlineConfigurationTemplate = (BeamlineConfigurationBean) selection.getFirstElement();
 			    	setChanged();
 			    	notifyObservers();
 			    }
-			}
 		});
 			
 		
-		beamlineConfigurations = BeamlineConfigurationPreferenceHelper.getBeamlineConfigurationsListFromPreferences();
-		beamlineConfigurationsComboViewer.setInput(beamlineConfigurations);
-		if(beamlineConfigurations != null && !beamlineConfigurations.isEmpty())
-			beamlineConfigurationsComboViewer.setSelection(new StructuredSelection(beamlineConfigurations.get(0)));
+		/*
+		 * Get the list of predefined beamline configuration templates from preferences.
+		 */
+		getBeamlineTemplatesFromPreferences();
 		
 		BeamlineConfigurationPreferenceHelper.addBeamlineConfigurationPropertyChangeListener(new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if(event.getProperty() == PreferenceConstants.BEAMLINE_CONFIGURATION){
-					beamlineConfigurations = BeamlineConfigurationPreferenceHelper.getBeamlineConfigurationsListFromPreferences();
-					beamlineConfigurationsComboViewer.setInput(beamlineConfigurations);
-					if(beamlineConfigurations != null && !beamlineConfigurations.isEmpty())
-						beamlineConfigurationsComboViewer.setSelection(new StructuredSelection(beamlineConfigurations.get(0)));
+					getBeamlineTemplatesFromPreferences();
 					beamlineConfigurationGroup.layout();
 				}
 				
 			}
 		});
 		
-		
 		beamlineConfigurationGroup.layout();
 	}
 
 	
-	public BeamlineConfigurationBean getPredefinedBeamlineConfiguration(){
-		return beamlineConfigurationTemplate;
+	/**
+	 * Gets the templates from preferences, sends them to the templates combo and selects the first one (if the list isn't empty).
+	 */
+	private void getBeamlineTemplatesFromPreferences() {
+		List<BeamlineConfigurationBean> beamlineConfigurations = BeamlineConfigurationPreferenceHelper.getBeamlineConfigurationsListFromPreferences();
+		beamlineConfigurationsComboViewer.setInput(beamlineConfigurations);
+		if(beamlineConfigurations != null && !beamlineConfigurations.isEmpty())
+			beamlineConfigurationsComboViewer.setSelection(new StructuredSelection(beamlineConfigurations.get(0)));
 	}
 	
 	
+	/**
+	 * @return The currently selected beamline configuration template.
+	 */
+	public BeamlineConfigurationBean getPredefinedBeamlineConfiguration(){
+		return beamlineConfigurationTemplate;
+	}
 }

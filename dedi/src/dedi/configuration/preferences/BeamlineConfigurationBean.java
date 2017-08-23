@@ -25,10 +25,6 @@ public class BeamlineConfigurationBean implements Serializable {
 	private double minCameraLength;
 	private double cameraLengthStepSize;
 	
-
-	public BeamlineConfigurationBean() {
-	}
-
 	
 	public String getName() {
 		return name;
@@ -157,5 +153,9 @@ public class BeamlineConfigurationBean implements Serializable {
 	public void setCameraLengthStepSize(double cameraLengthStepSize) {
 		this.cameraLengthStepSize = cameraLengthStepSize;
 	}
-
+	
+	@Override
+	public String toString() {
+		return name;
+	}
 }

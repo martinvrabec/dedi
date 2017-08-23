@@ -1,6 +1,5 @@
 package dedi.ui.views.configuration;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +12,7 @@ import javax.measure.unit.Unit;
 
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorConstants;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -35,16 +35,35 @@ import dedi.configuration.preferences.BeamlineConfigurationPreferenceHelper;
 import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
 
-
 public class DetectorPanel implements Observer {
-	private final static String TITLE =  "Detector";
+	private static final String TITLE =  "Detector";
 	
+	/**
+	 * The panel where users can choose one of predefined beamline configuration templates.
+	 */
 	private BeamlineConfigurationTemplatesPanel templatesPanel;
+	/**
+	 * The list of available detectors.
+	 */
 	private List<DiffractionDetector> detectors;
-	private Combo detectorTypesCombo; 
+	/**
+	 * A combo for choosing the detector.
+	 */
 	private ComboViewer detectorTypesComboViewer;
+	/**
+	 * A label for displaying the resolution of the currently selected detector.
+	 */
+	private Label resolutionValueLabel;
+	/**
+	 * A label for displaying the size of the pixels of the currently selected detector.
+	 */
+	private Label pixelSizeValueLabel;
+	/**
+	 * A combo for selecting the units in which to display the size of the pixels of the currently selected detector.
+	 */
+	private Combo unitsCombo;
 	
-	private final static List<Unit<Length>> PIXEL_SIZE_UNITS = new ArrayList<>(Arrays.asList(SI.MILLIMETRE, SI.MICRO(SI.METER)));
+	private static final List<Unit<Length>> PIXEL_SIZE_UNITS = new ArrayList<>(Arrays.asList(SI.MILLIMETRE, SI.MICRO(SI.METER)));
 
 	
 	public DetectorPanel(Composite parent, BeamlineConfigurationTemplatesPanel panel) {
@@ -52,56 +71,41 @@ public class DetectorPanel implements Observer {
 		panel.addObserver(this);
 		
 		Group detectorGroup = GuiHelper.createGroup(parent, TITLE, 3);
-
 		
-		//Label for the detector type
 		GuiHelper.createLabel(detectorGroup, "Detector type:");
 		
 		
-		detectorTypesCombo = new Combo(detectorGroup, SWT.READ_ONLY | SWT.H_SCROLL);
-		GridData data = new GridData();
-		data.horizontalSpan = 2;
-		detectorTypesCombo.setLayoutData(data);
+		/*
+		 * Create the combo for the detectors.
+		 */
+		Combo detectorTypesCombo = new Combo(detectorGroup, SWT.READ_ONLY | SWT.H_SCROLL);
+		GridDataFactory.fillDefaults().span(2, 1).applyTo(detectorTypesCombo);
 		detectorTypesComboViewer = new ComboViewer(detectorTypesCombo);
 		detectorTypesComboViewer.setContentProvider(ArrayContentProvider.getInstance());
-		detectorTypesComboViewer.setLabelProvider(new LabelProvider(){
-			@Override
-			public String getText(Object element){
-				if(element instanceof DiffractionDetector){
-					DiffractionDetector detector = (DiffractionDetector) element;
-					return detector.getDetectorName();
-				}
-				return super.getText(element);
-			}
-		});
-				
 		
 		
-		
-		// Labels for the resolution of the detector
+		/*
+		 * Create labels for displaying the resolution of the detector.
+		 */
 		GuiHelper.createLabel(detectorGroup, "Resolution (hxw):");
-		
-		Label resolutionValueLabel = new Label(detectorGroup, SWT.NONE);
+		resolutionValueLabel = new Label(detectorGroup, SWT.NONE);
 		resolutionValueLabel.setText("");
 		resolutionValueLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 		resolutionValueLabel.setAlignment(SWT.RIGHT);
-		
-		// Placeholder
-		new Label(detectorGroup, SWT.NONE);
+		new Label(detectorGroup, SWT.NONE); // Placeholder
 		
 		
-		
-		
-		// Labels for the pixel sizes
+		/*
+		 * Create labels for displaying the pixel sizes.
+		 */
 		GuiHelper.createLabel(detectorGroup, "Pixel size:");
-		
-		Label pixelSizeValueLabel = GuiHelper.createLabel(detectorGroup, "");
-		
+		pixelSizeValueLabel = GuiHelper.createLabel(detectorGroup, "");
 		
 		
-		// A combo for choosing the unit in which the pixel size is displayed
-		Combo unitsCombo = new Combo(detectorGroup, SWT.READ_ONLY);
-		
+		/*
+		 * Create the combo for choosing the unit in which the pixel size is displayed.
+		 */
+		unitsCombo = new Combo(detectorGroup, SWT.READ_ONLY);
 		ComboViewer unitsComboViewer = new ComboViewer(unitsCombo);
 		unitsComboViewer.setContentProvider(ArrayContentProvider.getInstance());
 		unitsComboViewer.setLabelProvider(new LabelProvider() {
@@ -115,13 +119,15 @@ public class DetectorPanel implements Observer {
 					return super.getText(element);
 				}
 		});
-		
 		unitsComboViewer.setInput(PIXEL_SIZE_UNITS);
 		unitsComboViewer.setSelection(new StructuredSelection(PIXEL_SIZE_UNITS.get(0)));
-		unitsCombo.setVisible(false);
+		unitsCombo.setVisible(false); // The combo should be visible only when a detector is selected.
 		
 			
-		// Listeners		
+	    /*
+	     * Event handlers.		
+	     */
+		
 		detectorTypesComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
@@ -129,84 +135,80 @@ public class DetectorPanel implements Observer {
 				    if (selection.size() > 0){
 				    	unitsCombo.setVisible(true);
 				        DiffractionDetector detector = (DiffractionDetector) selection.getFirstElement();
-				        resolutionValueLabel.setText(detector.getNumberOfPixelsX() + " x " +
-				        		detector.getNumberOfPixelsY());
+				        resolutionValueLabel.setText(detector.getNumberOfPixelsX() + " x " + detector.getNumberOfPixelsY());
 				        @SuppressWarnings("unchecked")
 						Unit<Length> unit = (Unit<Length>) unitsComboViewer.getStructuredSelection().getFirstElement();
 				        pixelSizeValueLabel.setText(TextUtil.format(detector.getxPixelSize().doubleValue(unit)) + " x " +
-				        		TextUtil.format(detector.getyPixelSize().doubleValue(unit)));
+				        		                    TextUtil.format(detector.getyPixelSize().doubleValue(unit)));
 				        detectorGroup.layout();
 				        ResultsService.getInstance().getBeamlineConfiguration().setDetector(detector);
-				    } else{
+				    } else {
 				    	resolutionValueLabel.setText("");
 				    	pixelSizeValueLabel.setText("");
 				    	unitsCombo.setVisible(false);
+				    	ResultsService.getInstance().getBeamlineConfiguration().setDetector(null);
 				    }
 				}
 					
 			});
 		
 		
+		 unitsComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			 @Override
+			 public void selectionChanged(SelectionChangedEvent event) {
+				 IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+				 if (selection.size() > 0){
+					  @SuppressWarnings("unchecked")
+					  Unit<Length> unit = (Unit<Length>) selection.getFirstElement();
+					  DiffractionDetector detector = (DiffractionDetector) detectorTypesComboViewer.getStructuredSelection().getFirstElement();
+					  if(detector != null){
+						  pixelSizeValueLabel.setText(TextUtil.format(detector.getxPixelSize().doubleValue(unit)) + " x " +
+					        		                      TextUtil.format(detector.getyPixelSize().doubleValue(unit)));
+					      detectorGroup.layout();
+					  }
+				 }
+			 }
+		 });
 		
 		
-		unitsComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-				if (selection.size() > 0){
-					 @SuppressWarnings("unchecked")
-					 Unit<Length> unit = (Unit<Length>) selection.getFirstElement();
-					 DiffractionDetector detector = (DiffractionDetector) detectorTypesComboViewer.getStructuredSelection().getFirstElement();
-					 if(detector != null){
-						 pixelSizeValueLabel.setText(TextUtil.format(detector.getxPixelSize().doubleValue(unit)) + " x " +
-				        		TextUtil.format(detector.getyPixelSize().doubleValue(unit)));
-				         detectorGroup.layout();
-					 }
-				}
-			}
-		});
-		
-		
-		
-		 // Load detector preferences
-		 detectors = BeamlineConfigurationPreferenceHelper.getDetectorsListFromPreference(); 
-		 sendDetectorsToCombo();
+		 /*
+		  * Load detectors from preferences.
+		  */
+		 getDetectorsFromPreference();
 		 detectorGroup.layout();
 		 
 		 BeamlineConfigurationPreferenceHelper.addDetectorPropertyChangeListener(new IPropertyChangeListener() {
 				@Override
 				public void propertyChange(PropertyChangeEvent event) {
 					if(event.getProperty() == DiffractionDetectorConstants.DETECTOR){
-						try{
-							detectors = BeamlineConfigurationPreferenceHelper.getDetectorsListFromPreference(); 
-							sendDetectorsToCombo();
-							if(detectors != null && !detectors.isEmpty())
-								detectorTypesComboViewer.setSelection(new StructuredSelection(detectors.get(0)));
-							else{
-								resolutionValueLabel.setText("");
-						    	pixelSizeValueLabel.setText("");
-						    	unitsCombo.setVisible(false);
-							}
-							detectorGroup.layout();
-						} catch(Exception e) {
-						}
+						getDetectorsFromPreference();
+						detectorGroup.layout();
 					}
-					
 				}
 			});
 		 
-	
+		
+		 /*
+		  * Get the currently selected beamline template. 
+		  */
 		 update(null, null);
 	}
 
 
+    private void getDetectorsFromPreference() {
+    	detectors = BeamlineConfigurationPreferenceHelper.getDetectorsListFromPreference(); 
+		detectorTypesComboViewer.setInput(detectors);
+		if(detectors != null && !detectors.isEmpty())
+			detectorTypesComboViewer.setSelection(new StructuredSelection(detectors.get(0)));
+		else{
+			resolutionValueLabel.setText("");
+	    	pixelSizeValueLabel.setText("");
+	    	unitsCombo.setVisible(false);
+	    	ResultsService.getInstance().getBeamlineConfiguration().setDetector(null);
+		}
+    }
 	
-	private void sendDetectorsToCombo(){
-		 detectorTypesComboViewer.setInput(detectors);
-	}
-
-	
+    
 	@Override
 	public void update(Observable o, Object arg) {
 		BeamlineConfigurationBean beamlineConfiguration = templatesPanel.getPredefinedBeamlineConfiguration();
@@ -216,8 +218,5 @@ public class DetectorPanel implements Observer {
 		} catch(Exception e){
 			if(detectors != null && !detectors.isEmpty()) detectorTypesComboViewer.setSelection(new StructuredSelection(detectors.get(0)));
 		}
-		
 	}
-	
-	
 }
