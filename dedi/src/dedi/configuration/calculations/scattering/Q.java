@@ -63,5 +63,4 @@ public class Q extends ScatteringQuantity {
 	public String getQuantityName() {
 		return NAME;
 	}
-	
 }

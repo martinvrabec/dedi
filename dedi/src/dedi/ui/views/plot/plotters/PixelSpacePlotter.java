@@ -1,11 +1,10 @@
-package dedi.ui.views.plot;
+package dedi.ui.views.plot.plotters;
 
-import dedi.configuration.calculations.BeamlineConfigurationUtil;
-import dedi.configuration.calculations.scattering.Q;
+import dedi.ui.views.plot.DefaultBeamlineConfigurationPlot;
 
-public class PixelSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
-	public PixelSpacePlotter(IBeamlineConfigurationPlotView view) {
-		super(view);
+public class PixelSpacePlotter extends AbstractBeamlineConfigurationPlotter {
+	public PixelSpacePlotter(DefaultBeamlineConfigurationPlot context) {
+		super(context);
 	}
 	
 	

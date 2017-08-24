@@ -7,6 +7,11 @@ import javax.measure.unit.SI;
 import org.jscience.physics.amount.Amount;
 
 public class PhysicalConstants {
+	
+	private PhysicalConstants() {
+		throw new IllegalStateException("This class is not meant to be instantiated.");
+	}
+	
 	/**
 	 * Holds the speed of light in vacuum (exact). 299792458m/s
 	 */

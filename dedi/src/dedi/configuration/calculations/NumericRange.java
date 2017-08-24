@@ -129,6 +129,4 @@ public class NumericRange {
 		return (Double.doubleToLongBits(max) == Double.doubleToLongBits(other.max)) &&
 				(Double.doubleToLongBits(min) == Double.doubleToLongBits(other.min));
 	}
-	
-	
 }

@@ -1,4 +1,4 @@
-package dedi.ui.views.plot;
+package dedi.ui.views.plot.plotters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.measure.unit.SI;
 import javax.vecmath.Vector2d;
 
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
@@ -16,53 +15,65 @@ import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
-import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
-import org.eclipse.dawnsci.plotting.api.axis.IPositionListener;
-import org.eclipse.dawnsci.plotting.api.axis.PositionEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
-import org.eclipse.january.dataset.DoubleDataset;
-import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Slice;
-import org.eclipse.january.dataset.SliceND;
-import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 
+import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.BeamlineConfigurationUtil;
+import dedi.configuration.calculations.results.controllers.AbstractResultsController;
 import dedi.configuration.calculations.scattering.D;
 import dedi.configuration.calculations.scattering.Q;
-import dedi.configuration.devices.Beamstop;
-import dedi.configuration.devices.CameraTube;
+import dedi.ui.views.plot.DefaultBeamlineConfigurationPlot;
+import dedi.ui.widgets.plotting.Legend;
+
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
-import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
-import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 
-public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeamlineConfigurationPlotter {	
-	private final String DETECTOR_REGION = "Detector";
-	private final String CAMERA_TUBE_REGION = "Camera Tube";
-	private final String BEAMSTOP_REGION = "Beamstop";
-	private final String CLEARANCE_REGION = "Clearance";
-	private final String MASK_TRACE = "Mask";
+
+public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineConfigurationPlotter {
+	private DefaultBeamlineConfigurationPlot context;
+	protected BeamlineConfiguration beamlineConfiguration; 
+	private AbstractResultsController resultsController;
+	private IPlottingSystem<Composite> system;
+	private Legend legend;
+	
+	private static final String DETECTOR_REGION = "Detector";
+	private static final String CAMERA_TUBE_REGION = "Camera Tube";
+	private static final String BEAMSTOP_REGION = "Beamstop";
+	private static final String CLEARANCE_REGION = "Clearance";
+	private static final String MASK_TRACE = "Mask";
 	
 	private List<IRegion> calibrantRingRegions = new ArrayList<>();
-
+    private CalibrantSpacing selectedCalibrant;
+	
 	private Map<Integer, Dataset> maskCache;
-	private final int MAX_CACHE_SIZE = 10;
+	private static final int MAX_CACHE_SIZE = 10;
 
-
-	@SuppressWarnings("serial")
-	public BaseBeamlineConfigurationPlotterImpl(IBeamlineConfigurationPlotView view) {
-		super(view);
+    
+	public AbstractBeamlineConfigurationPlotter(DefaultBeamlineConfigurationPlot context){
+		this.context = context;
+		this.beamlineConfiguration = context.getBeamlineConfiguration();
+		this.system = context.getSystem();
+		this.legend = context.getLegend();
+		this.resultsController = context.getResultsController();
 		
+		createMaskCache();
+	}
+	
+	
+	@SuppressWarnings("serial")
+	private void createMaskCache() {
 		maskCache = new LinkedHashMap<Integer, Dataset>(MAX_CACHE_SIZE+1, 0.75F, true){
 			@Override
 			protected boolean removeEldestEntry(java.util.Map.Entry<Integer, Dataset> eldest) {
@@ -73,37 +84,40 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	
 	
 	@Override
-	public void updatePlot(){
-		if(beamlineConfiguration.getDetector() != null) 
+	public void createPlot(){
+		this.selectedCalibrant = context.getSelectedCalibrant();
+		
+		if(beamlineConfiguration.getDetector() != null && context.isDetectorPlot()) 
 			createDetectorRegion();
 		else removeRegion(DETECTOR_REGION);
 		
-		if(beamlineConfiguration.getDetector() != null && beamlineConfiguration.getCameraTube() != null) 
+		if(beamlineConfiguration.getDetector() != null && beamlineConfiguration.getCameraTube() != null && context.isCameraTubePlot()) 
 			createCameraTubeRegion();
 		else removeRegion(CAMERA_TUBE_REGION);
 		
-		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null) 
+		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null && context.isBeamstopPlot()) 
 			createBeamstopRegion();
 		else removeRegions(new String[]{BEAMSTOP_REGION, CLEARANCE_REGION});
 		
 		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null && 
-		   beamlineConfiguration.getAngle() != null) 
+		   beamlineConfiguration.getAngle() != null && context.isRayPlot()) 
 			createRay();
 		else removeRegions(new String[] {"Ray1", "Ray2", "Ray3", "Ray4"});
 		
-		if(beamlineConfiguration.getWavelength() != null && beamlineConfiguration.getCameraLength() != null)
+		if(beamlineConfiguration.getWavelength() != null && beamlineConfiguration.getCameraLength() != null && 
+		   selectedCalibrant != null && context.isCalibrantPlot())
 			createCalibrantRings();
 		else removeRegions(calibrantRingRegions);
 		
-		createMask();
+		if(context.isMaskPlot()) createMask();
+		
 		createEmptyTrace();
 		rescalePlot();
 	}
 	
 	
-	protected void createDetectorRegion(){
+	private void createDetectorRegion(){
 		removeRegion(DETECTOR_REGION); 
-		if(!detectorIsPlot) return;
 		
 		IRegion detectorRegion;
 		try {
@@ -117,9 +131,8 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	};
 	
 	
-	protected void createBeamstopRegion(){
+	private void createBeamstopRegion(){
 		removeRegions(new String[]{BEAMSTOP_REGION, CLEARANCE_REGION});
-		if(!beamstopIsPlot) return;
 		
 		IRegion beamstopRegion;
 		IRegion clearanceRegion;
@@ -148,9 +161,8 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
-	protected void createCameraTubeRegion(){
+	private void createCameraTubeRegion(){
 		removeRegion(CAMERA_TUBE_REGION);
-		if(!cameraTubeIsPlot) return;
 		
 		IRegion cameraTubeRegion;
 		try {
@@ -168,9 +180,8 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
-	protected void createRay() {
+	private void createRay() {
 		removeRegions(new String[] {"Ray1", "Ray2", "Ray3", "Ray4"});
-		if(!rayIsPlot) return;
 		
 		IRegion visibleRangeRegion1;
 		IRegion visibleRangeRegion2;
@@ -231,11 +242,9 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
-	protected void createCalibrantRings(){
+	private void createCalibrantRings(){
 	   removeRegions(calibrantRingRegions);
 	   calibrantRingRegions = new ArrayList<>();
-	   
-	   if(selectedCalibrant == null || !calibrantIsPlot) return;
 	   
 	   List<HKL> hkls = selectedCalibrant.getHKLs();
 	   
@@ -259,9 +268,9 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
-	protected void createMask(){
+	@SuppressWarnings("deprecation")
+	private void createMask(){
 		removeTrace(MASK_TRACE);
-		if(!maskIsPlot) return;
 		
 		DiffractionDetector detector = beamlineConfiguration.getDetector();
 		
@@ -323,7 +332,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
-	protected void createEmptyTrace(){
+	private void createEmptyTrace(){
 		removeTrace("Dot");
 		final IImageTrace image = system.createImageTrace("Dot");
 		image.setRescaleHistogram(false);
@@ -345,7 +354,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
-	protected void addRegion(IRegion region, IROI roi, Color colour){
+	private void addRegion(IRegion region, IROI roi, Color colour){
 		region.setROI(roi);
 		region.setMobile(false);
 		region.setActive(false);
@@ -355,7 +364,7 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	}
 	
 	
-	public void rescalePlot(){
+	private void rescalePlot(){
 		if(system.isRescale()){
 			IAxis yAxis = system.getAxes().get(1);
 			yAxis.setInverted(true);
@@ -407,113 +416,137 @@ public abstract class BaseBeamlineConfigurationPlotterImpl extends AbstractBeaml
 	protected abstract double getVerticalLengthFromPixels(double lengthPixels);
 
 	
-	protected double getDetectorWidth(){
+	private double getDetectorWidth(){
 		return getHorizontalLengthFromMM(beamlineConfiguration.getDetectorWidthMM());
 	}
 	
 	
-	protected double getDetectorHeight(){
+	private double getDetectorHeight(){
 		return getVerticalLengthFromMM(beamlineConfiguration.getDetectorHeightMM());
 	}
 	
 	
-	protected double getClearanceMajor(){
+	private double getClearanceMajor(){
 		return getHorizontalLengthFromPixels(beamlineConfiguration.getClearance());
 	}
 	
 	
-	protected double getClearanceMinor(){
+	private double getClearanceMinor(){
 		return getVerticalLengthFromPixels(beamlineConfiguration.getClearance());
 	}
 	
 	
-	protected double getBeamstopMajor(){
+	private double getBeamstopMajor(){
 		return getHorizontalLengthFromMM(beamlineConfiguration.getBeamstop().getRadiusMM());
 	}
 	
 	
-	protected double getBeamstopMinor(){
+	private double getBeamstopMinor(){
 		return getVerticalLengthFromMM(beamlineConfiguration.getBeamstop().getRadiusMM());
 	}
 	
 	
-	protected double getBeamstopCentreX(){
+	private double getBeamstopCentreX(){
 		return getDetectorTopLeftX() + getHorizontalLengthFromMM(beamlineConfiguration.getBeamstopXCentreMM());
 	}
 	
 	
-	protected double getBeamstopCentreY(){
+	private double getBeamstopCentreY(){
 		return getDetectorTopLeftY() + getVerticalLengthFromMM(beamlineConfiguration.getBeamstopYCentreMM());
 	}
 	
 	
-	protected double getCameraTubeMajor(){
+	private double getCameraTubeMajor(){
 		return getHorizontalLengthFromMM(beamlineConfiguration.getCameraTube().getRadiusMM());
 	}
 	
 	
-	protected double getCameraTubeMinor(){
+	private double getCameraTubeMinor(){
 		return getVerticalLengthFromMM(beamlineConfiguration.getCameraTube().getRadiusMM());
 	}
 	
 	
-	protected double getCameraTubeCentreX(){
+	private double getCameraTubeCentreX(){
 		return getDetectorTopLeftX() + getHorizontalLengthFromMM(beamlineConfiguration.getCameraTubeXCentreMM());
 	}
 	
-	protected double getCameraTubeCentreY(){
+	private double getCameraTubeCentreY(){
 		return getDetectorTopLeftY() + getVerticalLengthFromMM(beamlineConfiguration.getCameraTubeYCentreMM());
 	}
 	
 	
-	protected double getVisibleRangeStartPointX(){
+	private double getVisibleRangeStartPointX(){
 		return getDetectorTopLeftX() + getHorizontalLengthFromMM(resultsController.getVisibleRangeStartPoint().x);
 	}
 	
 	
-	protected double getVisibleRangeStartPointY(){
+	private double getVisibleRangeStartPointY(){
 		return getDetectorTopLeftY() + getVerticalLengthFromMM(resultsController.getVisibleRangeStartPoint().y);
 	}
 	
 	
-	protected double getVisibleRangeEndPointX(){
+	private double getVisibleRangeEndPointX(){
 		return getDetectorTopLeftX() + getHorizontalLengthFromMM(resultsController.getVisibleRangeEndPoint().x);
 	}
 	
 	
-	protected double getVisibleRangeEndPointY(){
+	private double getVisibleRangeEndPointY(){
 		return getDetectorTopLeftY() + getVerticalLengthFromMM(resultsController.getVisibleRangeEndPoint().y);
 	}
 	
 	
-	protected double getRequestedRangeStartPointX(){
+	private double getRequestedRangeStartPointX(){
 		return getDetectorTopLeftX() + getHorizontalLengthFromMM(resultsController.getRequestedRangeStartPoint().x);
 	}
 	
 	
-	protected double getRequestedRangeStartPointY(){
+	private double getRequestedRangeStartPointY(){
 		return getDetectorTopLeftY() + getVerticalLengthFromMM(resultsController.getRequestedRangeStartPoint().y);
 	}
 	
 	
-	protected double getRequestedRangeEndPointX(){
+	private double getRequestedRangeEndPointX(){
 		return getDetectorTopLeftX() + getHorizontalLengthFromMM(resultsController.getRequestedRangeEndPoint().x);
 	}
 	
 	
-	protected double getRequestedRangeEndPointY(){
+	private double getRequestedRangeEndPointY(){
 		return getDetectorTopLeftY() + getVerticalLengthFromMM(resultsController.getRequestedRangeEndPoint().y);
 	}
 	
 	
-	protected double getCalibrantRingMajor(Q q){
+	private double getCalibrantRingMajor(Q q){
 		return getHorizontalLengthFromMM(1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(q.getValue().to(Q.BASE_UNIT).getEstimatedValue(), 
                 beamlineConfiguration.getCameraLength(), beamlineConfiguration.getWavelength())); 
 	}
 	
 	
-	protected double getCalibrantRingMinor(Q q){
+	private double getCalibrantRingMinor(Q q){
 		return getVerticalLengthFromMM(1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(q.getValue().to(Q.BASE_UNIT).getEstimatedValue(), 
                 beamlineConfiguration.getCameraLength(), beamlineConfiguration.getWavelength()));
 	}
+	
+	
+	private void removeRegion(String name){
+		IRegion region = system.getRegion(name);
+		if(region != null) system.removeRegion(region);
+	}
+	
+	
+	private void removeTrace(String name){
+		ITrace trace = system.getTrace(name);
+		if(trace != null) system.removeTrace(trace);
+	}
+	
+	
+	private void removeRegions(String[] names){
+		for(int i = 0; i < names.length; i++) removeRegion(names[i]);
+	}
+	
+	
+	private void removeRegions(List<IRegion> regions){
+		for(IRegion region : regions)
+			if(region != null) system.removeRegion(region);
+	}
 }
+

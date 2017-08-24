@@ -3,34 +3,17 @@ package dedi.ui.widgets.plotting;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Observable;
-import java.util.TreeMap;
 
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.resource.LocalResourceManager;
-import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 
 import dedi.ui.GuiHelper;
 
 public class Legend extends Composite {
-	private ResourceManager resourceManager;
-	
 	private List<LegendItem> items;
 	private Group legendGroup;
 	
@@ -40,8 +23,6 @@ public class Legend extends Composite {
 		GridLayoutFactory.swtDefaults().numColumns(1).applyTo(this);
 		
 		items = new ArrayList<>();
-		resourceManager = new LocalResourceManager(JFaceResources.getResources(), this);
-		
 		legendGroup = GuiHelper.createGroup(parent, "Legend", 1);
 	}
 	
@@ -68,6 +49,18 @@ public class Legend extends Composite {
 	}
 	
 	
+	public void removeAllLegendItems() {
+		Iterator<LegendItem> iter = items.iterator();
+		while(iter.hasNext()){
+			LegendItem item = iter.next();
+			if(item != null){
+				iter.remove();
+				item.dispose();
+			}
+		}
+	}
+	
+	
 	public Color getColour(String name){
 		for(LegendItem item : items){
 			if(item != null && Objects.equals(item.getItemName(), name))
@@ -84,5 +77,4 @@ public class Legend extends Composite {
 		}
 		return null;
 	}
-	
 }

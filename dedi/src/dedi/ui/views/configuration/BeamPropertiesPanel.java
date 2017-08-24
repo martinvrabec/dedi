@@ -36,15 +36,14 @@ public class BeamPropertiesPanel implements Observer {
 	private Amount<Length> maxWavelength;
 	private Amount<Energy> minEnergy;
 	private Amount<Energy> maxEnergy;
-	private Label minEnergyLabel;
-	private Label maxEnergyLabel;
+	private Label minWavelengthLabel;
+	private Label maxWavelengthLabel;
 	
 	private boolean isEdited = true;
 	
 	private static final List<Unit<Energy>> ENERGY_UNITS = new ArrayList<>(Arrays.asList(SI.KILO(NonSI.ELECTRON_VOLT), NonSI.ELECTRON_VOLT));
 	private static final List<Unit<Length>> WAVELENGTH_UNITS = new ArrayList<>(Arrays.asList(SI.NANO(SI.METER), NonSI.ANGSTROM));
 
-	
 	
 	public BeamPropertiesPanel(Composite parent, BeamlineConfigurationTemplatesPanel panel) {
 		templatesPanel = panel;
@@ -74,18 +73,18 @@ public class BeamPropertiesPanel implements Observer {
 		wavelengthUnitsCombo.moveBelow(wavelength);
 		
 		
-		GuiHelper.createLabel(beamlineQuantityGroup, "Minimum allowed energy:");
-		minEnergyLabel = GuiHelper.createLabel(beamlineQuantityGroup, "");
+		GuiHelper.createLabel(beamlineQuantityGroup, "Minimum allowed wavelength:");
+		minWavelengthLabel = GuiHelper.createLabel(beamlineQuantityGroup, "");
 		GuiHelper.createLabel(beamlineQuantityGroup, "");
 		
-		GuiHelper.createLabel(beamlineQuantityGroup, "Maximum allowed energy:");
-		maxEnergyLabel = GuiHelper.createLabel(beamlineQuantityGroup, "");
+		GuiHelper.createLabel(beamlineQuantityGroup, "Maximum allowed wavelength:");
+		maxWavelengthLabel = GuiHelper.createLabel(beamlineQuantityGroup, "");
 		GuiHelper.createLabel(beamlineQuantityGroup, "");
 		
 		setToolTipTextsAndLabels();
 		
-		wavelength.addUnitsChangeListener(() -> setToolTipTextsAndLabels());
-		energy.addUnitsChangeListener(() -> setToolTipTextsAndLabels());
+		wavelength.addUnitsChangeListener(this::setToolTipTextsAndLabels);
+		energy.addUnitsChangeListener(this::setToolTipTextsAndLabels);
 		
 		update(null, null);
 	}
@@ -148,14 +147,14 @@ public class BeamPropertiesPanel implements Observer {
 		if(minEnergy == null || maxEnergy == null || minWavelength == null || maxWavelength == null){
 			energy.setToolTipText("");
 			wavelength.setToolTipText("");
-			minEnergyLabel.setText("");
-			maxEnergyLabel.setText("");
+			minWavelengthLabel.setText("");
+			maxWavelengthLabel.setText("");
 			return;
 		}
 		energy.setToolTipText("Min energy: " + TextUtil.format(minEnergy.doubleValue(energy.getCurrentUnit())) + 
 				              "\nMax energy: " + TextUtil.format(maxEnergy.doubleValue(energy.getCurrentUnit())));
-		minEnergyLabel.setText(TextUtil.format(minEnergy.doubleValue(energy.getCurrentUnit())) + " " + energy.getCurrentUnit().toString());
-		maxEnergyLabel.setText(TextUtil.format(maxEnergy.doubleValue(energy.getCurrentUnit())) + " " + energy.getCurrentUnit().toString());
+		minWavelengthLabel.setText(TextUtil.format(minWavelength.doubleValue(wavelength.getCurrentUnit())) + " " + wavelength.getCurrentUnit().toString());
+		maxWavelengthLabel.setText(TextUtil.format(maxWavelength.doubleValue(wavelength.getCurrentUnit())) + " " + wavelength.getCurrentUnit().toString());
 		wavelength.setToolTipText("Min wavelength: " + TextUtil.format(minWavelength.doubleValue(wavelength.getCurrentUnit())) + 
 	              "\nMax wavelength: " + TextUtil.format(maxWavelength.doubleValue(wavelength.getCurrentUnit())));
 	}

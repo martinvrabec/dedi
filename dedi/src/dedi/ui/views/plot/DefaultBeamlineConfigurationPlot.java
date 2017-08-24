@@ -3,46 +3,32 @@ package dedi.ui.views.plot;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 
-import org.dawb.common.services.ServiceManager;
-import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
-import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
-import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.dataset.roi.CircularROI;
-import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalROI;
-import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
-import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
-import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetFactory;
-import org.eclipse.january.dataset.DoubleDataset;
-import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.results.controllers.AbstractResultsController;
-import dedi.configuration.calculations.results.models.Results;
 import dedi.configuration.calculations.results.models.ResultsService;
 import dedi.ui.GuiHelper;
+import dedi.ui.views.plot.plotters.IBeamlineConfigurationPlotter;
+import dedi.ui.views.plot.plotters.PhysicalSpacePlotter;
+import dedi.ui.views.plot.plotters.PixelSpacePlotter;
+import dedi.ui.views.plot.plotters.QSpacePlotter;
 import dedi.ui.widgets.plotting.ColourChangeEvent;
 import dedi.ui.widgets.plotting.ColourChangeListener;
 import dedi.ui.widgets.plotting.Legend;
@@ -51,35 +37,25 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
-import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 
-
-/**
- * Abstract class that defines what items should be plotted by a BeamlineConfigurationPlotter
- * and how the items' properties can be configured, but leaves the actual implementation
- * of the plotting to subclasses.
- * The default implementation is the {@link BaseBeamlineConfigurationPlotterImpl} which uses {@link IRegion}s 
- * and {@link ITrace}s to render the items on the plot.
- */
-public abstract class AbstractBeamlineConfigurationPlotter 
-                      implements IBeamlineConfigurationPlotter, PropertyChangeListener, Observer, ColourChangeListener, 
-                                 CalibrantSelectedListener {
+public class DefaultBeamlineConfigurationPlot extends AbstractBeamlineConfigurationPlot
+             implements  PropertyChangeListener, ColourChangeListener, CalibrantSelectedListener {
 	
-	protected IPlottingSystem<Composite> system;
-	protected IBeamlineConfigurationPlotView view;
-	protected BeamlineConfiguration beamlineConfiguration;
-	protected AbstractResultsController resultsController;
-
-	// List of controls that will be created and need to be properly disposed when
-	// the dispose() method from the IBeamlineConfigurationPlotter interface is called.
-	private List<Control> controls; 
+	private BeamlineConfiguration beamlineConfiguration;
+	private AbstractResultsController resultsController;
+	private IBeamlineConfigurationPlotter plotter;
+	
 	
 	// These strings must be exactly as they are, because I'm using java reflection to 
 	// access the corresponding ...IsPlot fields below.
 	private String[]  plotItems = {"detector", "beamstop", "cameraTube", "ray", "mask", "calibrant"};
-	// The names that will appear in the ControlsPanel next to the check boxes. (Can be modified).
+	
+	/**
+	 * The names that will appear in the ControlsPanel next to the check boxes. 
+	 */
 	private String[] plotItemNames = {"Detector", "Beamstop", "Camera tube", "Q range", "Mask", "Calibrant"};
 	
+	// Flags that indicate which of the items should be plotted, initialised to default values.
 	protected boolean detectorIsPlot = true;
 	protected boolean beamstopIsPlot = true;
 	protected boolean cameraTubeIsPlot = true;
@@ -97,21 +73,18 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	private Color clearanceColour = Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY);
 	private Color cameraTubeColour = Display.getDefault().getSystemColor(SWT.COLOR_YELLOW);
 	
-	private final String[] legendLabels = {"Detector", "Beamstop", "Clearance", "Camera tube"};
-	private final Color[] legendColours = {detectorColour, beamstopColour, clearanceColour, cameraTubeColour};
+	private static final String[] LEGEND_LABELS = {"Detector", "Beamstop", "Clearance", "Camera tube"};
+	private Color[] legendColours = {detectorColour, beamstopColour, clearanceColour, cameraTubeColour};
     private List<LegendItem> legendItems;
 	
 	protected Legend legend;
 	protected Composite plotConfigurationPanel;
-		
 	
 	
-	public AbstractBeamlineConfigurationPlotter(IBeamlineConfigurationPlotView view) {
-		this.view = view;
-		system = view.getPlottingSystem();
+	public DefaultBeamlineConfigurationPlot(IPlottingSystem<Composite> system) {
+		super(system);
 		
 		beamlineConfiguration = ResultsService.getInstance().getBeamlineConfiguration();
-		beamlineConfiguration.addObserver(this);
 		
 		resultsController = ResultsService.getInstance().getController();
 		resultsController.addView(this);
@@ -119,20 +92,32 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	
 	
 	@Override
-	public void init(){
-		legendItems = new ArrayList<>();
+	public void createPlotControls(Composite plotConfigurationPanel, Legend legend) {
+		this.legend = legend;
+		createLegend();
 		
-		legend = view.getLegend();
-		for(int i = 0; i < legendLabels.length; i++){
-			LegendItem item = legend.addLegendItem(legendLabels[i], legendColours[i]);
+		this.plotConfigurationPanel = plotConfigurationPanel;
+		
+		createItemCheckBoxes();
+		createPlotTypeButtons();
+		
+		plotConfigurationPanel.layout();
+		updatePlot();
+	}
+	
+	
+	private void createLegend() {
+		legendItems = new ArrayList<>();
+		for(int i = 0; i < LEGEND_LABELS.length; i++){
+			LegendItem item = legend.addLegendItem(LEGEND_LABELS[i], legendColours[i]);
 			item.addColourChangeListener(this);
 			legendItems.add(item);
 		}
-		
-		plotConfigurationPanel = view.getPlotConfigurationPanel();
-		
-		controls = new ArrayList<>();
-		controls.add(GuiHelper.createLabel(plotConfigurationPanel, "Select the items that should be displayed on the plot:"));
+	}
+	
+	
+	private void createItemCheckBoxes() {
+		GuiHelper.createLabel(plotConfigurationPanel, "Select the items that should be displayed on the plot:");
 		
 		for(int i = 0; i < plotItems.length; i++){
 			Button button = new Button(plotConfigurationPanel, SWT.CHECK);
@@ -142,8 +127,8 @@ public abstract class AbstractBeamlineConfigurationPlotter
 				@Override
 				public void widgetSelected(SelectionEvent e){
 					try {
-						Field field = AbstractBeamlineConfigurationPlotter.class.getDeclaredField(plotItem + "IsPlot");
-						field.setBoolean(AbstractBeamlineConfigurationPlotter.this, ((Button) e.getSource()).getSelection());
+						Field field = DefaultBeamlineConfigurationPlot.class.getDeclaredField(plotItem + "IsPlot");
+						field.setBoolean(DefaultBeamlineConfigurationPlot.this, ((Button) e.getSource()).getSelection());
 						updatePlot();
 					} catch (Exception ex) {
 						ex.printStackTrace();
@@ -151,19 +136,17 @@ public abstract class AbstractBeamlineConfigurationPlotter
 				}
 			});
 			try {
-				Field field = AbstractBeamlineConfigurationPlotter.class.getDeclaredField(plotItem + "IsPlot");
-				button.setSelection(field.getBoolean(AbstractBeamlineConfigurationPlotter.this));
+				Field field = DefaultBeamlineConfigurationPlot.class.getDeclaredField(plotItem + "IsPlot");
+				button.setSelection(field.getBoolean(DefaultBeamlineConfigurationPlot.this));
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
-			controls.add(button);
 		}
 		
 		selectedCalibrant = CalibrationFactory.getCalibrationStandards().getCalibrant(); 
 		
-		controls.add(GuiHelper.createLabel(plotConfigurationPanel, "The currently selected calibrant is :"));
+		GuiHelper.createLabel(plotConfigurationPanel, "The currently selected calibrant is :");
 		selectedCalibrantLabel = GuiHelper.createLabel(plotConfigurationPanel, "");
-		controls.add(selectedCalibrantLabel);
 		if(selectedCalibrant != null) selectedCalibrantLabel.setText(selectedCalibrant.getName());
 		Button configureCalibrantButton = new Button(plotConfigurationPanel, SWT.PUSH);
 		configureCalibrantButton.setText("Configure calibrant ...");
@@ -175,29 +158,67 @@ public abstract class AbstractBeamlineConfigurationPlotter
 				if (pref != null) pref.open();
 			}
 		});
-		controls.add(configureCalibrantButton);
 		
 		CalibrationFactory.addCalibrantSelectionListener(this);
+	}
+	
+	
+	private void createPlotTypeButtons() {
+		/*
+		 * Create the panel for selecting the type of plot. 
+		 */
+		Composite plotTypesPanel = new Composite(plotConfigurationPanel, SWT.NONE);
+		plotTypesPanel.setLayout(new GridLayout());		
 		
-		plotConfigurationPanel.layout();
-		updatePlot();
+		GuiHelper.createLabel(plotTypesPanel, "Select the type of plot:");
+		
+		Button physicalSpaceButton = new Button(plotTypesPanel, SWT.RADIO);
+		physicalSpaceButton.setText("Axes in mm");
+		physicalSpaceButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				if(((Button) e.getSource()).getSelection()) 
+					setPlotter(new PhysicalSpacePlotter(DefaultBeamlineConfigurationPlot.this));
+		}
+		});
+		
+	    Button pixelSpaceButton = new Button(plotTypesPanel, SWT.RADIO);
+	    pixelSpaceButton.setText("Axes in pixels");
+	    pixelSpaceButton.addSelectionListener(new SelectionAdapter() {
+	    	@Override
+			public void widgetSelected(SelectionEvent e){
+	    		if(((Button) e.getSource()).getSelection()) 
+	    			setPlotter(new PixelSpacePlotter(DefaultBeamlineConfigurationPlot.this));
+					
+		}
+		});
+	    
+	    Button qSpaceButton = new Button(plotTypesPanel, SWT.RADIO);
+	    qSpaceButton.setText("Axes in q (nm^-1)");
+	    qSpaceButton.addSelectionListener(new SelectionAdapter() {
+	    	@Override
+			public void widgetSelected(SelectionEvent e){
+	    		if(((Button) e.getSource()).getSelection()) 
+	    			setPlotter(new QSpacePlotter(DefaultBeamlineConfigurationPlot.this));
+					
+		}
+		});
+		
+	    physicalSpaceButton.setSelection(true);
+	    plotter = new PhysicalSpacePlotter(this);
 	}
 	
-	
-	@Override 
-	public void colourChanged(ColourChangeEvent event){
-		updatePlot();
-	}
 	
 	
 	@Override
-	public void update(Observable o, Object arg){
+	public void propertyChange(PropertyChangeEvent evt) {
 		updatePlot();
 	}
 	
 	
+	
 	@Override
-	public void propertyChange(PropertyChangeEvent e){
+	public void colourChanged(ColourChangeEvent event) {
 		updatePlot();
 	}
 	
@@ -211,47 +232,89 @@ public abstract class AbstractBeamlineConfigurationPlotter
 	}
 	
 	
+	@Override
+	public void updatePlot() {
+		plotter.createPlot();
+	}
+	
+	
 	protected void clearPlot(){
 		system.clearRegions();
 		for(IRegion region : system.getRegions()) system.removeRegion(region);
 		for(ITrace trace : system.getTraces()) system.removeTrace(trace);
 	}
+
 	
-	
-	protected void removeRegion(String name){
-		IRegion region = system.getRegion(name);
-		if(region != null) system.removeRegion(region);
+	public IPlottingSystem<Composite> getSystem() {
+		return system;
+	}
+
+
+	public BeamlineConfiguration getBeamlineConfiguration() {
+		return beamlineConfiguration;
+	}
+
+
+	public AbstractResultsController getResultsController() {
+		return resultsController;
+	}
+
+
+	public boolean isDetectorPlot() {
+		return detectorIsPlot;
+	}
+
+
+	public boolean isBeamstopPlot() {
+		return beamstopIsPlot;
+	}
+
+
+	public boolean isCameraTubePlot() {
+		return cameraTubeIsPlot;
+	}
+
+
+	public boolean isRayPlot() {
+		return rayIsPlot;
+	}
+
+
+	public boolean isCalibrantPlot() {
+		return calibrantIsPlot;
+	}
+
+
+	public boolean isMaskPlot() {
+		return maskIsPlot;
+	}
+
+
+	public CalibrantSpacing getSelectedCalibrant() {
+		return selectedCalibrant;
+	}
+
+
+	public Legend getLegend() {
+		return legend;
 	}
 	
 	
-	protected void removeTrace(String name){
-		ITrace trace = system.getTrace(name);
-		if(trace != null) system.removeTrace(trace);
-	}
-	
-	
-	protected void removeRegions(String[] names){
-		for(int i = 0; i < names.length; i++) removeRegion(names[i]);
-	}
-	
-	protected void removeRegions(List<IRegion> regions){
-		for(IRegion region : regions)
-			if(region != null) system.removeRegion(region);
+	public void setPlotter(IBeamlineConfigurationPlotter plotter) {
+		clearPlot();
+		this.plotter = plotter;
+		boolean rescale = system.isRescale();
+		system.setRescale(true);    // Temporarily set rescale to true.
+		plotter.createPlot();
+		system.setRescale(rescale); // Restore the previous value. 
 	}
 	
 
-	public void dispose(){
-		clearPlot();
-		beamlineConfiguration.deleteObserver(this);
+	@Override
+	public void dispose() {
 		resultsController.removeView(this);
-		view = null;
 		system = null;
 		for(LegendItem item : legendItems) item.removeColourChangeListener(this);
 		CalibrationFactory.removeCalibrantSelectionListener(this);
-		for(Control control : controls){
-			if(!control.isDisposed())
-				control.dispose();
-		}
 	}
-	
 }

@@ -2,7 +2,6 @@ package dedi.configuration.calculations.geometry;
 
 import javax.vecmath.Vector2d;
 
-
 import dedi.configuration.calculations.NumericRange;
 
 /**

@@ -1,14 +1,10 @@
-package dedi.ui.views.plot;
+package dedi.ui.views.plot.plotters;
 
-import java.util.Arrays;
+import dedi.ui.views.plot.DefaultBeamlineConfigurationPlot;
 
-import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
-import org.eclipse.january.dataset.DatasetFactory;
-
-
-public class PhysicalSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
-	public PhysicalSpacePlotter(IBeamlineConfigurationPlotView view) {
-		super(view);
+public class PhysicalSpacePlotter extends AbstractBeamlineConfigurationPlotter {
+	public PhysicalSpacePlotter(DefaultBeamlineConfigurationPlot context) {
+		super(context);
 	}
 	
 	

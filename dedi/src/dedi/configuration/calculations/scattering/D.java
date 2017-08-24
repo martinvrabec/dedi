@@ -57,5 +57,4 @@ public class D extends ScatteringQuantity {
 	public String getQuantityName() {
 		return NAME;
 	}
-
 }

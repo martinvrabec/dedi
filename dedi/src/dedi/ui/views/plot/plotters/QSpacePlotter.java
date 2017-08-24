@@ -1,23 +1,21 @@
-package dedi.ui.views.plot;
+package dedi.ui.views.plot.plotters;
 
-import javax.measure.unit.SI;
+import dedi.ui.views.plot.DefaultBeamlineConfigurationPlot;
 
-import dedi.configuration.calculations.scattering.Q;
-
-public class QSpacePlotter extends BaseBeamlineConfigurationPlotterImpl {
+public class QSpacePlotter extends AbstractBeamlineConfigurationPlotter {
 	private double scaleFactor; 
 	
-	public QSpacePlotter(IBeamlineConfigurationPlotView view) {
-		super(view);
+	public QSpacePlotter(DefaultBeamlineConfigurationPlot context) {
+		super(context);
 	}
 
 
 	@Override
-	public void updatePlot(){
+	public void createPlot(){
 		if(beamlineConfiguration.getCameraLength() == null || beamlineConfiguration.getWavelength() == null) return;
 		scaleFactor = 2e-12*Math.PI/(beamlineConfiguration.getCameraLength()*beamlineConfiguration.getWavelength()); 
 		
-		super.updatePlot();
+		super.createPlot();
 	}
 	
 
