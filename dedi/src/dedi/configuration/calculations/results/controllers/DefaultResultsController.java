@@ -76,7 +76,11 @@ public class DefaultResultsController extends AbstractResultsController {
 		Ray ray = new Ray(new Vector2d(Math.cos(angle), Math.sin(angle)), 
 				          new Vector2d(beamstopXCentreMM, beamstopYCentreMM));
 		
-		return ray.getPtAtDistance(1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(qvalue, cameraLength, wavelength));
+		try {
+			return ray.getPtAtDistance(1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(qvalue, cameraLength, wavelength));
+		} catch(IllegalArgumentException e) {
+			return null;
+		}
 	}
 	
 	
@@ -239,8 +243,7 @@ public class DefaultResultsController extends AbstractResultsController {
 		NumericRange t = ray.getRectangleIntersectionParameterRange(new Vector2d(bottomLeftPixel.x, bottomLeftPixel.y + detector.getYPixelMM()),
 				                                                    detector.getXPixelMM(), detector.getYPixelMM());
 		
-		if(t == null || t.getMax() < 0) return null;
-		if(t.getMin() < 0) t.setMin(0);
+		if(t == null) return null;
 		
 		Vector2d ptMin = new Vector2d(ray.getPt(t.getMin()));
 		Vector2d ptMax = new Vector2d(ray.getPt(t.getMax()));

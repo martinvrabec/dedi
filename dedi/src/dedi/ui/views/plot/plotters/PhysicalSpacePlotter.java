@@ -11,13 +11,13 @@ public class PhysicalSpacePlotter extends AbstractBeamlineConfigurationPlotter {
 	@Override
 	protected double getDetectorTopLeftX() {
 		return 0; 
-	};
+	}
 	
 	
 	@Override
 	protected double getDetectorTopLeftY() {
 		return 0; 
-	};
+	}
 	
 	
 	

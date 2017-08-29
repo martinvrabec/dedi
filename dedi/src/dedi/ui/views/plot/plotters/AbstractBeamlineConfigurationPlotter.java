@@ -128,7 +128,7 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 		}
 		IROI detectorROI = new RectangularROI(getDetectorTopLeftX(), getDetectorTopLeftY(), getDetectorWidth(), getDetectorHeight(), 0);
 		addRegion(detectorRegion, detectorROI, legend.getColour("Detector"));
-	};
+	}
 	
 	
 	private void createBeamstopRegion(){

@@ -213,7 +213,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		data.widthHint = 700;
 		data.heightHint = 70;
 		drawingArea.setLayoutData(data);
-		drawingArea.addPaintListener(e -> repaint(e));
+		drawingArea.addPaintListener(this::repaint);
 		
 		
 		
@@ -261,18 +261,24 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		 if(requestedRange == null || fullRange == null || visibleRange == null) 
 			 return;
 		 
+		 
 		 if(controller.getIsSatisfied()) 
 			 e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_GREEN));
 		 else 
 			 e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_RED));
 		 
 		 
+		 double offset = 60;
          double slope = (bounds.width-120)/ (Math.log(fullRange.getMax()) - Math.log(fullRange.getMin()));
-         double minRequestedX = slope*(Math.log(requestedRange.getMin()) - Math.log(fullRange.getMin())) + 60;
-         double maxRequestedX = slope*(Math.log(requestedRange.getMax()) - Math.log(fullRange.getMin())) + 60;
-         double minValueX = slope*(Math.log(visibleRange.getMin()) - Math.log(fullRange.getMin())) + 60;
+         double minRequestedX = slope*(Math.log(requestedRange.getMin()) - Math.log(fullRange.getMin())) + offset;
+         double maxRequestedX = slope*(Math.log(requestedRange.getMax()) - Math.log(fullRange.getMin())) + offset;
+         double minValueX = slope*(Math.log(visibleRange.getMin()) - Math.log(fullRange.getMin())) + offset;
+         double maxValueX = slope*(Math.log(visibleRange.getMax()) - Math.log(fullRange.getMin())) + offset;
          
-         double maxValueX = slope*(Math.log(visibleRange.getMax()) - Math.log(fullRange.getMin())) + 60;
+         // Restrict the requested coordinates to the area of the drawing canvas.
+         NumericRange requested = new NumericRange(minRequestedX, maxRequestedX).intersect(new NumericRange(60, bounds.width - 60));
+         minRequestedX = requested.getMin();
+         maxRequestedX = requested.getMax();
          
          e.gc.fillRectangle((int) minValueX, bounds.height/2, (int) (maxValueX - minValueX), bounds.height/2);
          e.gc.drawLine((int) minRequestedX, 5, (int) minRequestedX, bounds.height);
@@ -394,9 +400,9 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 	
 	
 	/**
-	 * Parses the user input and updates the results accordingly.
-	 * Does not check whether the input makes sense, i.e. whether requested min 
-	 * is less than requested max.
+	 * Parses the user input and updates the results if the input is valid
+	 * (does not check whether the input makes sense, i.e. whether requested min 
+	 * is less than requested max, but checks that the entered strings are numbers and positive).
 	 */
 	private void requestedRangeTextInputChanged() {
 		if(!isUserEdited) return;
@@ -410,7 +416,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 			isUserEdited = false;
 			// Only update the range when both boundary values are specified.
 			// Otherwise the range is invalid so set it to null. 
-			if(requestedMax != null && requestedMin != null) 
+			if(requestedMax != null && requestedMin != null && requestedMin > 0 && requestedMax > 0) 
 				controller.updateRequestedRange(new NumericRange(requestedMin, requestedMax), currentQuantity, currentUnit);
 			else
 				controller.updateRequestedQRange(null);

@@ -1,14 +1,18 @@
 package dedi.configuration.calculations.scattering;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import javax.measure.unit.NonSI;
+import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 import org.jscience.physics.amount.Amount;
 
 public class S extends ScatteringQuantity {
 	public static final String NAME = "s";
-	public static final Unit<?> BASE_UNIT = Q.BASE_UNIT; 
-	public static final List<Unit<?>> UNITS = Q.UNITS;
+	public static final Unit<?> BASE_UNIT = SI.METER.inverse(); 
+	private static final List<Unit<?>> UNITS = new ArrayList<>(Arrays.asList(SI.NANO(SI.METER).inverse(), NonSI.ANGSTROM.inverse()));
 	
 	public S(){
 	}

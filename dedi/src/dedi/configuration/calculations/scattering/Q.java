@@ -11,9 +11,9 @@ import javax.measure.unit.Unit;
 import org.jscience.physics.amount.Amount;
 
 public class Q extends ScatteringQuantity {
-	public static final String NAME = "q";
+	private static final String NAME = "q";
 	public static final Unit<?> BASE_UNIT = SI.METER.inverse();
-	public static final List<Unit<?>> UNITS = new ArrayList<Unit<?>>(Arrays.asList(SI.NANO(SI.METER).inverse(), NonSI.ANGSTROM.inverse()));
+	private static final List<Unit<?>> UNITS = new ArrayList<>(Arrays.asList(SI.NANO(SI.METER).inverse(), NonSI.ANGSTROM.inverse()));
 	
 	public Q(){
 	}
