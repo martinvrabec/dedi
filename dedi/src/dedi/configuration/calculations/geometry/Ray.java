@@ -43,6 +43,7 @@ public class Ray {
 
 	
 	public void setDirection(Vector2d direction) {
+		if(direction.length() == 0) throw new IllegalArgumentException("The direction vector of a ray cannot be the zero vector.");
 		this.direction = direction;
 	}
 
@@ -78,6 +79,7 @@ public class Ray {
 	 * @return The point on the ray at the given distance from the initial point.
 	 */
 	public Vector2d getPtAtDistance(double distance){
+		if(distance < 0) return null;
 		return getPt(distance/direction.length());
 	}
 	
@@ -89,7 +91,7 @@ public class Ray {
      * coeffOfx2*x^2 + coeffOfxy*x*y + coeffOfy2*y^2 + coeffOfx*x + coeffOfy*y + constant = 0.
 	 * 
 	 */
-	public NumericRange getConicIntersectionParameterRange(double coeffOfx2, double coeffOfxy, double coeffOfy2,
+	private NumericRange getConicIntersectionParameterRange(double coeffOfx2, double coeffOfxy, double coeffOfy2,
 														   double coeffOfx, double coeffOfy, double constant){
 		
 		double t1;
@@ -120,7 +122,7 @@ public class Ray {
 	 * Returns the {@link NumericRange} of values of the parameter t that give the points that belong to the intersection
 	 * of the ray with the given ellipse.
 	 */
-	public NumericRange getEllipseIntersectionParameterRange(double a, double b, Vector2d centre){
+	private NumericRange getEllipseIntersectionParameterRange(double a, double b, Vector2d centre){
 		double xcentre = centre.x;
 		double ycentre = centre.y;
 		
@@ -156,13 +158,13 @@ public class Ray {
 		double ymin = topLeftCorner.y - height;
 		
 		if(direction.x == 0){
-			if(! new NumericRange(xmin, xmax).contains(direction.x)) return null;
+			if(! new NumericRange(xmin, xmax).contains(pt.x)) return null;
 			result = new NumericRange(0, Double.POSITIVE_INFINITY);
 		} else 
 			result = new NumericRange((xmin-pt.x)/direction.x, (xmax-pt.x)/direction.x);
 		
 		if(direction.y == 0){
-			if(! new NumericRange(ymin, ymax).contains(direction.y)) return null;
+			if(! new NumericRange(ymin, ymax).contains(pt.y)) return null;
 			return getParameterRange(result);
 		}
 		
@@ -172,22 +174,26 @@ public class Ray {
 	}
 	
 	
+	/**
+	 * Takes an arbitrary closed interval, specified by the end points, and restricts it to the interval [0, infinity].
+	 */
 	private NumericRange getParameterRange(double t1, double t2){
 		if(t1 < 0 && t2 < 0) return null;
 		
-		double t_min = Math.min(t1, t2);
-		double t_max = Math.max(t1, t2);
+		double tMin = Math.min(t1, t2);
+		double tMax = Math.max(t1, t2);
 		
-		if(t_min < 0) t_min = 0;
+		if(tMin < 0) tMin = 0;
 		
-		return new NumericRange(t_min, t_max); 
+		return new NumericRange(tMin, tMax); 
 	}
 	
 	
 	/**
-	 * Takes an arbitrary closed interval and restricts it to the interval [0, infinity]
+	 * Takes an arbitrary closed interval, specified as a {@link NumericRange}, and restricts it to the interval [0, infinity].
 	 */
 	private NumericRange getParameterRange(NumericRange range) {
+		if(range == null) return null;
 		return getParameterRange(range.getMin(), range.getMax());
 	}
 }

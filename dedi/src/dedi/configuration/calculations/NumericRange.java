@@ -29,15 +29,6 @@ public class NumericRange {
 	}
 
 
-	/**
-	 * Sets the left end point of the interval.
-	 * Swaps min and max if the new min is greater than max.
-	 */
-	public void setMin(double min) {
-		this.min = min;
-		checkMinMax();
-	}
-
 
 	public double getMax() {
 		return max;
@@ -45,15 +36,9 @@ public class NumericRange {
 
 
 	/**
-	 * Sets the right end point of the interval.
-	 * Swaps min and max if the max is less than min.
+	 * Checks whether min is less than or equal to max,
+	 * and swaps them if it is not.
 	 */
-	public void setMax(double max) {
-		this.max = max;
-		checkMinMax();
-	}
-
-
 	private void checkMinMax() {
 		if (min > max) {
 			double t = max;
