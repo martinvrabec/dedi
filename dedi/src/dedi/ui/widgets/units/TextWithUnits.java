@@ -59,7 +59,7 @@ public class TextWithUnits<T extends Quantity> extends WidgetWithUnits<T> implem
 	}
 	
 	
-	
+	@Override
 	public void setToolTipText(String ttt){
 		checkWidget();
 		text.setToolTipText(ttt);

@@ -24,22 +24,27 @@ public class TextUtil {
 	 * @return - The number formatted to the given number of significant figures. 
 	 *           If the magnitude of the number is greater than 10^(precision) or less than 0.1, 
 	 *           exponential (scientific) notation is used.
+	 *           Returns the String 'NaN' if the given value isNaN or Infinity.
 	 * 
 	 * @throws IllegalArgumentException if the precision argument is less than zero.
 	 */
 	public static String format(double value, int precision){
-		String s;
-		double absvalue = Math.abs(value);
+		if(value == Double.POSITIVE_INFINITY || value == Double.NEGATIVE_INFINITY || Double.isNaN(value)) return "NaN";
 		
-		if ((absvalue <= Math.pow(10, precision) && absvalue >= 0.1) || absvalue == 0) { 
-			BigDecimal bd = BigDecimal.valueOf(value);
-			bd = bd.round(new MathContext(precision));
-			s = bd.toString();
+		String result;
+		BigDecimal bd = BigDecimal.valueOf(value);
+		bd = bd.round(new MathContext(precision));
+		BigDecimal absValue = bd.abs();
+		
+		if ((absValue.compareTo(BigDecimal.valueOf(Math.pow(10, precision))) <= 0 && 
+			 absValue.compareTo(BigDecimal.valueOf(0.1)) >= 0) || absValue.compareTo(BigDecimal.valueOf(0)) == 0) { 
+			
+			result = bd.toString();
 		}
 		else 
-			s = new DecimalFormat("0." + Stream.generate(() -> "0").limit(--precision).collect(Collectors.joining("")) + "E0").format(value);
+			result = new DecimalFormat("0." + Stream.generate(() -> "0").limit(--precision).collect(Collectors.joining("")) + "E0").format(value);
 		
-		return s;
+		return result;
 	}
 	
 	

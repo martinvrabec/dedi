@@ -259,7 +259,7 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 				return;
 			}
 		   
-		   Q q = new D(hkls.get(i).getD()).toQ();
+		   Q q = new D(hkls.get(i).getD().to(D.BASE_UNIT)).toQ();
 		   IROI ringROI = new EllipticalROI(getCalibrantRingMajor(q), getCalibrantRingMinor(q), 0, getBeamstopCentreX(), getBeamstopCentreY());
 				  
 		   ringRegion.setFill(false);
