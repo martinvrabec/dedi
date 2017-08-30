@@ -47,10 +47,10 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		bc1.setCameraTubeXCentre(737.5);
 		bc1.setCameraTubeYCentre(839.5);
 		bc1.setClearance(10);
-		bc1.setMinWavelength(0.059);
-		bc1.setMaxWavelength(0.335);
-		bc1.setMinCameraLength(1.2);
-		bc1.setMaxCameraLength(9.7);
+		bc1.setMinWavelength(0.062);
+		bc1.setMaxWavelength(0.3351);
+		bc1.setMinCameraLength(1.9);
+		bc1.setMaxCameraLength(9.9);
 		bc1.setCameraLengthStepSize(0.25);
 		
 		
@@ -63,16 +63,16 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		bc2.setCameraTubeXCentre(0);
 		bc2.setCameraTubeYCentre(0);
 		bc2.setClearance(10);
-		bc2.setMinWavelength(0.059);
-		bc2.setMaxWavelength(0.335);
+		bc2.setMinWavelength(0.062);
+		bc2.setMaxWavelength(0.3351);
 		bc2.setMinCameraLength(0.1);
-		bc2.setMaxCameraLength(9.7);
+		bc2.setMaxCameraLength(9.9);
 		bc2.setCameraLengthStepSize(0.01);
 		
 		
 		// Pilatus 2M - the default detector for bc1
 		DiffractionDetector dd = new DiffractionDetector();
-		dd.setDetectorName("Pilatus2m");
+		dd.setDetectorName("Pilatus P3-2M");
 		dd.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
 		dd.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
 		dd.setNumberOfPixelsX(1475);
@@ -95,7 +95,7 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		
 		// Pilatus 2M for WAXS - the default detector for bc2
 		DiffractionDetector dd2 = new DiffractionDetector();
-		dd2.setDetectorName("Pilatus2m for WAXS");
+		dd2.setDetectorName("Pilatus P3-2M-DLS-L (for WAXS)");
 		dd2.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
 		dd2.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
 		dd2.setNumberOfPixelsX(1475);
