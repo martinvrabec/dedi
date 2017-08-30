@@ -8,14 +8,13 @@ import javax.measure.unit.Unit;
 import org.jscience.physics.amount.Amount;
 
 public abstract class ScatteringQuantity implements Quantity {
-	protected Amount<?> value;
-	
+	protected Amount<? extends ScatteringQuantity> value;
 	
 	public ScatteringQuantity(){
 	}
 	
 	
-	public ScatteringQuantity(Amount<?> value){
+	public ScatteringQuantity(Amount<? extends ScatteringQuantity> value){
 		this.value = value;
 	}
 	
@@ -25,21 +24,21 @@ public abstract class ScatteringQuantity implements Quantity {
 	}
 	
 	
-	public abstract Unit<?> getBaseUnit();
+	public abstract Unit<? extends ScatteringQuantity> getBaseUnit();
 	
-	public abstract List<Unit<?>> getUnits();
+	public abstract List<Unit<? extends ScatteringQuantity>> getUnits();
 	
 	public abstract <T extends ScatteringQuantity> T fromQ(Q q);
 	
 	public abstract Q toQ();
 	
 	
-	public Amount<?> getValue(){
+	public Amount<? extends ScatteringQuantity> getValue(){
 		return value;
 	}
 	
 	
-	public void setValue(Amount<?> value){
+	public void setValue(Amount<? extends ScatteringQuantity> value){
 		this.value = value;
 	}
 	

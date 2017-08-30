@@ -46,8 +46,8 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 	private AbstractResultsController controller;
 	
 	private ScatteringQuantity currentQuantity;
-	private List<Unit<?>> currentUnits;
-	private Unit<?> currentUnit;
+	private List<Unit<? extends ScatteringQuantity>> currentUnits;
+	private Unit<? extends ScatteringQuantity> currentUnit;
 	// One of the scattering quantities 
 	private DoubleTheta doubleTheta;
 	
@@ -129,7 +129,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 			IStructuredSelection selection = (IStructuredSelection) e.getSelection();
 		    if (selection.size() > 0){
 		    	ScatteringQuantity newQuantity = (ScatteringQuantity) selection.getFirstElement();
-		    	Unit<?> baseUnit = newQuantity.getBaseUnit();
+		    	Unit<? extends ScatteringQuantity> baseUnit = newQuantity.getBaseUnit();
 		    	requestedMin = controller.convertValue(requestedMin, currentQuantity, newQuantity, currentUnit, baseUnit);
 		    	requestedMax = controller.convertValue(requestedMax, currentQuantity, newQuantity, currentUnit, baseUnit);
 		    	currentQuantity = newQuantity;
@@ -150,7 +150,8 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		scatteringQuantitiesUnitsCombo.addSelectionChangedListener(e -> {
 			IStructuredSelection selection = (IStructuredSelection) e.getSelection();
 			if (selection.size() > 0){
-				 Unit<?> newUnit = (Unit<?>) selection.getFirstElement();
+				 @SuppressWarnings("unchecked")
+				Unit<? extends ScatteringQuantity> newUnit = (Unit<? extends ScatteringQuantity>) selection.getFirstElement();
 				 requestedMin = controller.convertValue(requestedMin, currentQuantity, currentQuantity, currentUnit, newUnit);
 			     requestedMax = controller.convertValue(requestedMax, currentQuantity, currentQuantity, currentUnit, newUnit);
 				 currentUnit =  newUnit;

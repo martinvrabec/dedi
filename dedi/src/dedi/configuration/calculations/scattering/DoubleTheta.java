@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import javax.measure.quantity.Angle;
 import javax.measure.quantity.Length;
 import javax.measure.unit.SI;
 import javax.measure.unit.NonSI;
@@ -11,11 +12,12 @@ import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
 
-public class DoubleTheta extends ScatteringQuantity {
+public class DoubleTheta extends ScatteringQuantity implements Angle {
 	private Amount<Length> wavelength;
 	public static final String NAME = "2\u03B8";
-	public static final Unit<?> BASE_UNIT = SI.RADIAN;
-	public static final List<Unit<?>> UNITS = new ArrayList<Unit<?>>(Arrays.asList(NonSI.DEGREE_ANGLE, SI.RADIAN));
+	public static final Unit<DoubleTheta> BASE_UNIT = SI.RADIAN.asType(DoubleTheta.class);
+	private static final List<Unit<? extends ScatteringQuantity>> UNITS = 
+			new ArrayList<>(Arrays.asList(NonSI.DEGREE_ANGLE.asType(DoubleTheta.class), SI.RADIAN.asType(DoubleTheta.class)));
 	
 	
 	public DoubleTheta(){
@@ -32,7 +34,7 @@ public class DoubleTheta extends ScatteringQuantity {
 		this.wavelength = (wavelength == null) ? null : Amount.valueOf(wavelength, SI.METER);
 	}
 	
-	public DoubleTheta(Amount<?> doubleTheta, Amount<Length> wavelength) {
+	public DoubleTheta(Amount<? extends ScatteringQuantity> doubleTheta, Amount<Length> wavelength) {
 		super(doubleTheta.to(BASE_UNIT));
 		this.wavelength = wavelength;
 	}
@@ -44,12 +46,12 @@ public class DoubleTheta extends ScatteringQuantity {
 	
 	
 	@Override
-	public Unit<?> getBaseUnit() {
+	public Unit<? extends ScatteringQuantity> getBaseUnit() {
 		return BASE_UNIT;
 	}
 
 	@Override
-	public List<Unit<?>> getUnits() {
+	public List<Unit<? extends ScatteringQuantity>> getUnits() {
 		return UNITS;
 	}
 
@@ -83,4 +85,5 @@ public class DoubleTheta extends ScatteringQuantity {
 	public void setWavelength(Amount<Length> wavelength){
 		this.wavelength = wavelength;
 	}
+	
 }

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.measure.unit.NonSI;
+import javax.measure.unit.ProductUnit;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
@@ -12,8 +13,10 @@ import org.jscience.physics.amount.Amount;
 
 public class Q extends ScatteringQuantity {
 	private static final String NAME = "q";
-	public static final Unit<?> BASE_UNIT = SI.METER.inverse();
-	private static final List<Unit<?>> UNITS = new ArrayList<>(Arrays.asList(SI.NANO(SI.METER).inverse(), NonSI.ANGSTROM.inverse()));
+	public static final Unit<Q> BASE_UNIT = new ProductUnit<>(SI.METER.inverse());
+	private static final List<Unit<? extends ScatteringQuantity>> UNITS = 
+			new ArrayList<>(Arrays.asList(new ProductUnit<Q>(SI.NANO(SI.METER).inverse()), 
+					                      new ProductUnit<Q>(NonSI.ANGSTROM.inverse())));
 	
 	public Q(){
 	}
@@ -22,19 +25,19 @@ public class Q extends ScatteringQuantity {
 		super(Amount.valueOf(value, Q.BASE_UNIT));
 	}
 	
-	public Q(Amount<?> value) {
+	public Q(Amount<? extends ScatteringQuantity> value) {
 		super(value.to(Q.BASE_UNIT));
 	}
 	
 	
 	@Override
-	public Unit<?> getBaseUnit(){
+	public Unit<? extends ScatteringQuantity> getBaseUnit(){
 		return Q.BASE_UNIT;
 	}
 	
 	
 	@Override
-	public List<Unit<?>> getUnits(){
+	public List<Unit<? extends ScatteringQuantity>> getUnits(){
 		return Q.UNITS;
 	}
 	
@@ -54,7 +57,7 @@ public class Q extends ScatteringQuantity {
 		return this;
 	}
 
-	public static Q valueOf(Amount<?> value){
+	public static Q valueOf(Amount<? extends ScatteringQuantity> value){
 		return new Q(value);
 	}
 
