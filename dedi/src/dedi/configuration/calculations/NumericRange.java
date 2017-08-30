@@ -3,7 +3,7 @@ package dedi.configuration.calculations;
 /**
  * A class that represents a closed interval.
  * Provides useful methods for operations with intervals, 
- * such as intersection of two intervals.
+ * such as intersection of two intervals, or determining whether a given value lies within the interval.
  * The empty set is represented by null.
  *
  */

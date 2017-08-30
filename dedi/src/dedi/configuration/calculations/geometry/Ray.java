@@ -5,16 +5,19 @@ import javax.vecmath.Vector2d;
 import dedi.configuration.calculations.NumericRange;
 
 /**
- * This class represent a (geometrical) ray (or half-line) - half of a line proceeding from an initial point 
+ * <p> This class represent a (geometrical) ray (or half-line) - half of a line proceeding from an initial point 
  * in a direction specified by a non-zero vector.
+ * </p>
  * 
- * It uses the direction vector to parameterise the positions of the points lying on the ray
- * by a parameter (conventionally called t) that belongs to the interval [0, infinity].
+ * <p> Internally, it uses the direction vector to parameterise the positions of the points lying on the ray
+ * by a parameter (conventionally called t) that sweeps the interval [0, infinity].
+ * </p>
  * 
- * It provides useful methods for manipulating rays, such as getting the point that corresponds to 
+ * <p> It provides useful methods for manipulating rays, such as getting the point that corresponds to 
  * a certain value of the parameter t, getting a point at a given distance from the initial point,
  * and finding the {@link NumericRange} of values of the parameter t that give the points that belong to the intersection
- * of the ray with various geometrical figures, such as rectangle, conic (circle, ellipse, ...), etc.
+ * of the ray with various geometrical shapes, such as rectangle, conic (circle, ellipse, ...), etc.
+ * </p>
  */
 public class Ray {
 	private Vector2d direction;  // a vector pointing in the direction of the ray.  
