@@ -3,6 +3,7 @@ package dedi.configuration.calculations.scattering;
 import javax.measure.unit.SI;
 
 import org.jscience.physics.amount.Amount;
+import org.jscience.physics.amount.Constants;
 
 
 public class Energy extends BeamQuantity {
@@ -16,13 +17,13 @@ public class Energy extends BeamQuantity {
 	
 	@Override
 	public Wavelength toWavelength() {
-		return new Wavelength(this.getAmount().inverse().times(PhysicalConstants.c).times(PhysicalConstants.h).to(SI.METER));
+		return new Wavelength(this.getAmount().inverse().times(Constants.c).times(Constants.ℎ).to(SI.METER));
 	}
 
 	
 	@Override
 	public BeamQuantity fromWavelength(Wavelength wavelength) {
-		return new Energy(wavelength.getAmount().inverse().times(PhysicalConstants.c).times(PhysicalConstants.h).to(SI.JOULE));
+		return new Energy(wavelength.getAmount().inverse().times(Constants.c).times(Constants.ℎ).to(SI.JOULE));
 	}
 
 }
