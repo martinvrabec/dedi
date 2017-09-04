@@ -70,17 +70,8 @@ public class DefaultResultsController extends AbstractResultsController {
 	
 	
 	private Vector2d getPtForQ(double qvalue){
-		if(detector == null || beamstop == null || angle == null || wavelength == null || cameraLength == null)
-			return null;
-		
-		Ray ray = new Ray(new Vector2d(Math.cos(angle), Math.sin(angle)), 
-				          new Vector2d(beamstopXCentreMM, beamstopYCentreMM));
-		
-		try {
-			return ray.getPtAtDistance(1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(qvalue, cameraLength, wavelength));
-		} catch(IllegalArgumentException e) {
-			return null;
-		}
+		return (detector == null || beamstop == null || angle == null || wavelength == null || cameraLength == null) ? null :
+			BeamlineConfigurationUtil.getPtForQ(qvalue, angle, cameraLength, wavelength, beamstopXCentreMM, beamstopYCentreMM);
 	}
 	
 	
@@ -115,8 +106,8 @@ public class DefaultResultsController extends AbstractResultsController {
 		updateState();
 		
 		// Perform the computations in a separate thread.
-		// However, the updates of the results have to be done in the UI thread,
-		// because they modify the GUI, so use Display.getDefault().asyncExec(Runnable).
+		// The updates of the results have to be done in the UI thread
+		// (because they modify the GUI), so use Display.getDefault().asyncExec(Runnable).
 		// Any variables that need to be passed to that Runnable that are liable to get modified  
 		// in this thread before the update in the UI thread has finished must be passed as deep copies.
 		Thread thread = new Thread(() -> {
@@ -172,7 +163,7 @@ public class DefaultResultsController extends AbstractResultsController {
 				return;
 			}
 			
-			
+
 			// Calculate the visible Q range.
 			DetectorProperties detectorProperties = 
 					new DetectorProperties(cameraLength*1e3, 
@@ -187,7 +178,7 @@ public class DefaultResultsController extends AbstractResultsController {
 			
 			// Create a deep copy of ptMin and ptMax to pass to the Runnable below,
 			// because the code that follows might modify them,
-			// but we want the UI thread to use their current values.
+			// and we want the UI thread to use their current values.
 			// (It's not enough to create the copy in the call to setVisibleQRange()).
 			// Assume visibleQMin and visibleQMax won't change.
 			Vector2d ptMinCopy = new Vector2d(ptMin);

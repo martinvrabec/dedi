@@ -86,7 +86,7 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	public abstract void updateRequestedQRange(NumericRange requestedRange);
 	
 	
-	public void updateRequestedRange(NumericRange requestedRange, ScatteringQuantity quantity, Unit<? extends ScatteringQuantity> unit) {
+	public void updateRequestedRange(NumericRange requestedRange, ScatteringQuantity<?> quantity, Unit<?> unit) {
 		updateRequestedQRange(convertRange(requestedRange, quantity, new Q(), unit, Q.BASE_UNIT));
 	}
 	
@@ -165,23 +165,23 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	
 	// Methods that allow views to obtain the results in the required quantities and units.
 	
-	public NumericRange getVisibleRange(ScatteringQuantity quantity, Unit<? extends ScatteringQuantity> unit) {
+	public NumericRange getVisibleRange(ScatteringQuantity<?> quantity, Unit<?> unit) {
 		return convertRange(getVisibleQRange(), new Q(), quantity, Q.BASE_UNIT, unit);
 	}
 	
 	
-	public NumericRange getFullRange(ScatteringQuantity quantity, Unit<? extends ScatteringQuantity> unit) {
+	public NumericRange getFullRange(ScatteringQuantity<?> quantity, Unit<?> unit) {
 		return convertRange(getFullQRange(), new Q(), quantity, Q.BASE_UNIT, unit);
 	}
 	
 	
-	public NumericRange getRequestedRange(ScatteringQuantity quantity, Unit<? extends ScatteringQuantity> unit) {
+	public NumericRange getRequestedRange(ScatteringQuantity<?> quantity, Unit<?> unit) {
 		return convertRange(getRequestedQRange(), new Q(), quantity, Q.BASE_UNIT, unit);
 	}
 	
 	
-	public NumericRange convertRange(NumericRange range, ScatteringQuantity oldQuantity, ScatteringQuantity newQuantity, 
-            Unit<? extends ScatteringQuantity> oldUnit, Unit<? extends ScatteringQuantity> newUnit){
+	public NumericRange convertRange(NumericRange range, ScatteringQuantity<?> oldQuantity, ScatteringQuantity<?> newQuantity, 
+            Unit<?> oldUnit, Unit<?> newUnit){
 		
 		if(range == null) return null;
 		
@@ -192,11 +192,11 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	}
 	
 	
-	public Double convertValue(Double value, ScatteringQuantity oldQuantity, ScatteringQuantity newQuantity, 
-                           Unit<? extends ScatteringQuantity> oldUnit, Unit<? extends ScatteringQuantity> newUnit){
+	public Double convertValue(Double value, ScatteringQuantity<?> oldQuantity, ScatteringQuantity<?> newQuantity, 
+                           Unit<?> oldUnit, Unit<?> newUnit){
 		if(value == null) return null;
 		oldQuantity.setValue(Amount.valueOf(value, oldUnit));
-		ScatteringQuantity newSQ = oldQuantity.to(newQuantity);
+		ScatteringQuantity<?> newSQ = oldQuantity.to(newQuantity);
 		
 		return (newSQ == null) ? null : newSQ.getValue().to(newUnit).getEstimatedValue();
 	}

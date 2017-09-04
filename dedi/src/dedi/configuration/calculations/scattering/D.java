@@ -11,37 +11,32 @@ import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
 
-public class D extends ScatteringQuantity implements Length {
+public class D extends ScatteringQuantity<Length> {
 	public static final String NAME = "d";
-	public static final Unit<D> BASE_UNIT = SI.METER.asType(D.class);
-	private static final List<Unit<? extends ScatteringQuantity>> UNITS = 
-			new ArrayList<>(Arrays.asList(SI.NANO(SI.METER.asType(D.class)), 
-					                      NonSI.ANGSTROM.asType(D.class)));
+	public static final Unit<Length> BASE_UNIT = SI.METER;
+	private static final List<Unit<Length>> UNITS = 
+			new ArrayList<>(Arrays.asList(SI.NANO(SI.METER), 
+					                      NonSI.ANGSTROM));
 	
 	public D(){
 	}
 	
-	public D(Amount<? extends ScatteringQuantity> value) {
+	public D(Amount<Length> value) {
 		super(value.to(D.BASE_UNIT));
 	}
 	
 	
 	@Override
-	public Unit<? extends ScatteringQuantity> getBaseUnit(){
+	public Unit<Length> getBaseUnit(){
 		return D.BASE_UNIT;
 	}
 	
 	
 	@Override
-	public List<Unit<? extends ScatteringQuantity>> getUnits(){
+	public List<Unit<Length>> getUnits(){
 		return D.UNITS;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public D fromQ(Q q) {
-		return new D(q.getValue().inverse().times(2*Math.PI).to(BASE_UNIT));
-	}
 
 	@Override
 	public Q toQ() {
@@ -52,5 +47,11 @@ public class D extends ScatteringQuantity implements Length {
 	@Override
 	public String getQuantityName() {
 		return NAME;
+	}
+
+	
+	@Override
+	public void setValue(Q q) {
+		setValue(q.getValue().inverse().times(2*Math.PI).to(BASE_UNIT));
 	}
 }

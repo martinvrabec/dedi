@@ -12,12 +12,12 @@ import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
 
-public class DoubleTheta extends ScatteringQuantity implements Angle {
+public class DoubleTheta extends ScatteringQuantity<Angle> {
 	private Amount<Length> wavelength;
 	public static final String NAME = "2\u03B8";
-	public static final Unit<DoubleTheta> BASE_UNIT = SI.RADIAN.asType(DoubleTheta.class);
-	private static final List<Unit<? extends ScatteringQuantity>> UNITS = 
-			new ArrayList<>(Arrays.asList(NonSI.DEGREE_ANGLE.asType(DoubleTheta.class), SI.RADIAN.asType(DoubleTheta.class)));
+	public static final Unit<Angle> BASE_UNIT = SI.RADIAN;
+	private static final List<Unit<Angle>> UNITS = 
+			new ArrayList<>(Arrays.asList(NonSI.DEGREE_ANGLE, SI.RADIAN));
 	
 	
 	public DoubleTheta(){
@@ -34,7 +34,7 @@ public class DoubleTheta extends ScatteringQuantity implements Angle {
 		this.wavelength = (wavelength == null) ? null : Amount.valueOf(wavelength, SI.METER);
 	}
 	
-	public DoubleTheta(Amount<? extends ScatteringQuantity> doubleTheta, Amount<Length> wavelength) {
+	public DoubleTheta(Amount<Angle> doubleTheta, Amount<Length> wavelength) {
 		super(doubleTheta.to(BASE_UNIT));
 		this.wavelength = wavelength;
 	}
@@ -46,24 +46,16 @@ public class DoubleTheta extends ScatteringQuantity implements Angle {
 	
 	
 	@Override
-	public Unit<? extends ScatteringQuantity> getBaseUnit() {
+	public Unit<Angle> getBaseUnit() {
 		return BASE_UNIT;
 	}
 
 	@Override
-	public List<Unit<? extends ScatteringQuantity>> getUnits() {
+	public List<Unit<Angle>> getUnits() {
 		return UNITS;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public DoubleTheta fromQ(Q q) {
-		if(wavelength == null) return null;
-		return 
-		 new DoubleTheta(2*Math.asin(q.getValue().to(Q.BASE_UNIT).getEstimatedValue()*wavelength.doubleValue(SI.METER)/(4*Math.PI)), 
-				         wavelength.doubleValue(SI.METER));
-	}
-
+	
 	@Override
 	public Q toQ() {
 		if(wavelength == null) return new Q();
@@ -84,6 +76,13 @@ public class DoubleTheta extends ScatteringQuantity implements Angle {
 	
 	public void setWavelength(Amount<Length> wavelength){
 		this.wavelength = wavelength;
+	}
+
+
+	@Override
+	public void setValue(Q q) {
+		this.value = 
+				Amount.valueOf(2*Math.asin(q.getValue().to(Q.BASE_UNIT).getEstimatedValue()*wavelength.doubleValue(SI.METER)/(4*Math.PI)), BASE_UNIT);
 	}
 	
 }

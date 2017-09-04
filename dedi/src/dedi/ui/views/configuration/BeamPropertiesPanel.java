@@ -52,9 +52,9 @@ public class BeamPropertiesPanel implements Observer {
 		Group beamlineQuantityGroup = GuiHelper.createGroup(parent, "Beam properties", 3);
 		
 		minWavelength = Amount.valueOf(0, SI.METER);
-		maxWavelength = Amount.valueOf(Double.MAX_VALUE, SI.METER);
+		maxWavelength = Amount.valueOf(3, SI.METER);
 		minEnergy = Amount.valueOf(0, SI.JOULE);
-		maxEnergy = Amount.valueOf(Double.MAX_VALUE, SI.JOULE);
+		maxEnergy = Amount.valueOf(3, SI.JOULE);
 		
 		
 		ComboUnitsProvider<Energy> energyUnitsCombo = new ComboUnitsProvider<>(beamlineQuantityGroup, ENERGY_UNITS);

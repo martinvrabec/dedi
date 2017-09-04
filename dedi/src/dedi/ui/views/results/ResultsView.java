@@ -3,7 +3,6 @@ package dedi.ui.views.results;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.measure.unit.Unit;
 
@@ -45,9 +44,8 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 	// The controller used to access and modify the results.
 	private AbstractResultsController controller;
 	
-	private ScatteringQuantity currentQuantity;
-	private List<Unit<? extends ScatteringQuantity>> currentUnits;
-	private Unit<? extends ScatteringQuantity> currentUnit;
+	private ScatteringQuantity<?> currentQuantity;
+	private Unit<?> currentUnit;
 	// One of the scattering quantities 
 	private DoubleTheta doubleTheta;
 	
@@ -116,7 +114,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 			@Override
 			public String getText(Object element){
 				if(element instanceof ScatteringQuantity){
-					ScatteringQuantity quantity = (ScatteringQuantity) element;
+					ScatteringQuantity<?> quantity = (ScatteringQuantity<?>) element;
 					return quantity.getQuantityName();
 				}
 				return super.getText(element);
@@ -128,8 +126,8 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		scatteringQuantitiesComboViewer.addSelectionChangedListener(e -> {
 			IStructuredSelection selection = (IStructuredSelection) e.getSelection();
 		    if (selection.size() > 0){
-		    	ScatteringQuantity newQuantity = (ScatteringQuantity) selection.getFirstElement();
-		    	Unit<? extends ScatteringQuantity> baseUnit = newQuantity.getBaseUnit();
+		    	ScatteringQuantity<?> newQuantity = (ScatteringQuantity<?>) selection.getFirstElement();
+		    	Unit<?> baseUnit = newQuantity.getBaseUnit();
 		    	requestedMin = controller.convertValue(requestedMin, currentQuantity, newQuantity, currentUnit, baseUnit);
 		    	requestedMax = controller.convertValue(requestedMax, currentQuantity, newQuantity, currentUnit, baseUnit);
 		    	currentQuantity = newQuantity;
@@ -139,9 +137,8 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 				maxValueLabel.setText("Max " + quantityName + " value:");
 				requestedMinValueLabel.setText("Requested min " + quantityName + " value:");
 				requestedMaxValueLabel.setText("Requested max " + quantityName + " value:");
-		    	currentUnits = currentQuantity.getUnits();
-		    	scatteringQuantitiesUnitsCombo.setInput(currentUnits);
-		    	scatteringQuantitiesUnitsCombo.setSelection(new StructuredSelection(currentUnits.get(0)));
+		    	scatteringQuantitiesUnitsCombo.setInput(currentQuantity.getUnits());
+		    	scatteringQuantitiesUnitsCombo.setSelection(new StructuredSelection(currentQuantity.getUnits().get(0)));
 		    }
 		});
 		
@@ -150,8 +147,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		scatteringQuantitiesUnitsCombo.addSelectionChangedListener(e -> {
 			IStructuredSelection selection = (IStructuredSelection) e.getSelection();
 			if (selection.size() > 0){
-				 @SuppressWarnings("unchecked")
-				Unit<? extends ScatteringQuantity> newUnit = (Unit<? extends ScatteringQuantity>) selection.getFirstElement();
+				 Unit<?> newUnit = (Unit<?>) selection.getFirstElement();
 				 requestedMin = controller.convertValue(requestedMin, currentQuantity, currentQuantity, currentUnit, newUnit);
 			     requestedMax = controller.convertValue(requestedMax, currentQuantity, currentQuantity, currentUnit, newUnit);
 				 currentUnit =  newUnit;
@@ -221,7 +217,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 		/*
 		 * Initialise the scattering quantities.
 		 */
-		ArrayList<ScatteringQuantity> quantities = new ArrayList<>();
+		ArrayList<ScatteringQuantity<?>> quantities = new ArrayList<>();
 		quantities.add(new Q());
 		quantities.add(new D());
 		quantities.add(new S());

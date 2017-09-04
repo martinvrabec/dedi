@@ -11,12 +11,12 @@ import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
 
-public class Q extends ScatteringQuantity {
+public class Q extends ScatteringQuantity<InverseLength> {
 	private static final String NAME = "q";
-	public static final Unit<Q> BASE_UNIT = new ProductUnit<>(SI.METER.inverse());
-	private static final List<Unit<? extends ScatteringQuantity>> UNITS = 
-			new ArrayList<>(Arrays.asList(new ProductUnit<Q>(SI.NANO(SI.METER).inverse()), 
-					                      new ProductUnit<Q>(NonSI.ANGSTROM.inverse())));
+	public static final Unit<InverseLength> BASE_UNIT = new ProductUnit<>(SI.METER.inverse());
+	private static final List<Unit<InverseLength>> UNITS = 
+			new ArrayList<>(Arrays.asList(new ProductUnit<InverseLength>(SI.NANO(SI.METER).inverse()), 
+					                      new ProductUnit<InverseLength>(NonSI.ANGSTROM.inverse())));
 	
 	public Q(){
 	}
@@ -25,45 +25,36 @@ public class Q extends ScatteringQuantity {
 		super(Amount.valueOf(value, Q.BASE_UNIT));
 	}
 	
-	public Q(Amount<? extends ScatteringQuantity> value) {
+	public Q(Amount<InverseLength> value) {
 		super(value.to(Q.BASE_UNIT));
 	}
 	
 	
 	@Override
-	public Unit<? extends ScatteringQuantity> getBaseUnit(){
+	public Unit<InverseLength> getBaseUnit(){
 		return Q.BASE_UNIT;
 	}
 	
 	
 	@Override
-	public List<Unit<? extends ScatteringQuantity>> getUnits(){
+	public List<Unit<InverseLength>> getUnits(){
 		return Q.UNITS;
 	}
 	
-	@Override
-	public <T extends ScatteringQuantity> T to(T scatteringQuantity) {
-		return scatteringQuantity.fromQ(this);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public Q fromQ(Q q) {
-		return q;
-	}
 
 	@Override
 	public Q toQ() {
 		return this;
 	}
 
-	public static Q valueOf(Amount<? extends ScatteringQuantity> value){
-		return new Q(value);
-	}
-
 
 	@Override
 	public String getQuantityName() {
 		return NAME;
+	}
+
+	@Override
+	public void setValue(Q q) {
+		setValue(q.getValue());
 	}
 }

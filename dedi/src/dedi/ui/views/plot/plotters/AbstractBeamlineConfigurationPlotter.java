@@ -110,6 +110,7 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 		else removeRegions(calibrantRingRegions);
 		
 		if(context.isMaskPlot()) createMask();
+		else removeTrace(MASK_TRACE);
 		
 		createEmptyTrace();
 		rescalePlot();
@@ -260,7 +261,12 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 			}
 		   
 		   Q q = new D(hkls.get(i).getD().to(D.BASE_UNIT)).toQ();
-		   IROI ringROI = new EllipticalROI(getCalibrantRingMajor(q), getCalibrantRingMinor(q), 0, getBeamstopCentreX(), getBeamstopCentreY());
+		   IROI ringROI;
+		   try {
+			   ringROI = new EllipticalROI(getCalibrantRingMajor(q), getCalibrantRingMinor(q), 0, getBeamstopCentreX(), getBeamstopCentreY());
+		   } catch(IllegalArgumentException e) {
+			   continue;
+		   }
 				  
 		   ringRegion.setFill(false);
 		   addRegion(ringRegion, ringROI, Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
