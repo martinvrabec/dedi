@@ -81,7 +81,10 @@ public class TextWithUnits<T extends Quantity> extends WidgetWithUnits<T> implem
 				text.setForeground(new Color(Display.getCurrent(), new RGB(255, 0, 0)));
 			else
 				text.setForeground(new Color(Display.getCurrent(), new RGB(0, 0, 0)));
-			text.setText(TextUtil.format(currentAmount.getEstimatedValue()));
+			if(currentAmount != null)
+				text.setText(TextUtil.format(currentAmount.getEstimatedValue()));
+			else 
+				text.setText("");
 		} catch(NullPointerException e){
 			e.printStackTrace();
 		} finally {

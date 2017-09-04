@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  * Utility class for instantiating certain SWT elements with a predefined style and layout properties.
- * Allows to achieve a consistent look across the DEDI perspective while avoiding code repetition. 
+ * Allows to achieve a consistent look and feel across the DEDI perspective while avoiding code repetition. 
  * Makes it easy to modify a property for all UI elements of the same class across the entire perspective.
  */
 public class GuiHelper {

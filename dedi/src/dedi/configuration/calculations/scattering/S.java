@@ -11,6 +11,11 @@ import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
 
+/**
+ * S := 1/Q
+ * 
+ * @see Q
+ */
 public class S extends ScatteringQuantity<InverseLength> {
 	public static final String NAME = "s";
 	public static final Unit<InverseLength> BASE_UNIT = new ProductUnit<>(SI.METER.inverse()); 

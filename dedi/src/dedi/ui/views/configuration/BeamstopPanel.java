@@ -45,9 +45,9 @@ public class BeamstopPanel implements Observer {
 	private Group clearanceGroup;
 	Spinner clearanceValueSpinner;
 	
-	private final static String TITLE =  "Beamstop";
+	private static final String TITLE =  "Beamstop";
 	
-	private final static List<Unit<Length>> DIAMETER_UNITS = new ArrayList<>(Arrays.asList(SI.MILLIMETRE, SI.MICRO(SI.METER)));
+	private static final List<Unit<Length>> DIAMETER_UNITS = new ArrayList<>(Arrays.asList(SI.MILLIMETRE, SI.MICRO(SI.METER)));
 	
 	
 	public BeamstopPanel(Composite parent, BeamlineConfigurationTemplatesPanel panel) {
@@ -69,17 +69,17 @@ public class BeamstopPanel implements Observer {
 		beamstopPositionGroup.setLayoutData(data);
 		
 		
-		Unit<Dimensionless> Pixel = new BaseUnit<>("Pixel");
-		LabelUnitsProvider<Dimensionless> xPixelLabel = new LabelUnitsProvider<>(beamstopPositionGroup, Pixel);
+		Unit<Dimensionless> pixel = new BaseUnit<>("Pixel");
+		LabelUnitsProvider<Dimensionless> xPixelLabel = new LabelUnitsProvider<>(beamstopPositionGroup, pixel);
 		xPositionText = new TextWithUnits<>(beamstopPositionGroup, "x:", xPixelLabel);
-		xPositionText.addAmountChangeListener(() -> textChanged());
+		xPositionText.addAmountChangeListener(BeamstopPanel.this :: textChanged);
 		GridDataFactory.fillDefaults().span(2, 1).applyTo(xPositionText);
 		xPixelLabel.moveBelow(xPositionText);
 		
 		
-		LabelUnitsProvider<Dimensionless> yPixelLabel = new LabelUnitsProvider<>(beamstopPositionGroup, Pixel);
+		LabelUnitsProvider<Dimensionless> yPixelLabel = new LabelUnitsProvider<>(beamstopPositionGroup, pixel);
 		yPositionText = new TextWithUnits<>(beamstopPositionGroup, "y:", yPixelLabel);
-		yPositionText.addAmountChangeListener(() -> textChanged());
+		yPositionText.addAmountChangeListener(BeamstopPanel.this :: textChanged);
 		GridDataFactory.fillDefaults().span(2, 1).applyTo(yPositionText);
 		yPixelLabel.moveBelow(yPositionText);
 		

@@ -11,6 +11,11 @@ import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
 
+/**
+ * D := 2*pi/Q
+ *
+ * @see Q
+ */
 public class D extends ScatteringQuantity<Length> {
 	public static final String NAME = "d";
 	public static final Unit<Length> BASE_UNIT = SI.METER;

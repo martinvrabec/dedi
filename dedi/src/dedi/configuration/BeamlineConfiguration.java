@@ -13,7 +13,7 @@ import dedi.configuration.devices.CameraTube;
 /**
  * This class represents the configuration of an X-ray scattering beamline. 
  * It stores all the parameters that are needed for the determination of the range of scattering vectors q 
- * that can be observed on the detector in a given direction.
+ * that can be observed on the detector in a particular direction along the surface of the detector.
  * 
  * To get hold of the currently used BeamlineConfiguration use the {@link ResultsService} class' static getter methods.
  */
@@ -21,14 +21,15 @@ public final class BeamlineConfiguration extends Observable {
 	private DiffractionDetector detector;
 	private Beamstop beamstop;
 	private CameraTube cameraTube;
-	private Double angle;                   // The angle that specifies the direction for which the q ranges should be calculated.
-	private Double cameraLength;
+	private Double angle;                   // The angle (in rad) that specifies the direction along the surface of the detector for which the q ranges should be calculated.
+	private Double cameraLength;            // Sample-detector distance in m.
 	private Integer clearance; 
 	private Double wavelength;
-	private Double minWavelength;            // Minimum allowed wavelength of the X-ray beam.
-	private Double maxWavelength;            // Maximum allowed wavelength of the X-ray beam.
-	private Double minCameraLength;          // Minimum sample-to-detector distance.
-	private Double maxCameraLength;          // Maximum sample-to-detector distance.
+	private Double minWavelength;            // Minimum allowed wavelength of the X-ray beam in m.
+	private Double maxWavelength;            // Maximum allowed wavelength of the X-ray beam in m.
+	private Double minCameraLength;          // Minimum sample-detector distance in m.
+	private Double maxCameraLength;          // Maximum sample-detector distance in m.
+	
 	
 	
 	// Getters and Setters
@@ -40,7 +41,7 @@ public final class BeamlineConfiguration extends Observable {
 	
 	/**
 	 * A convenience method that returns the width of the detector in millimetres.
-	 * (The {@link DiffractionDetector} class provides it in pixels only).
+	 * (As the {@link DiffractionDetector} class provides it in pixels only).
 	 * 
 	 * @return The detector width in millimetres. Returns null if the detector is null.
 	 */
@@ -52,7 +53,7 @@ public final class BeamlineConfiguration extends Observable {
 	
 	/**
 	 * A convenience method that provides the height of the detector in millimetres.
-	 * (The {@link DiffractionDetector} class provides it in pixels only).
+	 * (As the {@link DiffractionDetector} class provides it in pixels only).
 	 * 
 	 * @return The detector height in millimetres. Returns null if the detector is null.
 	 */
@@ -64,7 +65,8 @@ public final class BeamlineConfiguration extends Observable {
 	
 	/**
 	 * Sets the current detector. 
-	 * If the new detector equals the current detector, no notification is sent to Observers.
+	 * If the new detector equals the current detector (including if they're both null), 
+	 * no notification is sent to Observers of this BeamlineConfiguration.
 	 * 
 	 * @param detector - the new detector.
 	 */
@@ -76,6 +78,10 @@ public final class BeamlineConfiguration extends Observable {
 	}
 
 
+	/**
+	 * @return - angle (in rad) that specifies the direction along the surface of the detector 
+	 *           for which the q ranges should be calculated.
+	 */
 	public Double getAngle() {
 		return angle;
 	}
@@ -83,9 +89,10 @@ public final class BeamlineConfiguration extends Observable {
 	
 	/**
 	 * Sets the current angle. 
-	 * If the new angle equals the current angle, no notification is sent to Observers.
+	 * If the new angle equals the current angle (including if they're both null), 
+	 * no notification is sent to Observers.
 	 * 
-	 * @param angle - the new angle.
+	 * @param angle - the new angle in radians.
 	 */
 	public void setAngle(Double angle) {
 		if(Objects.equals(angle, this.angle)) return;
@@ -95,6 +102,9 @@ public final class BeamlineConfiguration extends Observable {
 	}
 
 	
+	/**
+	 * @return - camera length in metres.
+	 */
 	public Double getCameraLength() {
 		return cameraLength;
 	}
@@ -102,9 +112,10 @@ public final class BeamlineConfiguration extends Observable {
 	
 	/**
 	 * Sets the current camera length. 
-	 * If the new camera length equals the current camera length, no notification is sent to Observers.
+	 * If the new camera length equals the current camera length (including if they're both null),  
+	 * no notification is sent to Observers.
 	 * 
-	 * @param cameraLength - the new camera length.
+	 * @param cameraLength - the new camera length in metres.
 	 */
 	public void setCameraLength(Double cameraLength) {
 		if(Objects.equals(cameraLength, this.cameraLength)) return;
@@ -114,6 +125,9 @@ public final class BeamlineConfiguration extends Observable {
 	}
 
 	
+	/**
+	 * @return - clearance in pixels.
+	 */
 	public Integer getClearance() {
 		return clearance;
 	}
@@ -192,7 +206,7 @@ public final class BeamlineConfiguration extends Observable {
 	 * Sets the current clearance. 
 	 * If the new clearance equals the current clearance, no notification is sent to Observers.
 	 * 
-	 * @param clearance - the new clearance.
+	 * @param clearance - the new clearance in pixels.
 	 */
 	public void setClearance(Integer clearance) {
 		if(Objects.equals(clearance, this.clearance)) return;
@@ -202,6 +216,9 @@ public final class BeamlineConfiguration extends Observable {
 	}
 
 	
+	/**
+	 * @return - wavelength of the X-ray beam in metres.
+	 */
 	public Double getWavelength() {
 		return wavelength;
 	}
@@ -211,7 +228,7 @@ public final class BeamlineConfiguration extends Observable {
 	 * Sets the current wavelength. 
 	 * If the new wavelength equals the current wavelength, no notification is sent to Observers.
 	 * 
-	 * @param wavelength - the new wavelength.
+	 * @param wavelength - the new wavelength in metres.
 	 */
 	public void setWavelength(Double wavelength) {
 		if(Objects.equals(wavelength, this.wavelength)) return;
@@ -246,12 +263,20 @@ public final class BeamlineConfiguration extends Observable {
 	}
 	
 	
+	/**
+	 * @return - the x coordinate of the centre of the beamstop w.r.t. the top left corner of the detector in millimetres,
+	 *           or null if the beamstop or detector are null.
+	 */    
 	public Double getBeamstopXCentreMM(){
 		if(beamstop == null || detector == null) return null;
 		return beamstop.getXCentre()*detector.getXPixelMM();
 	}
 	
 	
+	/**
+	 * @return - the y coordinate of the centre of the beamstop w.r.t. the top left corner of the detector in millimetres,
+	 *           or null if the beamstop or detector are null.
+	 */
 	public Double getBeamstopYCentreMM(){
 		if(beamstop == null || detector == null) return null;
 		return beamstop.getYCentre()*detector.getYPixelMM();
@@ -278,7 +303,7 @@ public final class BeamlineConfiguration extends Observable {
 	
 	
 	/**
-	 * @return The length of the semi-major axis of the camera tube in pixels,
+	 * @return The length of the semi-major axis of the camera tube's projection onto detector in pixels,
 	 *         or null if the camera tube or the detector are null. 
 	 */
 	public Double getCameraTubeMajorPixels(){
@@ -288,7 +313,7 @@ public final class BeamlineConfiguration extends Observable {
 	
 	
 	/**
-	 * @return The length of the semi-minor axis of the camera tube in pixels,
+	 * @return The length of the semi-minor axis of the camera tube's projection onto detector in pixels,
 	 *         or null if the camera tube or the detector are null. 
 	 */
 	public Double getCameraTubeMinorPixels(){
@@ -297,12 +322,20 @@ public final class BeamlineConfiguration extends Observable {
 	}
 	
 	
+	/**
+	 * @return - the x coordinate of the centre of the camera tube's projection onto detector
+	 *           w.r.t. the top left corner of the detector in millimetres, or null if the camera tube or detector are null.
+	 */
 	public Double getCameraTubeXCentreMM(){
 		if(cameraTube == null || detector == null) return null;
 		return cameraTube.getXCentre()*detector.getXPixelMM();
 	}
 
 	
+	/**
+	 * @return - the y coordinate of the centre of the camera tube's projection onto detector
+	 *           w.r.t. the top left corner of the detector in millimetres, or null if the camera tube or detector are null.
+	 */
 	public Double getCameraTubeYCentreMM(){
 		if(cameraTube == null || detector == null) return null;
 		return cameraTube.getYCentre()*detector.getYPixelMM();
@@ -323,6 +356,9 @@ public final class BeamlineConfiguration extends Observable {
 	}
 	
 	
+	/**
+	 * @return - maximum achievable wavelength of the beam in metres.
+	 */
 	public Double getMaxWavelength() {
 		return maxWavelength;
 	}
@@ -332,7 +368,7 @@ public final class BeamlineConfiguration extends Observable {
 	 * Sets the current the maximum allowed wavelength. 
 	 * If the new the maximum allowed wavelength equals the current maximum allowed wavelength, no notification is sent to Observers.
 	 * 
-	 * @param wavelength - the maximum allowed wavelength.
+	 * @param wavelength - the maximum allowed wavelength in metres.
 	 */
 	public void setMaxWavelength(Double wavelength) {
 		if(Objects.equals(wavelength, this.wavelength)) return;
@@ -342,6 +378,9 @@ public final class BeamlineConfiguration extends Observable {
 	}
 	
 	
+	/**
+	 * @return - minimum achievable wavelength of the beam in metres.
+	 */
 	public Double getMinWavelength() {
 		return minWavelength;
 	}
@@ -351,7 +390,7 @@ public final class BeamlineConfiguration extends Observable {
 	 * Sets the current the minimum allowed wavelength. 
 	 * If the new the minimum allowed wavelength equals the current minimum allowed wavelength, no notification is sent to Observers.
 	 * 
-	 * @param wavelength - the minimum allowed wavelength.
+	 * @param wavelength - the minimum allowed wavelength in metres.
 	 */
 	public void setMinWavelength(Double wavelength) {
 		if(Objects.equals(wavelength, this.wavelength)) return;
@@ -361,6 +400,9 @@ public final class BeamlineConfiguration extends Observable {
 	}
 	
 	
+	/**
+	 * @return - minimum possible camera length in metres.
+	 */
 	public Double getMinCameraLength() {
 		return minCameraLength;
 	}
@@ -370,7 +412,7 @@ public final class BeamlineConfiguration extends Observable {
 	 * Sets the current the minimum sample-to-detector distance. 
 	 * If the new the the minimum sample-to-detector distance equals the current minimum sample-to-detector distance, no notification is sent to Observers.
 	 * 
-	 * @param cameraLength - the minimum sample-to-detector distance.
+	 * @param cameraLength - the minimum sample-to-detector distance in metres.
 	 */
 	public void setMinCameraLength(Double cameraLength) {
 		if(Objects.equals(cameraLength, this.minCameraLength)) return;
@@ -380,6 +422,9 @@ public final class BeamlineConfiguration extends Observable {
 	}
 	
 	
+	/**
+	 * @return - maximum possible camera length in metres.
+	 */
 	public Double getMaxCameraLength() {
 		return maxCameraLength;
 	}
@@ -389,7 +434,7 @@ public final class BeamlineConfiguration extends Observable {
 	 * Sets the current the maximum sample-to-detector distance. 
 	 * If the new the the minimum sample-to-detector distance equals the current minimum sample-to-detector distance, no notification is sent to Observers.
 	 * 
-	 * @param cameraLength - the minimum sample-to-detector distance.
+	 * @param cameraLength - the minimum sample-to-detector distance in metres.
 	 */
 	public void setMaxCameraLength(Double cameraLength) {
 		if(Objects.equals(cameraLength, this.maxCameraLength)) return;

@@ -17,6 +17,11 @@ import dedi.configuration.calculations.scattering.Q;
 import dedi.configuration.calculations.scattering.ScatteringQuantity;
 
 
+/**
+ * An abstract controller for handling results of q-range calculations for a given {@link BeamlineConfiguration}
+ * and the requested range entered by the users.
+ *
+ */
 public abstract class AbstractResultsController extends AbstractController<IResultsModel> implements Observer {
 	/**
 	 * The beamline configuration for which the results should be calculated.
@@ -32,7 +37,9 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	/**
 	 * Constructs a new controller, with no models or views registered with it, initially.
 	 * All interested views need to register themselves with the controller;
-	 * and also need to register models where the results should be stored.
+	 * and also need to register the models where they want the results to be stored.
+	 * The controller will notify them whenever the beamline configuration changes,
+	 * compute the new results and store them in the given models.
 	 * 
 	 * @param configuration - the beamline configuration for which the results will be calculated.
 	 */
@@ -80,7 +87,7 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	
 	
 	/*
-	 * Methods that allow views to set the requested range entered by the user.
+	 * Public methods that allow views to set the requested range entered by the user.
 	 */
 	
 	public abstract void updateRequestedQRange(NumericRange requestedRange);
@@ -94,8 +101,8 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	
 	/*
 	 * Getter methods that allow views to access the data stored in the models.
-	 * They allow views to be entirely independent of the underlying models, and interact only with the controller.
-	 * The controller also provides convenient methods for converting the model data into different forms that might 
+	 * This allows views to be entirely independent of the underlying models, and interact only with the controller.
+	 * The controller also provides convenient methods for converting the model data into different units/quantities that might 
 	 * be required by the views, such as converting q values to other scattering quantities (see below).
 	 */
 	
@@ -139,7 +146,7 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	
 	
 	/**
-	 * @return Whether the requested q range is within the visible q range.
+	 * @return Whether the requested q range lies within the visible q range.
 	 */
 	public boolean getIsSatisfied() {
 		return (boolean) getModelProperty(ResultConstants.IS_SATISFIED_PROPERTY);
@@ -163,7 +170,10 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	
 	
 	
-	// Methods that allow views to obtain the results in the required quantities and units.
+	/*
+	 * Methods that allow views to obtain the results in the required quantities and units.
+	 */
+	
 	
 	public NumericRange getVisibleRange(ScatteringQuantity<?> quantity, Unit<?> unit) {
 		return convertRange(getVisibleQRange(), new Q(), quantity, Q.BASE_UNIT, unit);
@@ -180,6 +190,13 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	}
 	
 	
+	/**
+	 * 
+	 * @return - given range converted from the old quantity to the new quantity in the given units.
+	 *           Returns null if the given range was null.
+	 * 
+	 * @throws NullPointerException if any of the given scattering quantities are null.
+	 */
 	public NumericRange convertRange(NumericRange range, ScatteringQuantity<?> oldQuantity, ScatteringQuantity<?> newQuantity, 
             Unit<?> oldUnit, Unit<?> newUnit){
 		
@@ -192,6 +209,13 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 	}
 	
 	
+	/**
+	 * 
+	 * @return - given value converted from the old quantity to the new quantity in the given units.
+	 *           Returns null if the given value was null.
+	 * 
+	 * @throws NullPointerException if any of the given scattering quantities are null.
+	 */
 	public Double convertValue(Double value, ScatteringQuantity<?> oldQuantity, ScatteringQuantity<?> newQuantity, 
                            Unit<?> oldUnit, Unit<?> newUnit){
 		if(value == null) return null;

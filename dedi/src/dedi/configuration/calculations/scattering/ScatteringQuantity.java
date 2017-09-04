@@ -11,6 +11,9 @@ public abstract class ScatteringQuantity<E extends Quantity>  {
 	protected Amount<E> value;
 	
 	
+	/**
+	 * Constructs a scattering quantity with value == null.
+	 */
 	public ScatteringQuantity(){
 	}
 	
@@ -20,12 +23,22 @@ public abstract class ScatteringQuantity<E extends Quantity>  {
 	}
 	
 	
+	/**
+	 * Converts the value stored in this quantity to the given scatteringQuantity
+	 * and sets the value of the given quantity to the result.
+	 * Returns the given quantity holding the new value.
+	 * 
+	 * @throws NullPointerException If the given scatteringQuantity is null.
+	 */
 	public <U extends Quantity, T extends ScatteringQuantity<U>> T to(T scatteringQuantity){
 		scatteringQuantity.setValue(this.toQ());
 		return scatteringQuantity;
 	}
 	
 	
+	/**
+	 * @return This quantity converted to Q.
+	 */
 	public abstract Q toQ();
 	
 	

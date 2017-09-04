@@ -4,6 +4,9 @@ import java.io.Serializable;
 
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 
+/**
+ * Represents a beamline configuration in the form that is directly mapped to the fields in {@link BeamlineConfigurationPreferencePage}. 
+ */
 public class BeamlineConfigurationBean implements Serializable {
 	/**
 	 * Update this when there are any serious changes to API

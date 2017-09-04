@@ -4,30 +4,33 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A serializable class to hold a list of {@link BeamlineConfigurationBean}s.
+ */
 public class BeamlineConfigurations implements Serializable {
 	private static final long serialVersionUID = 7297838000309018662L;
 	
-	private List<BeamlineConfigurationBean> beamlineConfigurations;
+	private List<BeamlineConfigurationBean> beamlineConfigurationBeans;
 	private BeamlineConfigurationBean selected;
 
 	public BeamlineConfigurations() {
-		beamlineConfigurations = new ArrayList<BeamlineConfigurationBean>();
+		beamlineConfigurationBeans = new ArrayList<>();
 	}
 	
 	public List<BeamlineConfigurationBean> getBeamlineConfigurations() {
-		return beamlineConfigurations;
+		return beamlineConfigurationBeans;
 	}
 
 	public void setBeamlineConfigurations(List<BeamlineConfigurationBean> beamlineConfigurations) {
-		this.beamlineConfigurations = beamlineConfigurations;
+		this.beamlineConfigurationBeans = beamlineConfigurations;
 	}
 	
 	public void addBeamlineConfiguration(BeamlineConfigurationBean beamlineConfiguration){
-		beamlineConfigurations.add(beamlineConfiguration);
+		beamlineConfigurationBeans.add(beamlineConfiguration);
 	}
 	
 	public void removeBeamlineConfiguration(BeamlineConfigurationBean beamlineConfiguration){
-		beamlineConfigurations.remove(beamlineConfiguration);
+		beamlineConfigurationBeans.remove(beamlineConfiguration);
 	}
 	
 	public BeamlineConfigurationBean getSelected(){

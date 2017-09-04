@@ -342,9 +342,9 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 		removeTrace("Dot");
 		final IImageTrace image = system.createImageTrace("Dot");
 		image.setRescaleHistogram(false);
-		image.setData(DatasetFactory.createFromObject(new boolean[1][1]), 
-				      Arrays.asList(DatasetFactory.createFromObject(new boolean[1]),
-				    		  		DatasetFactory.createFromObject(new boolean[1])), false);
+		image.setData(DatasetFactory.createFromObject((boolean[][]) new boolean[1][1]), 
+				      Arrays.asList(DatasetFactory.createFromObject((boolean[]) new boolean[1]),
+				    		  		DatasetFactory.createFromObject((boolean[]) new boolean[1])), false);
 		image.setGlobalRange(getGlobalRange());
 		image.setAlpha(0);
 		system.addTrace(image);

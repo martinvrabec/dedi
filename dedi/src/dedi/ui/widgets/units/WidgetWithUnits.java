@@ -6,10 +6,8 @@ import java.util.List;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
-import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.jscience.physics.amount.Amount;
 
 import dedi.ui.GuiHelper;

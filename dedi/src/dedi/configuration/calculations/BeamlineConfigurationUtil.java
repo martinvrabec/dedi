@@ -21,7 +21,7 @@ public class BeamlineConfigurationUtil {
 	 * @param wavelength   - wavelength of the X-ray beam.
 	 * 
 	 * @return The magnitude q of the scattering vector corresponding to the given parameters. The units of the returned value
-	 *         will be the inverse of the units of the wavelength given.
+	 *         will be the inverse of the units used for the wavelength given.
 	 *         
 	 * @throws ArithmeticException if the given wavelength or camera length are zero.
 	 *         IllegalArgumentException if any of the given parameters is negative.
@@ -61,7 +61,7 @@ public class BeamlineConfigurationUtil {
 	
 	/**
 	 * @param qvalue                 - magnitude q of the scattering vector in 1/m.
-	 * @param angel                  - angle, in radians, giving the direction from the beamstop in which the point should lie.
+	 * @param angle                  - angle, in radians, giving the direction from the beamstop in which the point should lie.
 	 * @param cameraLength           - camera length in m.
 	 * @param wavelength             - wavelength in m.
 	 * @param beamstopXCentreMM      - x coordinate of beamstop's centre in mm.

@@ -11,6 +11,10 @@ import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
 
+
+/**
+ * A class that represents the magnitude of a scattering vector.
+ */
 public class Q extends ScatteringQuantity<InverseLength> {
 	private static final String NAME = "q";
 	public static final Unit<InverseLength> BASE_UNIT = new ProductUnit<>(SI.METER.inverse());

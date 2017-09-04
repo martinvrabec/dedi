@@ -16,7 +16,7 @@ import dedi.configuration.calculations.NumericRange;
  * <p> It provides useful methods for manipulating rays, such as getting the point that corresponds to 
  * a certain value of the parameter t, getting a point at a given distance from the initial point,
  * and finding the {@link NumericRange} of values of the parameter t that give the points that belong to the intersection
- * of the ray with various geometrical shapes, such as rectangle, conic (circle, ellipse, ...), etc.
+ * of the ray with various geometrical shapes such as rectangle, conic (circle, ellipse, ...), etc.
  * </p>
  */
 public class Ray {
@@ -45,6 +45,11 @@ public class Ray {
 	}
 
 	
+	/**
+	 * @param direction - a vector pointing in the direction of the ray.
+	 * 
+	 * @throws IllegalArgumentException - if the direction vector is the zero vector.
+	 */
 	public void setDirection(Vector2d direction) {
 		if(direction.length() == 0) throw new IllegalArgumentException("The direction vector of a ray cannot be the zero vector.");
 		this.direction = direction;
@@ -80,6 +85,7 @@ public class Ray {
 	 * @param distance - distance from the initial point.
 	 * 
 	 * @return The point on the ray at the given distance from the initial point.
+	 *         Returns null if the distance is negative.
 	 */
 	public Vector2d getPtAtDistance(double distance){
 		if(distance < 0) return null;
@@ -193,7 +199,9 @@ public class Ray {
 	
 	
 	/**
-	 * Takes an arbitrary closed interval, specified as a {@link NumericRange}, and restricts it to the interval [0, infinity].
+	 * Takes an arbitrary closed interval, specified as a {@link NumericRange}, and 
+	 * returns a new NumericRange which is its restriction to the interval [0, infinity].
+	 * Returns null if the given range is null.
 	 */
 	private NumericRange getParameterRange(NumericRange range) {
 		if(range == null) return null;

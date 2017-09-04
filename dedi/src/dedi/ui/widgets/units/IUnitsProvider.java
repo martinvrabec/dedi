@@ -3,7 +3,6 @@ package dedi.ui.widgets.units;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
-import org.eclipse.swt.widgets.Composite;
 
 public interface IUnitsProvider<T extends Quantity> {
 	

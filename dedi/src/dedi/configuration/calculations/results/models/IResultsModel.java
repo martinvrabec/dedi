@@ -2,11 +2,12 @@ package dedi.configuration.calculations.results.models;
 
 import javax.vecmath.Vector2d;
 
+import dedi.configuration.BeamlineConfiguration;
 import dedi.configuration.calculations.NumericRange;
 
 /**
- * A model to store information about the visible, full, and user-requested q range for a particular configuration of an X-ray scattering beamline.
- * (The full range minimum and maximum correspond to the q value that can be seen with the maximum allowed camera length and minimum allowed energy, 
+ * A model to store information about the visible, full, and user-requested q range for a particular {@link BeamlineConfiguration}.
+ * (The min and max of the full range correspond to the q value that can be seen with the maximum allowed camera length and minimum allowed energy, 
  *  and with the minimum allowed camera length and maximum allowed energy, respectively).
  * 
  * As well as the q values themselves, the model also stores the positions of the end points of the visible and requested range on the detector.

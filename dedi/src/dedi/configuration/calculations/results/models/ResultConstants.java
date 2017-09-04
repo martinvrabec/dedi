@@ -6,7 +6,7 @@ public class ResultConstants {
 		throw new IllegalStateException("This class is not meant to be instantiated.");
 	}
 
-	// PROPERTY constants used to notify listeners which property changed. 
+	// PROPERTY constants used to indicate which of the properties has changed. 
 	public static final String FULL_Q_RANGE_PROPERTY = "FullQRange";
 	public static final String VISIBLE_Q_RANGE_PROPERTY = "VisibleQRange";
 	public static final String REQUESTED_Q_RANGE_PROPERTY = "RequestedQRange";

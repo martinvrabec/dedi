@@ -1,14 +1,11 @@
 package dedi.ui.widgets.units;
 
 import javax.measure.quantity.Quantity;
-import javax.measure.unit.Unit;
 
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.jscience.physics.amount.Amount;
+
 
 import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;

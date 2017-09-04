@@ -12,6 +12,9 @@ import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
 
+/**
+ * A class to represent the scattering angle.
+ */
 public class DoubleTheta extends ScatteringQuantity<Angle> {
 	private Amount<Length> wavelength;
 	public static final String NAME = "2\u03B8";

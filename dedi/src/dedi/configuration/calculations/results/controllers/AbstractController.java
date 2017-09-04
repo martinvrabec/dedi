@@ -15,8 +15,8 @@ public abstract class AbstractController<T extends IModel> implements PropertyCh
 	    protected List<T> registeredModels;
 
 	    public AbstractController() {
-	        registeredViews = new ArrayList<PropertyChangeListener>();
-	        registeredModels = new ArrayList<T>();
+	        registeredViews = new ArrayList<>();
+	        registeredModels = new ArrayList<>();
 	    }
 
 	    
@@ -41,8 +41,9 @@ public abstract class AbstractController<T extends IModel> implements PropertyCh
 		}
 		
 	    
-	    //  Use this to observe property changes from registered models
+	    //  This method is used to observe property changes from registered models
 	    //  and propagate them on to all the views
+		@Override
 	    public void propertyChange(PropertyChangeEvent evt) {
 	        for (PropertyChangeListener view: registeredViews) {
 	            view.propertyChange(evt);
@@ -50,15 +51,20 @@ public abstract class AbstractController<T extends IModel> implements PropertyCh
 	    }
 	    
         
-	    // Convenience methods. Can be used to make controllers as independent of their models as possible.
-	    // However, concrete controller classes can define their own ways of manipulating the models as well.
+		
+	    /* 
+	     * Convenience methods that can be used to make controllers as independent of their models as possible.
+	     * However, concrete controller classes are free to define their own ways of manipulating the models as well.
+	     */
+		
+		
 		protected Object getModelProperty(String propertyName){
 	   	 	for (T model: registeredModels) {
 		            try {
 		            	Method method = model.getClass().getDeclaredMethod("get" + propertyName);
 		                return method.invoke(model);
 		            } catch (Exception ex) {
-		                //  Handle exception.
+		                //  Do nothing.
 		            }
 		     }
 	   	 	 return null;

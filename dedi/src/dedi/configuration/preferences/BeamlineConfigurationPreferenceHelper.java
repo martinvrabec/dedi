@@ -18,6 +18,11 @@ public class BeamlineConfigurationPreferenceHelper {
 	private static IPreferenceStore beamlineConfigurationsPreferenceStore = Activator.getDefault().getPreferenceStore();
 	
 	
+	private BeamlineConfigurationPreferenceHelper() {
+		throw new IllegalStateException("This class is not meant to be instantiated.");
+	}
+	
+	
 	public static List<DiffractionDetector> getDetectorsListFromPreference(){
 		List<DiffractionDetector> detectors = null;
 		

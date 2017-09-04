@@ -18,8 +18,8 @@ import dedi.configuration.devices.CameraTube;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 
 /**
- * This is the default implementation of a controller that performs the calculations of all the results stored in an {@link IResultsModel} 
- * and updates all registered views whenever the results change. 
+ * This is the default implementation of an {@link AbstractResultsController} that performs the calculations of all the results 
+ * specified in the {@link IResultsModel} API, and updates all registered views whenever the results change. 
  * 
  * In particular, it computes the visible and full Q range and the positions of their end points on the detector,
  * as well as the end points for the user-requested Q range. The bulk of the computation is in the computeQRanges() method. 
@@ -54,6 +54,10 @@ public class DefaultResultsController extends AbstractResultsController {
 	}
 
 	
+	/**
+	 * Updates the requested range. The range is allowed to be null 
+	 * (if the user didn't enter any, or if the user input was invalid). 
+	 */
 	@Override
 	public void updateRequestedQRange(NumericRange requestedRange) {
 		if(requestedRange == null) 
@@ -78,7 +82,7 @@ public class DefaultResultsController extends AbstractResultsController {
 	private void updateState(){
 		// Create a deep copy of the current BeamlineConfiguration state.
 		// (Note that Beamstop, CameraTube and primitive wrapper classes are immutable,
-		// so do not need to create a copy of those).
+		// so it's not necessary to create a copy of those).
 		detector = (configuration.getDetector() == null) ? null : new DiffractionDetector(configuration.getDetector());
 		detectorWidthMM = configuration.getDetectorWidthMM();
 		detectorHeightMM = configuration.getDetectorHeightMM();
@@ -124,12 +128,12 @@ public class DefaultResultsController extends AbstractResultsController {
 			}
 			
 
-			// Find the intersection pt of the clearance region (beamstop + clearance) with a line at the given angle starting at the beamstop centre.
+			// Find the intersection pt of the clearance region (beamstop + clearance) with a line at the given angle emanating from the beamstop centre.
 			Vector2d initialPosition = new Vector2d(clearanceRegionMajorMM*Math.cos(angle) + beamstopXCentreMM, 
 					                                clearanceRegionMinorMM*Math.sin(angle) + beamstopYCentreMM);
 			
 			
-			// Find the portion of a ray from the initial position at the given angle that lies within the detector face.
+			// Find the portion of a ray, emanating from the initial position at the given angle, that lies within the detector face.
 			Ray ray = new Ray(new Vector2d(Math.cos(angle), Math.sin(angle)), initialPosition);
 			NumericRange t1 = ray.getRectangleIntersectionParameterRange(new Vector2d(0, detectorHeightMM), 
 					                									 detectorWidthMM, detectorHeightMM);
@@ -138,7 +142,7 @@ public class DefaultResultsController extends AbstractResultsController {
 			// Find the portion of the ray that lies within the camera tube's projection onto the detector face.
 			if(t1 != null && cameraTube != null && cameraTube.getRadiusMM() != 0)
 				t1 = t1.intersect(ray.getCircleIntersectionParameterRange(cameraTube.getRadiusMM(), 
-	                                           new Vector2d(cameraTubeXCentreMM, cameraTubeYCentreMM)));
+	                                                                      new Vector2d(cameraTubeXCentreMM, cameraTubeYCentreMM)));
 			
 			
 			// Check whether the intersection is empty.
@@ -184,7 +188,7 @@ public class DefaultResultsController extends AbstractResultsController {
 			Vector2d ptMinCopy = new Vector2d(ptMin);
 			Vector2d ptMaxCopy = new Vector2d(ptMax);
 			Display.getDefault().asyncExec(() -> 
-				setVisibleQRange(new NumericRange(visibleQMin.length()*1e10, visibleQMax.length()*1e10), ptMinCopy, ptMaxCopy));
+				setVisibleQRange(new NumericRange(visibleQMin.length()*1e10, visibleQMax.length()*1e10), ptMinCopy, ptMaxCopy)); // convert q to 1/m
 			
 			
 			// If min/max camera length or wavelength are not known then can't calculate the full range.
@@ -192,6 +196,7 @@ public class DefaultResultsController extends AbstractResultsController {
 				Display.getDefault().asyncExec(() -> setFullQRange(null));
 				return;
 			}
+			
 			
 			// Compute the full range.
 			detectorProperties.getOrigin().z = minCameraLength*1e3;

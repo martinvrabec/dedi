@@ -35,11 +35,10 @@ public class CameraTubePanel implements Observer {
 	private LabelWithUnits<Length> cameraTubeDiameter;
 	private TextWithUnits<Dimensionless> xPositionText;
 	private TextWithUnits<Dimensionless> yPositionText;
-	//private Button checkBox;
 	
-	private final static String TITLE =  "Camera tube";
+	private static final String TITLE =  "Camera tube";
 	
-	private final static List<Unit<Length>> DIAMETER_UNITS = new ArrayList<>(Arrays.asList(SI.MILLIMETRE, SI.MICRO(SI.METER)));;
+	private static final List<Unit<Length>> DIAMETER_UNITS = new ArrayList<>(Arrays.asList(SI.MILLIMETRE, SI.MICRO(SI.METER)));
 	
 	
 	public CameraTubePanel(Composite parent, BeamlineConfigurationTemplatesPanel panel){
@@ -62,17 +61,17 @@ public class CameraTubePanel implements Observer {
 		cameraTubePositionGroup.setLayoutData(data);
 		
 		
-		Unit<Dimensionless> Pixel = new BaseUnit<>("Pixel");
-		LabelUnitsProvider<Dimensionless> xPixelLabel = new LabelUnitsProvider<>(cameraTubePositionGroup, Pixel);
+		Unit<Dimensionless> pixel = new BaseUnit<>("Pixel");
+		LabelUnitsProvider<Dimensionless> xPixelLabel = new LabelUnitsProvider<>(cameraTubePositionGroup, pixel);
 		xPositionText = new TextWithUnits<>(cameraTubePositionGroup, "x:", xPixelLabel);
-		xPositionText.addAmountChangeListener(() -> textChanged());
+		xPositionText.addAmountChangeListener(CameraTubePanel.this :: textChanged);
 		GridDataFactory.fillDefaults().span(2, 1).applyTo(xPositionText);
 		xPixelLabel.moveBelow(xPositionText);
 		
 		
-		LabelUnitsProvider<Dimensionless> yPixelLabel = new LabelUnitsProvider<>(cameraTubePositionGroup, Pixel);
+		LabelUnitsProvider<Dimensionless> yPixelLabel = new LabelUnitsProvider<>(cameraTubePositionGroup, pixel);
 		yPositionText = new TextWithUnits<>(cameraTubePositionGroup, "y:", yPixelLabel);
-		yPositionText.addAmountChangeListener(() -> textChanged());
+		yPositionText.addAmountChangeListener(CameraTubePanel.this :: textChanged);
 		GridDataFactory.fillDefaults().span(2, 1).applyTo(yPositionText);
 		yPixelLabel.moveBelow(yPositionText);
 		
@@ -116,7 +115,6 @@ public class CameraTubePanel implements Observer {
 			return;
 		}
 		if(beamlineConfiguration.getCameraTubeDiameter() == 0){
-			//ResultsService.getInstance().getBeamlineConfiguration().setCameraTube(null);
 			setValues(0, 0, 0);
 			cameraTubeGroup.setEnabled(false);
 		}

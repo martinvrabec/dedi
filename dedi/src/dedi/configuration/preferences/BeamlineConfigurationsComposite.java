@@ -103,8 +103,8 @@ public class BeamlineConfigurationsComposite extends Composite {
 	private void setDetectors(){
 		List<DiffractionDetector> detectors = BeamlineConfigurationPreferenceHelper.getDetectorsListFromPreference();
 		Map<String, DiffractionDetector> comboItems = new HashMap<>();
-		for(DiffractionDetector detector : detectors){
-			comboItems.put(detector.getDetectorName(), detector);
+		for(DiffractionDetector dd : detectors){
+			comboItems.put(dd.getDetectorName(), dd);
 		}
 		if(detector != null && !detector.isDisposed()) detector.setItems(comboItems);
 	}
