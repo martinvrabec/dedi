@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.Label;
 import org.jscience.physics.amount.Amount;
 
 import dedi.configuration.calculations.results.models.ResultsService;
+import dedi.configuration.calculations.scattering.BeamEnergy;
 import dedi.configuration.preferences.BeamlineConfigurationBean;
 import dedi.ui.GuiHelper;
 import dedi.ui.TextUtil;
@@ -96,13 +97,13 @@ public class BeamPropertiesPanel implements Observer {
 				isEdited = false;
 				switch(q){
 				case ENERGY:
-					wavelength.setValue(new dedi.configuration.calculations.scattering.Energy(energy.getValue())
-							.toWavelength().getAmount().to(SI.METER));
+					wavelength.setValue(new BeamEnergy(energy.getValue())
+							.toWavelength().getValue().to(SI.METER));
 					ResultsService.getInstance().getBeamlineConfiguration().setWavelength(wavelength.getValue(SI.METER).getEstimatedValue());
 					break;
 				case WAVELENGTH:
 					energy.setValue(new dedi.configuration.calculations.scattering.Wavelength(wavelength.getValue())
-							.to(new dedi.configuration.calculations.scattering.Energy()).getAmount().to(SI.JOULE));
+							.to(new BeamEnergy()).getValue().to(SI.JOULE));
 					ResultsService.getInstance().getBeamlineConfiguration().setWavelength(wavelength.getValue(SI.METER).getEstimatedValue());
 					break;
 				default:
@@ -134,9 +135,9 @@ public class BeamPropertiesPanel implements Observer {
 		minWavelength = Amount.valueOf(beamlineConfiguration.getMinWavelength()*1.0e-9, SI.METER);
 		maxWavelength = Amount.valueOf(beamlineConfiguration.getMaxWavelength()*1.0e-9, SI.METER);
 		minEnergy = new dedi.configuration.calculations.scattering.Wavelength(maxWavelength)
-				      .to(new dedi.configuration.calculations.scattering.Energy()).getAmount().to(SI.JOULE);
+				      .to(new BeamEnergy()).getValue().to(SI.JOULE);
 		maxEnergy = new dedi.configuration.calculations.scattering.Wavelength(minWavelength)
-			          .to(new dedi.configuration.calculations.scattering.Energy()).getAmount().to(SI.JOULE);
+			          .to(new BeamEnergy()).getValue().to(SI.JOULE);
 		ResultsService.getInstance().getBeamlineConfiguration().setMaxWavelength(maxWavelength.doubleValue(SI.METER));
 		ResultsService.getInstance().getBeamlineConfiguration().setMinWavelength(minWavelength.doubleValue(SI.METER));
 		setToolTipTextsAndLabels();

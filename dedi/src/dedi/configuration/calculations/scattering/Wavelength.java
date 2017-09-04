@@ -1,14 +1,16 @@
 package dedi.configuration.calculations.scattering;
 
+import javax.measure.quantity.Length;
+
 import org.jscience.physics.amount.Amount;
 
 
-public class Wavelength extends BeamQuantity {
+public class Wavelength extends BeamQuantity<Length> {
 
 	public Wavelength() {
 	}
 	
-	public Wavelength(Amount<?> value) {
+	public Wavelength(Amount<Length> value) {
 		super(value);
 	}
 	
@@ -18,9 +20,9 @@ public class Wavelength extends BeamQuantity {
 		return this;
 	}
 
+	
 	@Override
-	public BeamQuantity fromWavelength(Wavelength wavelength) {
-		return wavelength;
+	public void setValue(Wavelength wavelength) {
+		setValue(wavelength.getValue());
 	}
-
 }

@@ -1,35 +1,44 @@
 package dedi.configuration.calculations.scattering;
 
 
+import javax.measure.quantity.Quantity;
+
 import org.jscience.physics.amount.Amount;
 
 
-public abstract class BeamQuantity {
-	Amount<?> amount;
+public abstract class BeamQuantity<T extends Quantity> {
+	Amount<T> amount;
     
-	public enum Quantities {WAVELENGTH, ENERGY};
+	public enum Quantities {WAVELENGTH, ENERGY}
+	
 	
 	public BeamQuantity() {
 	}
 	
-	public BeamQuantity(Amount<?> amount) {
+	
+	public BeamQuantity(Amount<T> amount) {
 		super();
 		this.amount = amount;
 	}
 
-	public BeamQuantity to(BeamQuantity quantity){
-		return quantity.fromWavelength(this.toWavelength());
+	
+	public <U extends Quantity, E extends BeamQuantity<U>> E to(E quantity){
+		quantity.setValue(this.toWavelength());
+		return quantity;
 	}
 	
 	public abstract Wavelength toWavelength();
 	
-	public abstract BeamQuantity fromWavelength(Wavelength wavelength);
+	public abstract void setValue(Wavelength wavelength);
 	
-	public Amount<?> getAmount() {
+	
+	public Amount<T> getValue() {
 		return amount;
 	}
 
-	public void setAmount(Amount<?> amount) {
-		this.amount = amount;
+	
+	@SuppressWarnings("unchecked")
+	public void setValue(Amount<?> amount) {
+		this.amount = (Amount<T>) amount;
 	}
 }
