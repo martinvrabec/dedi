@@ -18,6 +18,9 @@ import org.jscience.physics.amount.Amount;
  */
 public class S extends ScatteringQuantity<InverseLength> {
 	public static final String NAME = "s";
+	/**
+	 * SI.METER.inverse(), i.e. 1/m.
+	 */
 	public static final Unit<InverseLength> BASE_UNIT = new ProductUnit<>(SI.METER.inverse()); 
 	private static final List<Unit<InverseLength>> UNITS = 
 			new ArrayList<>(Arrays.asList(new ProductUnit<InverseLength>(SI.NANO(SI.METER).inverse()), 
@@ -26,8 +29,17 @@ public class S extends ScatteringQuantity<InverseLength> {
 	public S(){
 	}
 	
+	
+	/**
+	 * @param value - value in S.BASE_UNIT.
+	 */
+	public S(double value){
+		super(Amount.valueOf(value, BASE_UNIT));
+	}
+	
+	
 	public S(Amount<InverseLength> value) {
-		super(value.to(S.BASE_UNIT));
+		super(value);
 	}
 	
 	
@@ -55,6 +67,6 @@ public class S extends ScatteringQuantity<InverseLength> {
 
 	@Override
 	public void setValue(Q q) {
-		setValue(q.getValue().divide(Math.PI*2).to(BASE_UNIT));
+		setValue(q.getValue().divide(Math.PI*2));
 	}
 }

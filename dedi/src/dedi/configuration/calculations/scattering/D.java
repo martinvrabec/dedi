@@ -18,6 +18,9 @@ import org.jscience.physics.amount.Amount;
  */
 public class D extends ScatteringQuantity<Length> {
 	public static final String NAME = "d";
+	/**
+	 * SI.METER
+	 */
 	public static final Unit<Length> BASE_UNIT = SI.METER;
 	private static final List<Unit<Length>> UNITS = 
 			new ArrayList<>(Arrays.asList(SI.NANO(SI.METER), 
@@ -26,8 +29,17 @@ public class D extends ScatteringQuantity<Length> {
 	public D(){
 	}
 	
+	
 	public D(Amount<Length> value) {
-		super(value.to(D.BASE_UNIT));
+		super(value);
+	}
+	
+	
+	/**
+	 * @param value - value in D.BASE_UNIT.
+	 */
+	public D(double value){
+		super(Amount.valueOf(value, BASE_UNIT));
 	}
 	
 	
@@ -57,6 +69,6 @@ public class D extends ScatteringQuantity<Length> {
 	
 	@Override
 	public void setValue(Q q) {
-		setValue(q.getValue().inverse().times(2*Math.PI).to(BASE_UNIT));
+		setValue(q.getValue().inverse().times(2*Math.PI));
 	}
 }

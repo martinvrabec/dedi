@@ -17,20 +17,31 @@ import org.jscience.physics.amount.Amount;
  */
 public class Q extends ScatteringQuantity<InverseLength> {
 	private static final String NAME = "q";
+	/**
+	 * SI.METER.inverse(), i.e. 1/m.
+	 */
 	public static final Unit<InverseLength> BASE_UNIT = new ProductUnit<>(SI.METER.inverse());
 	private static final List<Unit<InverseLength>> UNITS = 
 			new ArrayList<>(Arrays.asList(new ProductUnit<InverseLength>(SI.NANO(SI.METER).inverse()), 
 					                      new ProductUnit<InverseLength>(NonSI.ANGSTROM.inverse())));
 	
+	/**
+	 * Constructs a new Q with value == null.
+	 */
 	public Q(){
 	}
 	
+	
+	/**
+	 * @param value - value in Q.BASE_UNIT.
+	 */
 	public Q(double value){
-		super(Amount.valueOf(value, Q.BASE_UNIT));
+		super(Amount.valueOf(value, BASE_UNIT));
 	}
 	
+	
 	public Q(Amount<InverseLength> value) {
-		super(value.to(Q.BASE_UNIT));
+		super(value);
 	}
 	
 	
@@ -46,9 +57,14 @@ public class Q extends ScatteringQuantity<InverseLength> {
 	}
 	
 
+	/**
+	 * @return A new Q with value set to a copy of this Q's value.
+	 * 
+	 * @throws NullPointerException If this Q's value is null.
+	 */
 	@Override
 	public Q toQ() {
-		return this;
+		return new Q(this.value.copy());
 	}
 
 
@@ -57,8 +73,15 @@ public class Q extends ScatteringQuantity<InverseLength> {
 		return NAME;
 	}
 
+	
+	/**
+	 * Sets the value of this Q to a copy of the value held by the given Q.
+	 * Does not modify the given Q.
+	 * 
+	 * @throws NullPointerException If the given Q is null, or if its value is null.
+	 */	
 	@Override
 	public void setValue(Q q) {
-		setValue(q.getValue());
+		setValue(q.getValue().copy());
 	}
 }

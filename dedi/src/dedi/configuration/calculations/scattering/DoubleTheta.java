@@ -13,39 +13,55 @@ import javax.measure.unit.Unit;
 import org.jscience.physics.amount.Amount;
 
 /**
- * A class to represent the scattering angle.
+ * A class to represent a scattering angle.
  */
 public class DoubleTheta extends ScatteringQuantity<Angle> {
 	private Amount<Length> wavelength;
 	public static final String NAME = "2\u03B8";
+	/**
+	 * SI.RADIAN
+	 */
 	public static final Unit<Angle> BASE_UNIT = SI.RADIAN;
-	private static final List<Unit<Angle>> UNITS = 
-			new ArrayList<>(Arrays.asList(NonSI.DEGREE_ANGLE, SI.RADIAN));
+	/**
+	 * SI.METER
+	 */
+	private static final Unit<Length> WAVELENGTH_BASE_UNIT = SI.METER;
+	private static final List<Unit<Angle>> UNITS = new ArrayList<>(Arrays.asList(NonSI.DEGREE_ANGLE, SI.RADIAN));
 	
 	
 	public DoubleTheta(){
 	}
 	
 	
-	public DoubleTheta(Double wavelength){
-		this.wavelength = (wavelength == null) ? null : Amount.valueOf(wavelength, SI.METER);
+	/**
+	 * @param wavelength - wavelength in metres.
+	 */
+	public DoubleTheta(double wavelength){
+		this.wavelength = Amount.valueOf(wavelength, WAVELENGTH_BASE_UNIT);
 	}
 	
-	
-	public DoubleTheta(double doubleTheta, Double wavelength){
-		super(Amount.valueOf(doubleTheta, BASE_UNIT));
-		this.wavelength = (wavelength == null) ? null : Amount.valueOf(wavelength, SI.METER);
-	}
-	
-	public DoubleTheta(Amount<Angle> doubleTheta, Amount<Length> wavelength) {
-		super(doubleTheta.to(BASE_UNIT));
-		this.wavelength = wavelength;
-	}
-	
-	
+
 	public DoubleTheta(Amount<Length> wavelength) {
 		this.wavelength = wavelength;
 	}
+	
+	
+	/**
+	 * @param doubleTheta - angle in DoubleTheta.BASE_UNIT.
+	 * @param wavelength  - wavelength in metres.
+	 */
+	public DoubleTheta(double doubleTheta, double wavelength){
+		super(Amount.valueOf(doubleTheta, BASE_UNIT));
+		this.wavelength = Amount.valueOf(wavelength, WAVELENGTH_BASE_UNIT);
+	}
+	
+	
+	public DoubleTheta(Amount<Angle> doubleTheta, Amount<Length> wavelength) {
+		super(doubleTheta);
+		this.wavelength = wavelength;
+	}
+	
+	
 	
 	
 	@Override
@@ -59,13 +75,18 @@ public class DoubleTheta extends ScatteringQuantity<Angle> {
 	}
 
 	
+	/**
+	 * @return A new Q with value set to this DoubleTheta's value converted to Q.
+	 * 
+	 * @throws NullPointerException If this DoubleTheta's value or wavelength are null.
+	 */
 	@Override
 	public Q toQ() {
-		if(wavelength == null) return new Q();
-		return new Q(4*Math.PI*Math.sin(value.to(BASE_UNIT).getEstimatedValue()/2)/
-				     wavelength.doubleValue(SI.METER));
+		return new Q(4*Math.PI*Math.sin(value.doubleValue(BASE_UNIT)/2)/
+				     wavelength.to(Q.BASE_UNIT.inverse()).getEstimatedValue());
 	}
 
+	
 	@Override
 	public String getQuantityName() {
 		return NAME;
@@ -73,7 +94,7 @@ public class DoubleTheta extends ScatteringQuantity<Angle> {
 	
 	
 	public void setWavelength(Double wavelength){
-		this.wavelength = (wavelength == null) ? null : Amount.valueOf(wavelength, SI.METER);
+		this.wavelength = (wavelength == null) ? null : Amount.valueOf(wavelength, WAVELENGTH_BASE_UNIT);
 	}
 	
 	
@@ -82,10 +103,17 @@ public class DoubleTheta extends ScatteringQuantity<Angle> {
 	}
 
 
+	/**
+	 * Sets the value of this DoubleTheta to the value held by the given Q converted to DoubleTheta.
+	 * Sets the value to NaN if the Q value is not attainable at this DoubleTheta's wavelength.
+	 * Does not modify the given Q. 
+	 * 
+	 * @throws NullPointerException If the given Q is null, if its value is null, or if this DoubleTheta's wavelength is null.
+	 */
 	@Override
 	public void setValue(Q q) {
-		this.value = 
-				Amount.valueOf(2*Math.asin(q.getValue().to(Q.BASE_UNIT).getEstimatedValue()*wavelength.doubleValue(SI.METER)/(4*Math.PI)), BASE_UNIT);
+		setValue(Amount.valueOf(2*Math.asin(q.getValue().to(Q.BASE_UNIT).getEstimatedValue()*
+				                wavelength.to(Q.BASE_UNIT.inverse()).getEstimatedValue()/(4*Math.PI)), BASE_UNIT));
 	}
 	
 }
