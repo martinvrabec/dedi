@@ -75,7 +75,7 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
 	
 	/**
 	 * Flag that indicates whether the values displayed in this view are currently being modified by 
-	 * the user or by the view itself. Set this flag to false when programmatically setting the values
+	 * the user or programmatically. Set this flag to false when programmatically setting the values
 	 * of a text field.
 	 */
 	private boolean isUserEdited = true;
@@ -272,18 +272,21 @@ public class ResultsView extends ViewPart implements PropertyChangeListener {
          double minValueX = slope*(Math.log(visibleRange.getMin()) - Math.log(fullRange.getMin())) + offset;
          double maxValueX = slope*(Math.log(visibleRange.getMax()) - Math.log(fullRange.getMin())) + offset;
          
+         
          // Restrict the requested coordinates to the area of the drawing canvas.
-         NumericRange requested = new NumericRange(minRequestedX, maxRequestedX).intersect(new NumericRange(60, bounds.width - 60));
-         minRequestedX = requested.getMin();
-         maxRequestedX = requested.getMax();
+         if(!Double.isNaN(minRequestedX) && !Double.isNaN(maxRequestedX)) {
+	         NumericRange requested = new NumericRange(minRequestedX, maxRequestedX).intersect(new NumericRange(60, bounds.width - 60));
+	         minRequestedX = requested.getMin();
+	         maxRequestedX = requested.getMax();
+         }
          
          e.gc.fillRectangle((int) minValueX, bounds.height/2, (int) (maxValueX - minValueX), bounds.height/2);
-         e.gc.drawLine((int) minRequestedX, 5, (int) minRequestedX, bounds.height);
-         e.gc.drawLine((int) maxRequestedX, 20, (int) maxRequestedX, bounds.height);
+         if(!Double.isNaN(minRequestedX)) e.gc.drawLine((int) minRequestedX, 5, (int) minRequestedX, bounds.height);
+         if(!Double.isNaN(maxRequestedX)) e.gc.drawLine((int) maxRequestedX, 20, (int) maxRequestedX, bounds.height);
          
          e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_WHITE));
-         e.gc.drawText("Requested min", (int) minRequestedX - 40, 5);
-         e.gc.drawText("Requested max", (int) maxRequestedX - 40, 20);
+         if(!Double.isNaN(minRequestedX)) e.gc.drawText("Requested min", (int) minRequestedX - 40, 5);
+         if(!Double.isNaN(maxRequestedX)) e.gc.drawText("Requested max", (int) maxRequestedX - 40, 20);
 	}
 
 
