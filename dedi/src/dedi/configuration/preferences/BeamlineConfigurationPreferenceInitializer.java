@@ -65,8 +65,8 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		bc2.setClearance(10);
 		bc2.setMinWavelength(0.062);
 		bc2.setMaxWavelength(0.3351);
-		bc2.setMinCameraLength(0.1);
-		bc2.setMaxCameraLength(9.9);
+		bc2.setMinCameraLength(0.18);
+		bc2.setMaxCameraLength(0.58);
 		bc2.setCameraLengthStepSize(0.01);
 		
 		
