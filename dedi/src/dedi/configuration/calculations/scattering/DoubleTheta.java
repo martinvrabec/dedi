@@ -93,16 +93,27 @@ public class DoubleTheta extends ScatteringQuantity<Angle> {
 	}
 	
 	
+	public Amount<Length> getWavelength(){
+		return wavelength;
+	}
+	
+	
+	/**
+	 * @param wavelength - the new wavelength in metres.
+	 */
 	public void setWavelength(Double wavelength){
 		this.wavelength = (wavelength == null) ? null : Amount.valueOf(wavelength, WAVELENGTH_BASE_UNIT);
 	}
 	
 	
+	/**
+	 * @param wavelength - the new wavelength.
+	 */
 	public void setWavelength(Amount<Length> wavelength){
 		this.wavelength = wavelength;
 	}
 
-
+	
 	/**
 	 * Sets the value of this DoubleTheta to the value held by the given Q converted to DoubleTheta.
 	 * Sets the value to NaN if the Q value is not attainable at this DoubleTheta's wavelength.
