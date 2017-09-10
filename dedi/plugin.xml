@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            class="dedi.ui.perspectives.Perspective"
+            class="org.dawnsci.dedi.ui.perspectives.Perspective"
             id="dedi.perspective"
             name="DEDI">
       </perspective>
@@ -17,20 +17,20 @@
    	    </category>
    	    <view
    	    	category="dedi.dediViewsCategory"
-   	    	class="dedi.ui.views.plot.BeamlineConfigurationPlotView"
+   	    	class="org.dawnsci.dedi.ui.views.plot.BeamlineConfigurationPlotView"
    	    	id="dedi.plottingview"
    	    	name="Plot">
    	    </view>
         <view
               category="dedi.dediViewsCategory"
-              class="dedi.ui.views.configuration.ConfigurationView"
+              class="org.dawnsci.dedi.ui.views.configuration.ConfigurationView"
               id="dedi.configurationpanel"
               name="Configuration"
               restorable="true">
         </view>
         <view
               category="dedi.dediViewsCategory"
-              class="dedi.ui.views.results.ResultsView"
+              class="org.dawnsci.dedi.ui.views.results.ResultsView"
               id="dedi.views.results"
               name="Results"
               restorable="true">
@@ -74,14 +74,14 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
-            class="dedi.configuration.preferences.BeamlineConfigurationPreferenceInitializer">
+            class="org.dawnsci.dedi.configuration.preferences.BeamlineConfigurationPreferenceInitializer">
       </initializer>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
             category="org.dawnsci.preferences.root"
-            class="dedi.configuration.preferences.BeamlineConfigurationPreferencePage"
+            class="org.dawnsci.dedi.configuration.preferences.BeamlineConfigurationPreferencePage"
             id="dedi.configuration.preferences.beamlineconfiguration"
             name="Beamline Configuration ">
       </page>

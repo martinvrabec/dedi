@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Dedi
-Bundle-SymbolicName: dedi;singleton:=true
+Bundle-SymbolicName: org.dawnsci.dedi;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: dedi.Activator
+Bundle-Activator: org.dawnsci.dedi.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime;bundle-version="3.11.1",
